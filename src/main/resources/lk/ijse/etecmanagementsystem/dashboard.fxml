@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f3f4f6;" stylesheets="file:/E:/ETecManagementSystem/ETecManagementSystem/src/main/java/lk/ijse/etecmanagementsystem/styles/menuBtnStyle.css" xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.DashboardController">
 
     <left>
         <VBox prefHeight="768.0" prefWidth="240.0" spacing="10.0" style="-fx-background-color: #1e293b;" BorderPane.alignment="CENTER">
@@ -30,7 +30,7 @@
                 </Label>
                 <Separator opacity="0.3" prefWidth="200.0" />
 
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: #334155; -fx-cursor: hand;" text="Dashboard" textFill="WHITE">
+                <Button fx:id="btnDashboard" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Dashboard" textFill="WHITE">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -40,8 +40,12 @@
                     <graphic>
                         <Label text="🏠" textFill="WHITE" />
                     </graphic>
+               <styleClass>
+                  <String fx:value="nav-button" />
+                  <String fx:value="active" />
+               </styleClass>
                 </Button>
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="78.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Inventory" textFill="#cbd5e1">
+                <Button fx:id="btnInventory" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="78.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Inventory" textFill="#cbd5e1">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -52,7 +56,7 @@
                         <Label text="📦" textFill="#cbd5e1" />
                     </graphic>
                 </Button>
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="254.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Repairs" textFill="#cbd5e1">
+                <Button fx:id="btnRepairs" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="254.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Repairs" textFill="#cbd5e1">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -63,7 +67,7 @@
                         <Label text="🛠" textFill="#cbd5e1" />
                     </graphic>
                 </Button>
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="122.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Suppliers" textFill="#cbd5e1">
+                <Button fx:id="btnSuppliers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="122.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Suppliers" textFill="#cbd5e1">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -74,7 +78,7 @@
                         <Label text="🚚" textFill="#cbd5e1" />
                     </graphic>
                 </Button>
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="166.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Customers" textFill="#cbd5e1">
+                <Button fx:id="btnCustomers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="166.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Customers" textFill="#cbd5e1">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -85,7 +89,7 @@
                         <Label text="🧑‍🤝‍🧑" textFill="#cbd5e1" />
                     </graphic>
                 </Button>
-                <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="210.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Payments" textFill="#cbd5e1">
+                <Button fx:id="btnPayments" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="210.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Payments" textFill="#cbd5e1">
                     <padding>
                         <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                     </padding>
@@ -96,7 +100,7 @@
                         <Label text="💳" textFill="#cbd5e1" />
                     </graphic>
                 </Button>
-            <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Warranty" textFill="#cbd5e1">
+            <Button fx:id="btnWarranty" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Warranty" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                </padding>
@@ -109,7 +113,7 @@
             </Button>
 
                 <Region VBox.vgrow="ALWAYS" />
-            <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Settings" textFill="#cbd5e1">
+            <Button fx:id="btnSettings" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="Settings" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
                </padding>
@@ -120,7 +124,7 @@
                   <Label text="⚙️" textFill="#cbd5e1" />
                </graphic>
             </Button>
-            <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" textFill="#cbd5e1">
+            <Button fx:id="btnUser" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleNavClicks" style="-fx-background-color: transparent; -fx-cursor: hand;" styleClass="nav-button" text="User" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
                </padding>
@@ -128,13 +132,10 @@
                   <Font size="14.0" />
                </font>
                <graphic>
-                  <Label graphicTextGap="20.0" prefHeight="17.0" prefWidth="105.0" text="User" textFill="#cbd5e1">
-                     <graphic>
-                        <Label contentDisplay="RIGHT" graphicTextGap="15.0" text="👤   " textFill="#cbd5e1" />
-                     </graphic>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                  <Label contentDisplay="RIGHT" graphicTextGap="15.0" text="👤" textFill="#cbd5e1">
+                     <padding>
+                        <Insets right="15.0" />
+                     </padding>
                   </Label>
                </graphic>
             </Button>

@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import lk.ijse.etecmanagementsystem.service.Login;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,6 +40,8 @@ private void initialize() {
 
         // Simple authentication logic (replace with real authentication)
         if ("admin".equals(username) && "password".equals(password)) {
+
+            Login.setUserName(username); // Store username in Login service
             try {
                 App.setRoot("dashboard"); // Navigate to dashboard on successful login
             } catch (IOException e) {
