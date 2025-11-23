@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
@@ -15,21 +15,18 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane style="-fx-background-color: #051b46;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane style="-fx-background-color: #051b46;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.LoginController">
    <children>
-      <!-- Background Image Placeholder -->
-      <ImageView fx:id="bgImage" fitHeight="600.0" fitWidth="900.0" pickOnBounds="true" preserveRatio="false">
+      <ImageView fitHeight="608.0" fitWidth="908.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="file:E:\ETecManagementSystem\ETecManagementSystem\src\main\java\lk\ijse\etecmanagementsystem\assets\Background03.png" />
+            <Image url="file:/E:/ETecManagementSystem/ETecManagementSystem/src/main/java/lk/ijse/etecmanagementsystem/assets/Background03.png" />
          </image>
-         <viewport>
-            <Rectangle2D minY="10.0" />
-         </viewport>
       </ImageView>
 
       <!-- Login Form Container -->
-      <AnchorPane layoutX="275.0" layoutY="139.0" prefHeight="350.0" prefWidth="350.0" style="-fx-background-color: rgba(39, 50, 105,8); -fx-background-radius: 10;">
+      <AnchorPane layoutX="275.0" layoutY="139.0" prefHeight="350.0" prefWidth="350.0">
          <children>
+            <Pane opacity="0.54" prefHeight="350.0" prefWidth="350.0" style="-fx-background-color: rgba(39, 50, 105,8); -fx-background-radius: 10;" />
             <Label layoutX="145.0" layoutY="30.0" text="Login" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="24.0" />
@@ -44,7 +41,7 @@
             </Label>
             <HBox layoutX="50.0" layoutY="115.0" prefHeight="35.0" prefWidth="250.0" spacing="10.0">
                <children>
-                  <TextField prefHeight="30.0" prefWidth="260.0" promptText="Enter User Name" style="-fx-background-color: white;" />
+                  <TextField fx:id="userNameField" prefHeight="30.0" prefWidth="260.0" promptText="Enter User Name" style="-fx-background-color: white;" />
                </children>
             </HBox>
             
@@ -56,21 +53,24 @@
             </Label>
             <HBox layoutX="50.0" layoutY="185.0" prefHeight="35.0" prefWidth="250.0" spacing="10.0">
                <children>
-                  <PasswordField prefHeight="30.0" prefWidth="306.0" promptText="Enter Password" style="-fx-background-color: white;" />
+                  <PasswordField fx:id="passwordField" prefHeight="30.0" prefWidth="306.0" promptText="Enter Password" style="-fx-background-color: white;" />
                </children>
             </HBox>
             
             <!-- Login Button -->
-            <Button layoutX="50.0" layoutY="262.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" text="Login" textFill="WHITE">
+            <Button layoutX="50.0" layoutY="262.0" mnemonicParsing="false" onAction="#onLoginButtonClick" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" styleClass="my-button" stylesheets="file:/E:/ETecManagementSystem/ETecManagementSystem/src/main/java/lk/ijse/etecmanagementsystem/styles/button_glow.css" text="Login" textFill="WHITE">
                <font>
                   <Font size="14.0" />
                </font>
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor>
             </Button>
          </children>
       </AnchorPane>
       <AnchorPane layoutX="214.0" layoutY="53.0" prefHeight="68.0" prefWidth="472.0">
          <children>
-            <Pane prefHeight="72.0" prefWidth="470.0" style="-fx-background-color: rgba(39, 50, 105,8); -fx-background-radius: 20;" />
+            <Pane opacity="0.34" prefHeight="72.0" prefWidth="470.0" style="-fx-background-color: rgba(39, 50, 105,8); -fx-background-radius: 20;" />
             <VBox alignment="CENTER" prefHeight="76.0" prefWidth="465.0">
                <children>
                   <Text fill="WHITE" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.0" text="ETEC Computers" textAlignment="CENTER" wrappingWidth="444.9716796875">

@@ -1,0 +1,21 @@
+.my-button {
+    -fx-background-color: transparent; /* Default color */
+    -fx-text-fill:  white;
+    -fx-padding: 1px;
+    /* Define the default shadow, perhaps a subtle one */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 5, 0, 0, 0);
+    /* Smooth transition for the effect */
+    -fx-effect-transition: all 0.3s ease-in-out;
+}
+
+/* Styles applied when the mouse hovers over the button */
+.my-button:hover {
+    /* Create the "glow" by applying a larger, colored shadow */
+    -fx-effect: dropshadow(three-pass-box, #21E3FF, 30, 0.5, 0, 0); /* Orange glow */
+    -fx-cursor: hand;
+}
+
+/* Optional: Styles when the button is pressed */
+.my-button:pressed {
+    -fx-background-color: #a0a0a0;
+}
