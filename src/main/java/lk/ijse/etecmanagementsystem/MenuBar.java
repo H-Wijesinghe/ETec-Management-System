@@ -42,6 +42,9 @@ public class MenuBar {
             if(btn != pBtn) {
                 System.out.println(key);
                 String btnText = btn.getText().toLowerCase();
+                if(key.equals("btnUser") ) {
+                    btnText = "user";
+                }
                 try {
                     App.setRoot(btnText);
                 } catch (IOException e1) {
