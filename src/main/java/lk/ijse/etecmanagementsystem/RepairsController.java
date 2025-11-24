@@ -1,6 +1,5 @@
 package lk.ijse.etecmanagementsystem;
 
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import lk.ijse.etecmanagementsystem.service.Login;
@@ -8,9 +7,10 @@ import lk.ijse.etecmanagementsystem.service.Login;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryController {
-    @FXML
-    private Button btnDashboard;
+public class RepairsController {
+
+    // Inject all buttons from FXML
+    @FXML private Button btnDashboard;
     @FXML private Button btnInventory;
     @FXML private Button btnRepairs;
     @FXML private Button btnSuppliers;
@@ -20,12 +20,13 @@ public class InventoryController {
     @FXML private Button btnSettings;
     @FXML private Button btnUser;
 
+
     // We need a list to easily loop through them
     private List<Button> menuButtons = new ArrayList<>();
 
     @FXML
     public void initialize() {
-//         Add all buttons to the list
+        // Add all buttons to the list
         menuButtons.add(btnDashboard);
         menuButtons.add(btnInventory);
         menuButtons.add(btnRepairs);
@@ -40,7 +41,6 @@ public class InventoryController {
         String username = Login.getUserName();
         btnUser.setText(username);
 
-        MenuBar menuBar = new MenuBar();// Create MenuBar instance
 
         // Apply logic to EVERY button
         for (Button btn : menuButtons) {
@@ -48,7 +48,7 @@ public class InventoryController {
         }
 
         // Set Default Active Button (e.g., Dashboard)
-        MenuBar.setActive(btnInventory);
+        MenuBar.setActive(btnRepairs);
 
     }
 }

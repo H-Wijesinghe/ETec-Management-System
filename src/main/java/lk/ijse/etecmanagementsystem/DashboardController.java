@@ -18,7 +18,7 @@ public class DashboardController {
     @FXML private Button btnRepairs;
     @FXML private Button btnSuppliers;
     @FXML private Button btnCustomers;
-    @FXML private Button btnPayments;
+    @FXML private Button btnTransactions;
     @FXML private Button btnWarranty;
     @FXML private Button btnSettings;
     @FXML private Button btnUser;
@@ -35,7 +35,7 @@ public class DashboardController {
         menuButtons.add(btnRepairs);
         menuButtons.add(btnSuppliers);
         menuButtons.add(btnCustomers);
-        menuButtons.add(btnPayments);
+        menuButtons.add(btnTransactions);
         menuButtons.add(btnWarranty);
         menuButtons.add(btnSettings);
         menuButtons.add(btnUser);
