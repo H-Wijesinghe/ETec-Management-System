@@ -5,6 +5,7 @@ import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -13,8 +14,7 @@ import lk.ijse.etecmanagementsystem.service.Login;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -24,9 +24,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import lk.ijse.etecmanagementsystem.service.Product; // Import your model
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class InventoryController {
@@ -58,16 +56,26 @@ public class InventoryController {
     @FXML
     private Button btnLoadMore;
 
+
+    @FXML private Button btnPrev;
+    @FXML private Button btnNext;
+    @FXML private Label lblPageInfo;
+
+    // Pagination Config
+    private int currentPage = 0;       // Current page index (starts at 0)
+    private final int ITEMS_PER_PAGE = 8; // How many items to show per page
+
     // Data Storage
     private final List<Product> allProducts = new ArrayList<>(); // Master list
     private List<Product> displayedList = new ArrayList<>(); // List after filtering
 
     // Keep track of running animations to stop them later
-    private List<FadeTransition> runningAnimations = new ArrayList<>();
+    private final List<FadeTransition> runningAnimations = new ArrayList<>();
 
     // Pagination Variables
     private int currentLimit = 10; // Start by showing 10 items
     private final int BATCH_SIZE = 10; // Load 10 more on click
+    private final int moreButtonThreshold = 48; // Show "View More" if more than 10 items
 
     // We need a list to easily loop through them
     private final List<Button> menuButtons = new ArrayList<>();
@@ -98,6 +106,8 @@ public class InventoryController {
         // Set Default Active Button (e.g., Dashboard)
         MenuBar.setActive(btnInventory);
 
+
+
         // 1. Initialize Dummy Data (Or load from DB)
         loadDummyData();
 
@@ -118,10 +128,10 @@ public class InventoryController {
         // Create 30 dummy items to test scrolling and pagination
         for (int i = 1; i <= 3000; i++) {
             String cat = (i % 3 == 0) ? "Electronics" : (i % 2 == 0) ? "Accessories" : "Parts";
-            allProducts.add(new Product("Item " + i, 1000 + (i * 50), cat, "0.jpg"));
+            allProducts.add(new Product("Item " + i, 1000 + (i * 50), cat, "placeholder.png"));
         }
 
-        allProducts.add(new Product("Apple iPhone", 250000, "Electronics", "placeholder.png"));
+        allProducts.add(new Product("Apple iPhone22222222222222222222", 250000, "Electronics", "placeholder.png"));
         allProducts.add(new Product("Zebra Cable", 500, "Accessories", "0.png"));
     }
 
@@ -141,27 +151,45 @@ public class InventoryController {
         // 2. Reset Pagination
         currentLimit = BATCH_SIZE;
 
+        // reset Load More button visibility
+        if (displayedList.size() <= moreButtonThreshold)
+            btnLoadMore.setVisible(false);
+        else {
+            btnLoadMore.setVisible(true);
+        }
+
         // 3. Update UI
         renderGrid();
     }
 
     @FXML
+    private void handlePrevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            renderGrid(); // Re-draw the grid
+        }
+    }
+
+    @FXML
+    private void handleNextPage() {
+        int maxPage = (int) Math.ceil((double) displayedList.size() / ITEMS_PER_PAGE) - 1;
+        if (currentPage < maxPage) {
+            currentPage++;
+            renderGrid(); // Re-draw the grid
+        }
+    }
+
+    @FXML
     private void handleLoadMore() {
         // Increase the limit and re-render
-        currentLimit += BATCH_SIZE;
+        currentLimit = moreButtonThreshold;
+        btnLoadMore.setVisible(false);
         renderGrid();
     }
 
     private void renderGrid() {
         productGrid.getChildren().clear();
 
-
-        // Show/Hide "View More" button
-        if (currentLimit >= displayedList.size()) {
-            btnLoadMore.setVisible(false);
-        } else {
-            btnLoadMore.setVisible(true);
-        }
 
         loadProductGrid();
 
@@ -224,20 +252,29 @@ public class InventoryController {
     // --- UI GENERATOR FOR SINGLE CARD ---
     // This looks exactly like the FXML dummy card
     private VBox createProductCard(Product p) {
-        VBox card = new VBox(10);
+// 1. The Main Card Container
+        VBox card = new VBox(5); // Spacing of 5 between elements
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(15));
+        card.setPadding(new Insets(10));
         card.setPrefWidth(180);
+        card.setPrefHeight(220); // Force a FIXED TOTAL HEIGHT for the card
         card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-cursor: hand;");
 
-//        // Image
+        // --- SECTION 1: THE IMAGE (Fixed 100x100 Box) ---
+        // We wrap the ImageView in a StackPane.
+        // This forces the "Image Area" to be 100px tall even if the image is missing.
+        StackPane imageContainer = new StackPane();
+        imageContainer.setPrefSize(100, 100);
+        imageContainer.setMinSize(100, 100);
+        imageContainer.setMaxSize(100, 100);
+
         ImageView imageView = new ImageView();
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
         imageView.setPreserveRatio(true);
 
+        // Image Loading Logic
         String imagePath = "/lk/ijse/etecmanagementsystem/images/" + p.getImagePath();
-
         try {
             // 1. Check if resource exists BEFORE trying to load it
             if (getClass().getResource(imagePath) != null) {
@@ -247,24 +284,38 @@ public class InventoryController {
                 // 2. Resource not found? Load a default/error image
 //                System.out.println("Image missing in resources: " + imagePath);
 //                imageView.setImage(new Image("/images/placeholder.png")); // Ensure this file exists!
-                imageView.setImage(null); // Ensure this file exists!
+                imageView.setVisible(false); // Ensure this file exists!
 
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Labels
+        imageContainer.getChildren().add(imageView);
+
+        // --- SECTION 2: THE NAME (Fixed 45px Tall) ---
         Label lblName = new Label(p.getName());
+        lblName.setWrapText(true);
+        lblName.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        lblName.setAlignment(Pos.CENTER); // Vertically Center the text in its box
+
+        // CRITICAL: Force this label to always be exactly 45px tall
+        lblName.setMinHeight(45);
+        lblName.setPrefHeight(45);
+        lblName.setMaxHeight(45);
+
         lblName.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1e293b;");
 
+        // --- SECTION 3: THE PRICE & STOCK ---
         Label lblPrice = new Label("LKR " + String.format("%,.2f", p.getPrice()));
-        lblPrice.setStyle("-fx-text-fill: #3b82f6; -fx-font-weight: bold;");
+        lblPrice.setStyle("-fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-font-size: 13px;");
 
-        Label lblQuantity = new Label("In Stock: 50");
-        lblQuantity.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
+        Label lblStock = new Label("In Stock: 50");
+        lblStock.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold; -fx-font-size: 12px;");
 
-        card.getChildren().addAll(imageView, lblName, lblPrice, lblQuantity);
+        // Add everything to card
+        card.getChildren().addAll(imageContainer, lblName, lblPrice, lblStock);
+
         return card;
     }
 

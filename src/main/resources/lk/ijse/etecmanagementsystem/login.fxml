@@ -36,7 +36,7 @@
                         </Text>
                      </children>
                   </VBox>
-                  <Label layoutX="131.0" layoutY="49.0" text="Login" textFill="#00eaff">
+                  <Label layoutX="131.0" layoutY="56.0" text="Login" textFill="#00eaff">
                      <font>
                         <Font name="System Bold" size="34.0" />
                      </font>
@@ -69,7 +69,7 @@
             </HBox>
             
                                                                                                 <!-- Login Button -->
-            <Button layoutX="50.0" layoutY="284.0" mnemonicParsing="false" onAction="#onLoginButtonClick" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" styleClass="my-button" stylesheets="file:/E:/ETecManagementSystem/ETecManagementSystem/src/main/java/lk/ijse/etecmanagementsystem/styles/button_glow.css" text="Login" textFill="WHITE">
+            <Button layoutX="50.0" layoutY="284.0" mnemonicParsing="false" onAction="#onLoginButtonClick" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" styleClass="my-button" stylesheets="@images/button_glow.css" text="Login" textFill="WHITE">
                <font>
                   <Font size="14.0" />
                </font>
