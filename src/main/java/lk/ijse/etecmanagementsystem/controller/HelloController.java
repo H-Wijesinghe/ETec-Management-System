@@ -1,4 +1,4 @@
-package lk.ijse.etecmanagementsystem.Controller;
+package lk.ijse.etecmanagementsystem.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
