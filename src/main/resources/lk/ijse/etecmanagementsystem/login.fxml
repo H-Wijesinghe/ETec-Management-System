@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -14,16 +15,19 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1060.0" style="-fx-background-color: #051b46;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.LoginController">
+<AnchorPane accessibleRole="NODE" maxHeight="715.0" maxWidth="1086.0" prefHeight="647.0" prefWidth="958.0" style="-fx-background-color: #051b46;" xmlns="http://javafx.com/javafx/21.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.LoginController">
    <children>
-      <ImageView fitHeight="720.0" fitWidth="1083.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="714.0" fitWidth="1033.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/Background03.png" />
          </image>
+         <viewport>
+            <Rectangle2D />
+         </viewport>
       </ImageView>
 
-      <!-- Login Form Container -->
-      <AnchorPane layoutX="363.0" layoutY="182.0" prefHeight="356.0" prefWidth="350.0">
+                                    <!-- Login Form Container -->
+      <AnchorPane layoutX="325.0" layoutY="145.0" prefHeight="356.0" prefWidth="350.0">
          <children>
             <Pane layoutY="-1.0" opacity="0.82" prefHeight="356.0" prefWidth="350.0" style="-fx-background-color: #1e293b; -fx-background-radius: 10;">
                <children>
@@ -36,7 +40,7 @@
                         </Text>
                      </children>
                   </VBox>
-                  <Label layoutX="131.0" layoutY="56.0" text="Login" textFill="#00eaff">
+                  <Label layoutX="131.0" layoutY="60.0" text="Login" textFill="#00eaff">
                      <font>
                         <Font name="System Bold" size="34.0" />
                      </font>
@@ -44,7 +48,7 @@
                </children>
             </Pane>
             
-                              <!-- User Name Field -->
+                                                            <!-- User Name Field -->
             <Label layoutX="50.0" layoutY="122.0" text="User Name" textFill="WHITE">
                <font>
                   <Font size="14.0" />
@@ -56,7 +60,7 @@
                </children>
             </HBox>
             
-                        <!-- Password Field -->
+                                                      <!-- Password Field -->
             <Label layoutX="50.0" layoutY="183.0" text="Password" textFill="WHITE">
                <font>
                   <Font size="14.0" />
@@ -68,13 +72,13 @@
                </children>
             </HBox>
             
-                                                                                                <!-- Login Button -->
-            <Button layoutX="50.0" layoutY="284.0" mnemonicParsing="false" onAction="#onLoginButtonClick" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" styleClass="my-button" stylesheets="@images/button_glow.css" text="Login" textFill="WHITE">
+                                                                                                                              <!-- Login Button -->
+            <Button fx:id="loginBtn" layoutX="50.0" layoutY="284.0" mnemonicParsing="false" onAction="#onLoginButtonClick" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-border-color: white; -fx-border-width: 1px;" text="Login" textFill="WHITE">
                <font>
                   <Font size="14.0" />
                </font>
                <cursor>
-                  <Cursor fx:constant="DEFAULT" />
+                  <Cursor fx:constant="HAND" />
                </cursor>
             </Button>
          </children>

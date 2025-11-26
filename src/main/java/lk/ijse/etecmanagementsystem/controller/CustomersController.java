@@ -1,13 +1,14 @@
-package lk.ijse.etecmanagementsystem;
+package lk.ijse.etecmanagementsystem.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import lk.ijse.etecmanagementsystem.util.MenuBar;
 import lk.ijse.etecmanagementsystem.service.Login;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SuppliersController {
+public class CustomersController {
 
     // Inject all buttons from FXML
     @FXML private Button btnDashboard;
@@ -24,31 +25,25 @@ public class SuppliersController {
     // We need a list to easily loop through them
     private List<Button> menuButtons = new ArrayList<>();
 
+    private MenuBar menuBar = new MenuBar();
+
     @FXML
     public void initialize() {
-        // Add all buttons to the list
-        menuButtons.add(btnDashboard);
-        menuButtons.add(btnInventory);
-        menuButtons.add(btnRepairs);
-        menuButtons.add(btnSuppliers);
-        menuButtons.add(btnCustomers);
-        menuButtons.add(btnTransactions);
-        menuButtons.add(btnWarranty);
-        menuButtons.add(btnSettings);
-        menuButtons.add(btnUser);
 
+        menuBar.setActive(btnCustomers);
+
+        menuBar.setupButton(btnDashboard);
+        menuBar.setupButton(btnInventory);
+        menuBar.setupButton(btnRepairs);
+        menuBar.setupButton(btnSuppliers);
+        menuBar.setupButton(btnCustomers);
+        menuBar.setupButton(btnTransactions);
+        menuBar.setupButton(btnWarranty);
+        menuBar.setupButton(btnSettings);
+        menuBar.setupButton(btnUser);
 
         String username = Login.getUserName();
         btnUser.setText(username);
-
-
-        // Apply logic to EVERY button
-        for (Button btn : menuButtons) {
-            MenuBar.setupButton(btn);
-        }
-
-        // Set Default Active Button (e.g., Dashboard)
-        MenuBar.setActive(btnSuppliers);
 
     }
 }

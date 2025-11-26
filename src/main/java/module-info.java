@@ -8,5 +8,9 @@ module lk.ijse.etecmanagementsystem {
 
     opens lk.ijse.etecmanagementsystem to javafx.fxml;
     exports lk.ijse.etecmanagementsystem;
+    exports lk.ijse.etecmanagementsystem.controller;
+    opens lk.ijse.etecmanagementsystem.controller to javafx.fxml;
+    exports lk.ijse.etecmanagementsystem.util;
+    opens lk.ijse.etecmanagementsystem.util to javafx.fxml;
 
 }

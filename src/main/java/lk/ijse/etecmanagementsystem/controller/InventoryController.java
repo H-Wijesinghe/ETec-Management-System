@@ -1,4 +1,4 @@
-package lk.ijse.etecmanagementsystem;
+package lk.ijse.etecmanagementsystem.controller;
 
 
 import javafx.animation.FadeTransition;
@@ -9,6 +9,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import lk.ijse.etecmanagementsystem.service.ThreadService;
+import lk.ijse.etecmanagementsystem.util.MenuBar;
 import lk.ijse.etecmanagementsystem.service.Login;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import lk.ijse.etecmanagementsystem.service.Product; // Import your model
+import lk.ijse.etecmanagementsystem.dto.ProductDTO; // Import your model
 
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -57,54 +59,49 @@ public class InventoryController {
     private Button btnLoadMore;
 
 
-    @FXML private Button btnPrev;
-    @FXML private Button btnNext;
-    @FXML private Label lblPageInfo;
+    @FXML
+    private Button btnPrev;
+    @FXML
+    private Button btnNext;
+    @FXML
+    private Label lblPageInfo;
 
     // Pagination Config
     private int currentPage = 0;       // Current page index (starts at 0)
     private final int ITEMS_PER_PAGE = 8; // How many items to show per page
 
     // Data Storage
-    private final List<Product> allProducts = new ArrayList<>(); // Master list
-    private List<Product> displayedList = new ArrayList<>(); // List after filtering
+    private final List<ProductDTO> allProductDTOS = new ArrayList<>(); // Master list
+    private List<ProductDTO> displayedList = new ArrayList<>(); // List after filtering
 
     // Keep track of running animations to stop them later
     private final List<FadeTransition> runningAnimations = new ArrayList<>();
 
     // Pagination Variables
-    private int currentLimit = 10; // Start by showing 10 items
-    private final int BATCH_SIZE = 10; // Load 10 more on click
-    private final int moreButtonThreshold = 48; // Show "View More" if more than 10 items
+    private int currentLimit = 10;
+    private final int BATCH_SIZE = 10;
+    private final int moreButtonThreshold = 48;
 
-    // We need a list to easily loop through them
-    private final List<Button> menuButtons = new ArrayList<>();
+    MenuBar menuBar = new MenuBar();
+
 
     @FXML
     public void initialize() {
-//         Add all buttons to the list
-        menuButtons.add(btnDashboard);
-        menuButtons.add(btnInventory);
-        menuButtons.add(btnRepairs);
-        menuButtons.add(btnSuppliers);
-        menuButtons.add(btnCustomers);
-        menuButtons.add(btnTransactions);
-        menuButtons.add(btnWarranty);
-        menuButtons.add(btnSettings);
-        menuButtons.add(btnUser);
 
+        menuBar.setActive(btnInventory);
+
+        menuBar.setupButton(btnDashboard);
+        menuBar.setupButton(btnInventory);
+        menuBar.setupButton(btnRepairs);
+        menuBar.setupButton(btnSuppliers);
+        menuBar.setupButton(btnCustomers);
+        menuBar.setupButton(btnTransactions);
+        menuBar.setupButton(btnWarranty);
+        menuBar.setupButton(btnSettings);
+        menuBar.setupButton(btnUser);
 
         String username = Login.getUserName();
         btnUser.setText(username);
-
-
-        // Apply logic to EVERY button
-        for (Button btn : menuButtons) {
-            MenuBar.setupButton(btn);
-        }
-
-        // Set Default Active Button (e.g., Dashboard)
-        MenuBar.setActive(btnInventory);
 
 
 
@@ -128,11 +125,11 @@ public class InventoryController {
         // Create 30 dummy items to test scrolling and pagination
         for (int i = 1; i <= 3000; i++) {
             String cat = (i % 3 == 0) ? "Electronics" : (i % 2 == 0) ? "Accessories" : "Parts";
-            allProducts.add(new Product("Item " + i, 1000 + (i * 50), cat, "placeholder.png"));
+            allProductDTOS.add(new ProductDTO("Item " + i, 1000 + (i * 50), cat, "placeholder.png"));
         }
 
-        allProducts.add(new Product("Apple iPhone22222222222222222222", 250000, "Electronics", "placeholder.png"));
-        allProducts.add(new Product("Zebra Cable", 500, "Accessories", "0.png"));
+        allProductDTOS.add(new ProductDTO("Apple iPhone22222222222222222222", 250000, "Electronics", "placeholder.png"));
+        allProductDTOS.add(new ProductDTO("Zebra Cable", 500, "Accessories", "0.png"));
     }
 
     // --- MAIN LOGIC: FILTER, SORT, AND UPDATE GRID ---
@@ -141,11 +138,11 @@ public class InventoryController {
         String selectedCategory = cmbCategory.getValue();
 
         // 1. Filter the Master List
-        displayedList = allProducts.stream().filter(p -> p.getName().toLowerCase().contains(searchText)) // Search Name
+        displayedList = allProductDTOS.stream().filter(p -> p.getName().toLowerCase().contains(searchText)) // Search Name
                 .filter(p -> {
                     if (selectedCategory == null || selectedCategory.equals("All Categories")) return true;
                     return p.getCategory().equals(selectedCategory); // Filter Category
-                }).sorted(Comparator.comparing(Product::getName)) // Sort A-Z (Ascending)
+                }).sorted(Comparator.comparing(ProductDTO::getName)) // Sort A-Z (Ascending)
                 .collect(Collectors.toList());
 
         // 2. Reset Pagination
@@ -158,6 +155,8 @@ public class InventoryController {
             btnLoadMore.setVisible(true);
         }
 
+        System.out.println("is loadingThead deamon: "+ThreadService.getInventoryLoadingThread().isDaemon());
+        System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());
         // 3. Update UI
         renderGrid();
     }
@@ -210,14 +209,10 @@ public class InventoryController {
             productGrid.getChildren().add(createSkeletonCard());
         }
 
-        // 3. USE A DAEMON THREAD (Or JavaFX Task)
-        // Using a Daemon thread ensures it dies if the app closes.
-        Thread loadingThread = new Thread(() -> {
+        ThreadService.setInventoryLoadingThread(new Thread(() -> {
             try {
-                // Simulate delay
-                Thread.sleep(500); // Reduced for better UX
+                Thread.sleep(5); // Reduced for better UX
 
-                // 4. UPDATE UI SAFELY
                 javafx.application.Platform.runLater(() -> {
                     // Stop Skeleton Animations before removing them
                     for (FadeTransition fade : runningAnimations) {
@@ -231,9 +226,8 @@ public class InventoryController {
                     // Determine max items
                     int maxItems = Math.min(currentLimit, displayedList.size());
 
-                    // Loop and Create Real Cards
                     for (int i = 0; i < maxItems; i++) {
-                        Product p = displayedList.get(i);
+                        ProductDTO p = displayedList.get(i);
                         productGrid.getChildren().add(createProductCard(p));
                     }
                 });
@@ -243,15 +237,16 @@ public class InventoryController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        })
+        );
 
-        loadingThread.setDaemon(true);
-        loadingThread.start();
+        ThreadService.getInventoryLoadingThread().setDaemon(true);
+        ThreadService.getInventoryLoadingThread().start();
     }
 
     // --- UI GENERATOR FOR SINGLE CARD ---
     // This looks exactly like the FXML dummy card
-    private VBox createProductCard(Product p) {
+    private VBox createProductCard(ProductDTO p) {
 // 1. The Main Card Container
         VBox card = new VBox(5); // Spacing of 5 between elements
         card.setAlignment(Pos.CENTER);

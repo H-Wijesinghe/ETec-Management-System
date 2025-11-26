@@ -1,12 +1,12 @@
-package lk.ijse.etecmanagementsystem.service;
+package lk.ijse.etecmanagementsystem.dto;
 
-public class Product {
+public class ProductDTO {
     private String name;
     private double price;
     private String category;
     private String imagePath;
 
-    public Product(String name, double price, String category, String imagePath) {
+    public ProductDTO(String name, double price, String category, String imagePath) {
         this.name = name;
         this.price = price;
         this.category = category;

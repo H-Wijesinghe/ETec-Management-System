@@ -15,7 +15,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
-        scene = new Scene(loadFXML("login"), 1060, 720);
+        scene = new Scene(loadFXML("login"), 998, 645);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false); // lock size for login
         primaryStage.show();
@@ -36,6 +36,10 @@ public class App extends Application {
 
     public static Scene getScene() {
         return  scene;
+    }
+
+    public static  Stage getPrimaryStage() {
+        return primaryStage;
     }
 
     public static void main(String[] args) {
