@@ -2,6 +2,8 @@ package lk.ijse.etecmanagementsystem.controller;
 
 
 import javafx.animation.FadeTransition;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import lk.ijse.etecmanagementsystem.service.ThreadService;
+import lk.ijse.etecmanagementsystem.util.ButtonStyle;
 import lk.ijse.etecmanagementsystem.util.MenuBar;
 import lk.ijse.etecmanagementsystem.service.Login;
 
@@ -83,6 +86,11 @@ public class InventoryController {
     @FXML
     private TableColumn colQty;
 
+    @FXML
+    private Button gridViewButton;
+    @FXML
+    private Button tableViewButton;
+
 
     private int currentPage = 0;
     private final int ITEMS_PER_PAGE = 8;
@@ -118,7 +126,6 @@ public class InventoryController {
         btnUser.setText(username);
 
 
-
         // 1. Initialize Dummy Data (Or load from DB)
         loadDummyData();
 
@@ -130,13 +137,14 @@ public class InventoryController {
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> filterAndRender());
         cmbCategory.valueProperty().addListener((observable, oldValue, newValue) -> filterAndRender());
 
-        // 4. Initial Render
-        filterAndRender();
 
 
-        // Set up the product table
-//        setProductTable();
-        loadProductData();
+
+
+
+        switchToGridView();
+
+
 
     }
 
@@ -173,6 +181,10 @@ public class InventoryController {
         System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());
 
         renderGrid();
+
+        // Set up the product table
+        setProductTable();
+        loadProductData();
     }
 
     @FXML
@@ -364,7 +376,13 @@ public class InventoryController {
     private void setProductTable(){
 
 
-
+        // Set up the columns
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+        colSellPrice.setCellValueFactory(new PropertyValueFactory<>("sellPrice"));
+        colWarrantyMonth.setCellValueFactory(new PropertyValueFactory<>("warrantyMonth"));
+        colQty.setCellValueFactory(new PropertyValueFactory<>("qty"));
 
     }
     private void loadProductData() {
@@ -375,7 +393,61 @@ public class InventoryController {
                 new ProductDTO("P003", "Mousepad XXL", "Accessories", 25.50, 0, 50)
         );
 
+        for(ProductDTO productlist: displayedList){
+            products.add(productlist);
+        }
+
         // Set the data into the TableView
         productTable.setItems(products);
+    }
+
+    @FXML
+    private void switchToGridView() {
+        productGrid.setVisible(true);
+        productTable.setVisible(false);
+
+        gridViewButton.setDisable(true);
+        tableViewButton.setDisable(false);
+
+        productTable.setManaged(false);
+        productGrid.setManaged(true);
+
+        ButtonStyle buttonStyle = new ButtonStyle();
+        buttonStyle.onMouseAction(gridViewButton);
+
+
+
+
+        // 4. Initial Render
+        filterAndRender();
+
+
+
+    }
+    @FXML
+    private void switchToTableView() {
+        productGrid.setVisible(false);
+        productTable.setVisible(true);
+
+        productGrid.setManaged(false);
+        productTable.setManaged(true);
+
+        tableViewButton.setDisable(true);
+        gridViewButton.setDisable(false);
+
+        ButtonStyle buttonStyle = new ButtonStyle();
+        buttonStyle.onMouseAction(tableViewButton);
+
+
+
+        // Set up the product table
+        setProductTable();
+        loadProductData();
+
+        ThreadService.getInventoryLoadingThread().setDaemon(false);
+        ThreadService.getInventoryLoadingThread().interrupt();
+        productGrid.getChildren().clear();
+
+
     }
 }

@@ -103,4 +103,14 @@ public class ButtonStyle {
         });
 
     }
+    public void onMouseAction(Button btn, String currentStyle, String hoverStyle) {
+        btn.setOnMouseEntered(event -> {
+            btn.setStyle(hoverStyle);
+        });
+
+        btn.setOnMouseExited(event -> {
+            btn.setStyle(currentStyle);
+        });
+
+    }
 }
