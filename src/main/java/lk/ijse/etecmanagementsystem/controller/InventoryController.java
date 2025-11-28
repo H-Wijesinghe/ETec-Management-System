@@ -125,6 +125,8 @@ public class InventoryController {
         String username = Login.getUserName();
         btnUser.setText(username);
 
+        setupButtons();
+
 
         // 1. Initialize Dummy Data (Or load from DB)
         loadDummyData();
@@ -138,12 +140,7 @@ public class InventoryController {
         cmbCategory.valueProperty().addListener((observable, oldValue, newValue) -> filterAndRender());
 
 
-
-
-
-
         switchToGridView();
-
 
 
     }
@@ -171,23 +168,23 @@ public class InventoryController {
 
         currentLimit = BATCH_SIZE;
 
-        if (displayedList.size() <= moreButtonThreshold)
-            btnLoadMore.setVisible(false);
-        else {
-            btnLoadMore.setVisible(true);
-        }
 
-        if(gridViewButton.isDisable()){
-            renderGrid();
+        if (gridViewButton.isDisable()) {
+            if (displayedList.size() <= moreButtonThreshold)
+                btnLoadMore.setVisible(false);
+            else {
+                btnLoadMore.setVisible(true);
+            }
+            loadProductGrid();
         }
-        if(tableViewButton.isDisable()){
+        if (tableViewButton.isDisable()) {
             // Set up the product table
             setProductTable();
             loadProductData();
         }
 
-        System.out.println("is loadingThead deamon: "+ThreadService.getInventoryLoadingThread().isDaemon());
-        System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());
+        System.out.println("is loadingThead deamon: " + ThreadService.getInventoryLoadingThread().isDaemon());
+        System.out.println("is loadingThead alive: " + ThreadService.getInventoryLoadingThread().isAlive());
 
     }
 
@@ -195,7 +192,7 @@ public class InventoryController {
     private void handlePrevPage() {
         if (currentPage > 0) {
             currentPage--;
-            renderGrid(); // Re-draw the grid
+            loadProductGrid();
         }
     }
 
@@ -204,7 +201,8 @@ public class InventoryController {
         int maxPage = (int) Math.ceil((double) displayedList.size() / ITEMS_PER_PAGE) - 1;
         if (currentPage < maxPage) {
             currentPage++;
-            renderGrid(); // Re-draw the grid
+
+            loadProductGrid();
         }
     }
 
@@ -213,14 +211,9 @@ public class InventoryController {
         // Increase the limit and re-render
         currentLimit = moreButtonThreshold;
         btnLoadMore.setVisible(false);
-        renderGrid();
-    }
-
-    private void renderGrid() {
-        productGrid.getChildren().clear();
-
         loadProductGrid();
     }
+
 
     private void loadProductGrid() {
         // 1. STOP OLD ANIMATIONS (Fixes Memory Leak)
@@ -238,34 +231,35 @@ public class InventoryController {
         }
 
         ThreadService.setInventoryLoadingThread(new Thread(() -> {
-            try {
-                Thread.sleep(50);
+                    try {
+//                Thread.yield();
+                        Thread.sleep(5000);
 
-                javafx.application.Platform.runLater(() -> {
-                    // Stop Skeleton Animations before removing them
-                    for (FadeTransition fade : runningAnimations) {
-                        fade.stop();
+                        javafx.application.Platform.runLater(() -> {
+                            // Stop Skeleton Animations before removing them
+                            for (FadeTransition fade : runningAnimations) {
+                                fade.stop();
+                            }
+                            runningAnimations.clear();
+
+                            // Clear Skeletons
+                            productGrid.getChildren().clear();
+
+                            // Determine max items
+                            int maxItems = Math.min(currentLimit, displayedList.size());
+
+                            for (int i = 0; i < maxItems; i++) {
+                                ProductDTO p = displayedList.get(i);
+                                productGrid.getChildren().add(createProductCard(p));
+                            }
+                        });
+
+                    } catch (InterruptedException e) {
+                        // Thread was interrupted (e.g. user typed new search), just stop.
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    runningAnimations.clear();
-
-                    // Clear Skeletons
-                    productGrid.getChildren().clear();
-
-                    // Determine max items
-                    int maxItems = Math.min(currentLimit, displayedList.size());
-
-                    for (int i = 0; i < maxItems; i++) {
-                        ProductDTO p = displayedList.get(i);
-                        productGrid.getChildren().add(createProductCard(p));
-                    }
-                });
-
-            } catch (InterruptedException e) {
-                // Thread was interrupted (e.g. user typed new search), just stop.
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        })
+                })
         );
 
         ThreadService.getInventoryLoadingThread().setDaemon(true);
@@ -377,7 +371,7 @@ public class InventoryController {
         return card;
     }
 
-    private void setProductTable(){
+    private void setProductTable() {
 
 
         // Set up the columns
@@ -389,6 +383,7 @@ public class InventoryController {
         colQty.setCellValueFactory(new PropertyValueFactory<>("qty"));
 
     }
+
     private void loadProductData() {
         // Example data (replace with actual database data)
         ObservableList<ProductDTO> products = FXCollections.observableArrayList(
@@ -397,7 +392,7 @@ public class InventoryController {
                 new ProductDTO("P003", "Mousepad XXL", "Accessories", 25.50, 0, 50)
         );
 
-        for(ProductDTO productlist: displayedList){
+        for (ProductDTO productlist : displayedList) {
             products.add(productlist);
         }
 
@@ -416,18 +411,17 @@ public class InventoryController {
         productTable.setManaged(false);
         productGrid.setManaged(true);
 
-        ButtonStyle buttonStyle = new ButtonStyle();
-        buttonStyle.onMouseAction(gridViewButton);
 
-
+        btnLoadMore.setVisible(true);
+        btnLoadMore.setManaged(true);
 
 
         // 4. Initial Render
         filterAndRender();
 
 
-
     }
+
     @FXML
     private void switchToTableView() {
         productGrid.setVisible(false);
@@ -439,9 +433,8 @@ public class InventoryController {
         tableViewButton.setDisable(true);
         gridViewButton.setDisable(false);
 
-        ButtonStyle buttonStyle = new ButtonStyle();
-        buttonStyle.onMouseAction(tableViewButton);
-
+        btnLoadMore.setVisible(false);
+        btnLoadMore.setManaged(false);
 
 
         ThreadService.getInventoryLoadingThread().setDaemon(false);
@@ -452,6 +445,18 @@ public class InventoryController {
         filterAndRender();
 
 
+    }
+
+    private void setupButtons() {
+        String currentStyle = "-fx-background-color: #2C3545; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-cursor: hand;";
+        String hoverStyle = "-fx-background-color: #2C3545; -fx-text-fill: #3498db; -fx-alignment: CENTER_LEFT; -fx-border-color: #3498db; -fx-border-width: 2;";
+
+
+        ButtonStyle buttonStyle1 = new ButtonStyle();
+        buttonStyle1.onMouseAction(tableViewButton, currentStyle, hoverStyle);
+
+        ButtonStyle buttonStyle2 = new ButtonStyle();
+        buttonStyle2.onMouseAction(gridViewButton, currentStyle, hoverStyle);
 
     }
 }
