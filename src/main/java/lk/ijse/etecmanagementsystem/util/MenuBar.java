@@ -44,7 +44,7 @@ public class MenuBar {
                     btnText = "user";
                 }
                 if (!btnText.equals("inventory")) {
-                    ThreadService.getInventoryLoadingThread().setDaemon(false);
+                    System.out.println(ThreadService.getInventoryLoadingThread().isAlive());
                 }
 
                 try {
