@@ -42,11 +42,11 @@ public class App extends Application {
 
     public static void setupSecondaryStageScene(String fxmlFileName,String title) throws Exception {
         Stage secondaryStage = new Stage();
-        secondaryScene = new Scene(loadFXML(fxmlFileName), 800, 600);
+        secondaryScene = new Scene(loadFXML(fxmlFileName), 1000, 700);
         secondaryStage.setScene(secondaryScene);
         secondaryStage.setTitle(title);
-        secondaryStage.setResizable(false);
-        secondaryStage.setAlwaysOnTop(true);
+        secondaryStage.setResizable(true);
+        secondaryStage.setAlwaysOnTop(false);
         secondaryStage.initModality(Modality.WINDOW_MODAL);
         secondaryStage.initOwner(primaryStage);
         secondaryStage.show();
@@ -63,6 +63,10 @@ public class App extends Application {
 
     public static  Stage getPrimaryStage() {
         return primaryStage;
+    }
+
+    public static Stage getSecondaryStage() {
+        return  (Stage) secondaryScene.getWindow();
     }
 
     public static void main(String[] args) {

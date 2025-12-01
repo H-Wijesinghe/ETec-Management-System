@@ -25,23 +25,23 @@ MenuBar menuBar = new MenuBar();
     @FXML
     public void initialize() {
 
-        menuBar.setActive(btnDashboard);
+//        menuBar.setActive(btnDashboard);
+//
+//        menuBar.setupButton(btnDashboard);
+//        menuBar.setupButton(btnInventory);
+//        menuBar.setupButton(btnRepairs);
+//        menuBar.setupButton(btnSuppliers);
+//        menuBar.setupButton(btnCustomers);
+//        menuBar.setupButton(btnTransactions);
+//        menuBar.setupButton(btnWarranty);
+//        menuBar.setupButton(btnSettings);
+//        menuBar.setupButton(btnUser);
 
-        menuBar.setupButton(btnDashboard);
-        menuBar.setupButton(btnInventory);
-        menuBar.setupButton(btnRepairs);
-        menuBar.setupButton(btnSuppliers);
-        menuBar.setupButton(btnCustomers);
-        menuBar.setupButton(btnTransactions);
-        menuBar.setupButton(btnWarranty);
-        menuBar.setupButton(btnSettings);
-        menuBar.setupButton(btnUser);
 
+//        String username = Login.getUserName();
+//        btnUser.setText(username);
 
-        String username = Login.getUserName();
-        btnUser.setText(username);
-
-        System.out.println("is loadingThead deamon: "+ThreadService.getInventoryLoadingThread().isDaemon());
-        System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());
+//        System.out.println("is loadingThead deamon: "+ThreadService.getInventoryLoadingThread().isDaemon());
+//        System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());
     }
 }
