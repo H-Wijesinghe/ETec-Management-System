@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
@@ -18,6 +19,7 @@ import lk.ijse.etecmanagementsystem.util.ProductUtil;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ProductController implements Initializable {
@@ -55,8 +57,7 @@ public class ProductController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // 1. Load Products from Database (Simulated here)
-//        productList.setAll(ProductUtil.productCache);
+
         tableProducts.setItems(ProductUtil.productCache);
 
         setCellValueFactories();
@@ -100,7 +101,8 @@ public class ProductController implements Initializable {
 
         // Logic for the "+" button next to Category
         btnNewCategory.setOnAction(event -> {
-            Category.setCategoryStage(cmbCategory);
+            setCategoryStage();
+            loadCategories();
             cmbCategory.setItems(Category.getCategories());
 
         });
@@ -108,8 +110,24 @@ public class ProductController implements Initializable {
         // Logic for Image Popup
         btnOpenImagePopup.setOnAction(event -> openImagePopup());
     }
+    private void loadCategories() {
 
+        CategoryModel categoryModel = new CategoryModel();
+        Category.getCategories().clear();
+        try {
+            List<String> list = categoryModel.getAllCategories();
+            if (!list.isEmpty()) {
+                Category.getCategories().setAll(list);
 
+                System.out.println("Categories loaded from DB: " + list);
+            } else {
+                System.out.println("No categories found in the database.");
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to load categories: " + e.getMessage());
+        }
+
+    }
 
     // --- CRUD Operations ---
 
@@ -246,6 +264,22 @@ public class ProductController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Could not open image popup.");
+        }
+    }
+    private void setCategoryStage() {
+        try {
+            Stage newStage = new Stage();
+            newStage.initModality(Modality.APPLICATION_MODAL);
+            newStage.setTitle("Category");
+
+            newStage.setScene(new Scene(App.loadFXML("category"), 400, 200));
+            newStage.setResizable(false);
+            newStage.showAndWait();
+
+
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 }

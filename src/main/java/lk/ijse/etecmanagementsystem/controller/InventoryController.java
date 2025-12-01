@@ -14,6 +14,7 @@ import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.component.ProductCard;
 import lk.ijse.etecmanagementsystem.component.SkeletonCard;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
+import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.InventoryModel;
 import lk.ijse.etecmanagementsystem.service.InventoryService;
 import lk.ijse.etecmanagementsystem.service.ThreadService;
@@ -50,6 +51,8 @@ public class InventoryController {
     @FXML
     private ComboBox<ProductCondition> cmbCondition;
 
+    @FXML
+    private Button btnProductManager;
 
 
     private final InventoryService inventoryService = new InventoryService();
@@ -68,36 +71,29 @@ public class InventoryController {
     private final InventoryModel inventoryModel = new InventoryModel();
 
 
-static {
-    ProductUtil.productCache.clear();
-}
-
     @FXML
     public void initialize() {
 
-
-        if(ProductUtil.productCache.isEmpty()){
-            setAllRawData();
-        }
-
+        loadProducts();
+        loadCategories();
 
         setupTableColumns();
-
         setupControls();
+        setupCategoryComboBox();
 
         setupListeners();
 
-        switchToGridView();
+        refreshData();
     }
 
 
-    private void setAllRawData(){
+    private void loadProducts() {
         try {
 
             List<ProductDTO> rawData = inventoryModel.findAll();
-            if(rawData != null){
+            if (rawData != null) {
                 ProductUtil.productCache.setAll(rawData);
-            }else {
+            } else {
                 ProductUtil.productCache.clear();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "No products found in the database.");
                 alert.show();
@@ -109,18 +105,28 @@ static {
         }
     }
 
-
     @FXML
-    private void addProduct() {
+    private void manageProduct() {
 
-        System.out.println("Add Product button clicked.");
+        System.out.println("Product Manager button clicked.");
 
         try {
 
-            App.setupSecondaryStageScene("product", "Product Management");
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Product Management");
+            stage.setScene(new Scene(App.loadFXML("product"), 1000, 700));
+            stage.showAndWait();
+
+
+            loadProducts();
+            loadCategories(); // Refresh categories in case new ones were added
+            setupCategoryComboBox();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Product Management window: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -202,7 +208,9 @@ static {
 
 
         currentLoadTask.setOnSucceeded(event -> {
-            allFetchedData = currentLoadTask.getValue(); // Store master list
+            if(currentLoadTask.valueProperty().get() != null) {
+                allFetchedData = currentLoadTask.getValue(); // Store master list
+            }
 
             if (isGridView) {
                 renderGrid(); // Render cards
@@ -267,24 +275,29 @@ static {
     }
 
     private void setupControls() {
-        // 1. Setup Controls
-        cmbCategory.setItems(Category.getCategories());
-        cmbCategory.getSelectionModel().select(null);
+
         cmbCondition.getItems().setAll(ProductCondition.values());
         cmbCondition.getSelectionModel().select(ProductCondition.BOTH);
         btnLoadMore.setVisible(false);
+
     }
+
     private void setCategoryStage() {
         try {
-        Stage newStage = new Stage();
-        newStage.initModality(Modality.APPLICATION_MODAL);
-        newStage.setTitle("Category");
+            Stage newStage = new Stage();
+            newStage.initModality(Modality.APPLICATION_MODAL);
+            newStage.setTitle("Category");
 
             newStage.setScene(new Scene(App.loadFXML("category"), 400, 200));
+            newStage.setResizable(false);
             newStage.showAndWait();
+
             // After closing, refresh categories
+            setupCategoryComboBox();
+
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -302,6 +315,39 @@ static {
         colSellPrice.setCellValueFactory(new PropertyValueFactory<>("sellPrice"));
         colWarrantyMonth.setCellValueFactory(new PropertyValueFactory<>("warrantyMonth"));
         colQty.setCellValueFactory(new PropertyValueFactory<>("qty"));
+    }
+
+    private void loadCategories() {
+
+        CategoryModel categoryModel = new CategoryModel();
+        Category.getCategories().clear();
+        try {
+            List<String> list = categoryModel.getAllCategories();
+            if (!list.isEmpty()) {
+                Category.getCategories().setAll(list);
+
+                System.out.println("Categories loaded from DB: " + list);
+            } else {
+                System.out.println("No categories found in the database.");
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to load categories: " + e.getMessage());
+        }
+
+    }
+
+    private void setupCategoryComboBox() {
+        List<String> dbCategories = Category.getCategories();
+
+        ObservableList<String> listData = FXCollections.observableArrayList();
+
+        listData.add("All Categories");
+
+        listData.addAll(dbCategories);
+
+        cmbCategory.setItems(listData);
+
+        cmbCategory.getSelectionModel().select("All Categories");
     }
 
 }

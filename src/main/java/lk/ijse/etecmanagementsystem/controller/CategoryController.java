@@ -43,13 +43,12 @@ public class CategoryController {
 
     private void loadCategories() {
 
-        ObservableList<String> categories = Category.getCategories();
-        System.out.println("Loaded categories: " + categories);
+
         try{
             List<String> list = categoryModel.getAllCategories();
             if(!list.isEmpty()){
-                categories.setAll(list);
-                categories.add(0,"All Categories");
+                Category.getCategories().clear();// Clear existing categories
+                Category.getCategories().setAll(list);
 
                 System.out.println("Categories loaded from DB: " + list);
             }else{

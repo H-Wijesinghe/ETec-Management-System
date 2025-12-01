@@ -1,5 +1,6 @@
 package lk.ijse.etecmanagementsystem.service;
 
+import javafx.collections.ObservableList;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
@@ -20,11 +21,6 @@ public class InventoryService {
         masterList.addAll(ProductUtil.productCache);
     }
 
-
-
-
-
-
     private void loadDummyData() {
         for (int i = 1; i <= 500; i++) {
             String cat = (i % 3 == 0) ? "Electronics" : (i % 2 == 0) ? "Accessories" : "Parts";
@@ -41,20 +37,17 @@ public class InventoryService {
         }
     }
 
-
-
-
-
     public List<ProductDTO> getFilteredProducts(String searchText, String category, ProductCondition value) {
 
         String finalSearch = (searchText == null) ? "" : searchText.toLowerCase();
+        String finalCategory = (category == null) ? "" : category;
 
         return masterList.stream()
 
                 .filter(p -> p.getName().toLowerCase().contains(finalSearch))
 
 
-                .filter(p -> isCategoryMatch(p, category))
+                .filter(p -> isCategoryMatch(p, finalCategory))
 
 
                 .filter(p -> isConditionMatch(p, value))
