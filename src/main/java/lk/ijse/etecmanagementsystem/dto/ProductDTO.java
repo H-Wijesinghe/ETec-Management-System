@@ -17,6 +17,18 @@ public class ProductDTO {
     public ProductDTO() {
     }
 
+    public ProductDTO(String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty, String imagePath) {
+        this.name = name;
+        this.description = description;
+        this.sellPrice = sellPrice;
+        this.category = category;
+        this.condition = condition;
+        this.buyPrice = buyPrice;
+        this.warrantyMonth = warrantyMonth;
+        this.qty = qty;
+        this.imagePath = imagePath;
+    }
+
     public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty, String imagePath) {
         this.id = id;
         this.name = name;

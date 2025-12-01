@@ -31,7 +31,7 @@ public class CategoryController {
 
     CategoryModel categoryModel = new CategoryModel();
 
-    private final String CATEGORY_REGEX = "^(?=.{3,30}$)[A-Z][a-z]*(\\\\s[A-Z][a-z]*)*";
+    private final String CATEGORY_REGEX = "^[A-Z][a-zA-Z0-9\\s\\-&]{2,29}$";
 
     @FXML
     public void initialize() {

@@ -20,6 +20,7 @@ import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
 
 import javafx.scene.input.KeyEvent;
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
@@ -29,39 +30,75 @@ import java.util.ResourceBundle;
 public class ProductController implements Initializable {
 
 
-    @FXML private TextField txtId;
-    @FXML private TextArea txtName;
-    @FXML private ComboBox<String> cmbCategory;
-    @FXML private ComboBox<ProductCondition> cmbCondition;
-    @FXML private TextField txtSellPrice;
-    @FXML private TextField txtBuyPrice;
-    @FXML private TextField txtWarranty;
-    @FXML private TextField txtQty;
-    @FXML private TextArea txtDescription;
+    @FXML
+    private TextField txtId;
+    @FXML
+    private TextArea txtName;
+    @FXML
+    private ComboBox<String> cmbCategory;
+    @FXML
+    private ComboBox<ProductCondition> cmbCondition;
+    @FXML
+    private TextField txtSellPrice;
+    @FXML
+    private TextField txtBuyPrice;
+    @FXML
+    private TextField txtWarranty;
+    @FXML
+    private TextField txtQty;
+    @FXML
+    private TextArea txtDescription;
 
-    @FXML private Button btnAdd;
-    @FXML private Button btnUpdate;
-    @FXML private Button btnDelete;
-    @FXML private Button btnClear;
-    @FXML private Button btnNewCategory;
-    @FXML private Button btnOpenImagePopup;
+    @FXML
+    private Button btnAdd;
+    @FXML
+    private Button btnUpdate;
+    @FXML
+    private Button btnDelete;
+    @FXML
+    private Button btnClear;
+    @FXML
+    private Button btnNewCategory;
+    @FXML
+    private Button btnOpenImagePopup;
 
-    @FXML private TableView<ProductDTO> tableProducts;
-    @FXML private TableColumn<ProductDTO, String> colId;
-    @FXML private TableColumn<ProductDTO, String> colName;
-    @FXML private TableColumn<ProductDTO, String> colCategory;
-    @FXML private TableColumn<ProductDTO, String> colCondition;
-    @FXML private TableColumn<ProductDTO, Double> colSellPrice;
-    @FXML private TableColumn<ProductDTO, Double> colBuyPrice;
-    @FXML private TableColumn<ProductDTO, Integer> colWarranty;
-    @FXML private TableColumn<ProductDTO, Integer> colQty;
-    @FXML private TableColumn<ProductDTO, String> colDesc;
+    @FXML
+    private TableView<ProductDTO> tableProducts;
+    @FXML
+    private TableColumn<ProductDTO, String> colId;
+    @FXML
+    private TableColumn<ProductDTO, String> colName;
+    @FXML
+    private TableColumn<ProductDTO, String> colCategory;
+    @FXML
+    private TableColumn<ProductDTO, String> colCondition;
+    @FXML
+    private TableColumn<ProductDTO, Double> colSellPrice;
+    @FXML
+    private TableColumn<ProductDTO, Double> colBuyPrice;
+    @FXML
+    private TableColumn<ProductDTO, Integer> colWarranty;
+    @FXML
+    private TableColumn<ProductDTO, Integer> colQty;
+    @FXML
+    private TableColumn<ProductDTO, String> colDesc;
 
 
     private final ObservableList<ProductDTO> productList = FXCollections.observableArrayList();
     private String selectedImagePath = "";
 
-    private ProductModel productModel = new ProductModel();
+    private final ProductModel productModel = new ProductModel();
+
+    // Added '-' and '_' support for product names like "Dell-XPS"
+    private final String NAME_REGEX = "^[a-zA-Z0-9\\- ]{3,50}$";
+    // Added numbers, '.', ',', '-', and ':' to allow detailed descriptions
+    // Example: "Intel i7, 16GB RAM."
+    private final String DESCRIPTION_REGEX = "^[a-zA-Z0-9.,\\-: ]{3,150}$";
+    // Price is generally good, but \\d is cleaner than [0-9]
+    private final String PRICE_REGEX = "^\\d+(\\.\\d{1,2})?$";
+    // Warranty and Qty are fine as is
+    private final String WARRANTY_REGEX = "^\\d{1,2}$";
+    private final String QTY_REGEX = "^\\d{1,5}$";
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -119,6 +156,7 @@ public class ProductController implements Initializable {
         // Logic for Image Popup
         btnOpenImagePopup.setOnAction(event -> openImagePopup());
     }
+
     private void loadCategories() {
 
         CategoryModel categoryModel = new CategoryModel();
@@ -141,64 +179,89 @@ public class ProductController implements Initializable {
     // --- CRUD Operations ---
 
     private void saveProduct() {
-        if (!validateFields()) return;
+        txtId.setText("auto generate!");
+        if (validateFields()) return;
+
 
         ProductDTO newProduct = new ProductDTO(
-                txtId.getText(),
-                txtName.getText(),
-                txtDescription.getText(),
-                Double.parseDouble(txtSellPrice.getText()),
+
+                txtName.getText().trim(),
+                txtDescription.getText().trim(),
+                Double.parseDouble(txtSellPrice.getText().trim()),
                 cmbCategory.getValue(),
                 cmbCondition.getValue(),
-                Double.parseDouble(txtBuyPrice.getText()),
+                Double.parseDouble(txtBuyPrice.getText().trim()),
                 Integer.parseInt(txtWarranty.getText()),
                 Integer.parseInt(txtQty.getText()),
                 selectedImagePath
         );
-        try{
+        try {
             boolean result = productModel.save(newProduct);
 
             if (result) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
                 reFresh();
-            }else {
+            } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
         }
     }
 
     private void updateProduct() {
         ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-        if (selected == null) {
+        if(selected == null){
+            selected = new ProductDTO();
+        }
+        if (txtId.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
             return;
         }
-        if (!validateFields()) return;
+        String id = txtId.getText();
+        try {
+            ResultSet product = productModel.findById(id);
+            if(!product.next()){
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Record does not exist this id, are you want to add new product for " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.YES) {
+
+                    new Alert(Alert.AlertType.INFORMATION, "Sorry! This Option Not Set Yet").show();
+
+                }
+                return;
+            }
+
+        }catch (Exception e){
+            showAlert(Alert.AlertType.ERROR, "Error", "Error retrieving product for update: " + e.getMessage());
+            return;
+        }
+
+        if (validateFields()) return;
 
         // Update the object
-        selected.setId(txtId.getText());
-        selected.setName(txtName.getText());
+        selected.setId(txtId.getText().trim());
+        selected.setName(txtName.getText().trim());
         selected.setCategory(cmbCategory.getValue());
         selected.setCondition(cmbCondition.getValue());
         selected.setSellPrice(Double.parseDouble(txtSellPrice.getText()));
         selected.setBuyPrice(Double.parseDouble(txtBuyPrice.getText()));
         selected.setWarrantyMonth(Integer.parseInt(txtWarranty.getText()));
         selected.setQty(Integer.parseInt(txtQty.getText()));
-        selected.setDescription(txtDescription.getText());
+        selected.setDescription(txtDescription.getText().trim());
         selected.setImagePath(selectedImagePath);
 
-        try{
+        try {
             boolean result = productModel.update(selected);
 
             if (result) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
                 reFresh();
-            }else {
+            } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to update product: " + e.getMessage());
         }
 
@@ -206,11 +269,14 @@ public class ProductController implements Initializable {
 
     private void deleteProduct() {
         ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-        if (selected == null) {
+        if(selected == null){
+            selected = new ProductDTO();
+        }
+        if (txtId.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
             return;
         }
-        selected.setId(txtId.getText());
+        selected.setId(txtId.getText().trim());
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
@@ -231,7 +297,7 @@ public class ProductController implements Initializable {
     }
 
     @FXML
-    private void getEnterKeyNav(KeyEvent Event){
+    private void getEnterKeyNav(KeyEvent Event) {
         if (Event.getCode() == KeyCode.ENTER) {
             String id = txtId.getText();
             try {
@@ -279,7 +345,7 @@ public class ProductController implements Initializable {
         }
     }
 
-    private void reFresh(){
+    private void reFresh() {
         loadProducts();
         clearForm();
     }
@@ -316,7 +382,7 @@ public class ProductController implements Initializable {
     private boolean validateFields() {
         if (txtId.getText().isEmpty() || txtName.getText().isEmpty() || txtSellPrice.getText().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "ID, Name, and Price are required!");
-            return false;
+            return true;
         }
         try {
             Double.parseDouble(txtSellPrice.getText());
@@ -324,9 +390,29 @@ public class ProductController implements Initializable {
             Integer.parseInt(txtWarranty.getText());
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.ERROR, "Input Error", "Price, Qty, and Warranty must be numbers.");
-            return false;
+            return true;
         }
-        return true;
+        if (!txtName.getText().matches(NAME_REGEX)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Name must be 3-50 alphanumeric characters.");
+            return true;
+        }
+        if (!txtDescription.getText().matches(DESCRIPTION_REGEX)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Desc must be 3-150 alphabetic characters.");
+            return true;
+        }
+        if (!txtSellPrice.getText().matches(PRICE_REGEX) || !txtBuyPrice.getText().matches(PRICE_REGEX)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Invalid  Price format.");
+            return true;
+        }
+        if (!txtWarranty.getText().matches(WARRANTY_REGEX)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Warranty must be 1-2 digit number.");
+            return true;
+        }
+        if (!txtQty.getText().matches(QTY_REGEX)) {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Qty must be 1-5 digit number.");
+            return true;
+        }
+        return false;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
@@ -344,7 +430,7 @@ public class ProductController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
             stage.setTitle("Select Image");
-            stage.setScene(new Scene(App.loadFXML("imagePopup"),500,400));
+            stage.setScene(new Scene(App.loadFXML("imagePopup"), 500, 400));
             stage.showAndWait();
 
             // Logic to retrieve the selected file would go here if using a shared model/controller logic
@@ -354,6 +440,7 @@ public class ProductController implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Error", "Could not open image popup.");
         }
     }
+
     private void setCategoryStage() {
         try {
             Stage newStage = new Stage();
@@ -370,12 +457,13 @@ public class ProductController implements Initializable {
             alert.showAndWait();
         }
     }
+
     private ProductCondition fromConditionString(String s) {
         if (s == null) return null;
         try {
-            if(s.equals("Used")){
+            if (s.equals("Used")) {
                 return ProductCondition.USED;
-            }else if(s.equals("Brand New")){
+            } else if (s.equals("Brand New")) {
                 return ProductCondition.BRAND_NEW;
             }
             return ProductCondition.BOTH;
