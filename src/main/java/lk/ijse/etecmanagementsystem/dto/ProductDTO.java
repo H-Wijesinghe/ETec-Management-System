@@ -14,39 +14,7 @@ public class ProductDTO {
     private int qty;
     private String imagePath;
 
-    public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, int warrantyMonth, int qty) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.sellPrice = sellPrice;
-        this.category = category;
-        this.condition = condition;
-        this.warrantyMonth = warrantyMonth;
-        this.qty = qty;
-    }
-
-    public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.sellPrice = sellPrice;
-        this.category = category;
-        this.condition = condition;
-        this.buyPrice = buyPrice;
-        this.warrantyMonth = warrantyMonth;
-        this.qty = qty;
-    }
-
-    public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, int warrantyMonth, int qty, String imagePath) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.sellPrice = sellPrice;
-        this.category = category;
-        this.condition = condition;
-        this.warrantyMonth = warrantyMonth;
-        this.qty = qty;
-        this.imagePath = imagePath;
+    public ProductDTO() {
     }
 
     public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty, String imagePath) {

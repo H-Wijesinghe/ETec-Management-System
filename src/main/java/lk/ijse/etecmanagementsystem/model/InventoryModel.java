@@ -126,9 +126,14 @@ public class InventoryModel {
     private ProductCondition fromConditionString(String s) {
         if (s == null) return null;
         try {
-            return ProductCondition.valueOf(s);
+            if(s.equals("Used")){
+                return ProductCondition.USED;
+            }else if(s.equals("Brand New")){
+                return ProductCondition.BRAND_NEW;
+            }
+            return ProductCondition.BOTH;
         } catch (IllegalArgumentException ex) {
-            return null; // unknown condition value
+            return ProductCondition.BOTH; // unknown condition value
         }
     }
 }

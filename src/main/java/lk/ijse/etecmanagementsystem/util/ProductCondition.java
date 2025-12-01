@@ -5,7 +5,7 @@ public enum ProductCondition {
 
     USED("Used"),
     BRAND_NEW("Brand New"),
-    BOTH("New & Used");
+    BOTH("NOT SET");
 
     private final String label;
 

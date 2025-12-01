@@ -62,11 +62,12 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
                   <Label text="Product ID:" />
-                  <TextField fx:id="txtId" prefHeight="25.0" prefWidth="213.0" promptText="Auto-generated or Manual" GridPane.columnIndex="1" />
+                  <TextField fx:id="txtId" onKeyPressed="#getEnterKeyNav" prefHeight="25.0" prefWidth="213.0" promptText="Auto-generated or Manual" GridPane.columnIndex="1" />
 
                   <Label text="Name:" GridPane.rowIndex="1" />
 
@@ -84,24 +85,24 @@
                   </ComboBox>
 
                   <Label text="Sell Price:" GridPane.rowIndex="4" />
-                  <TextField fx:id="txtPrice" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField fx:id="txtSellPrice" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                  <Label text="Warranty:" GridPane.rowIndex="5" />
-                  <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                  <Label text="Warranty:" GridPane.rowIndex="6" />
+                  <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                      <children>
                         <TextField fx:id="txtWarranty" prefWidth="120.0" promptText="Months" />
                         <Label text="Months" textFill="#7f8c8d" />
                      </children>
                   </HBox>
 
-                  <Label text="Quantity:" GridPane.rowIndex="6" />
-                  <TextField fx:id="txtQty" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <Label text="Quantity:" GridPane.rowIndex="7" />
+                  <TextField fx:id="txtQty" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
-                  <Label text="Description:" GridPane.rowIndex="7" GridPane.valignment="TOP">
+                  <Label text="Description:" GridPane.rowIndex="8" GridPane.valignment="TOP">
                      <GridPane.margin>
                         <Insets top="5.0" />
                      </GridPane.margin></Label>
-                  <TextArea fx:id="txtDescription" maxHeight="136.0" prefHeight="68.0" prefWidth="190.0" promptText="Product details..." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS" />
+                  <TextArea fx:id="txtDescription" maxHeight="136.0" prefHeight="68.0" prefWidth="190.0" promptText="Product details..." wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="8" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS" />
                   <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
                         <ComboBox fx:id="cmbCategory" prefWidth="170.0" promptText="Select Category" />
@@ -113,6 +114,8 @@
                      </children>
                   </HBox>
                   <TextArea fx:id="txtName" prefHeight="68.0" prefWidth="190.0" promptText="e.g. Gaming Mouse" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Buy Price:" GridPane.rowIndex="5" />
+                  <TextField fx:id="txtBuyPrice" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
             </GridPane>
             <HBox alignment="CENTER_LEFT" prefHeight="62.0" prefWidth="294.0" spacing="10.0">
@@ -171,17 +174,21 @@
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <TableView fx:id="tableProducts" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tableProducts" prefHeight="200.0" prefWidth="637.0" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
               <columns>
                 <TableColumn fx:id="colId" prefWidth="100.0" text="ID" />
                 <TableColumn fx:id="colName" prefWidth="180.0" text="Name" />
                 <TableColumn fx:id="colCategory" prefWidth="150.0" text="Category" />
                 <TableColumn fx:id="colCondition" prefWidth="150.0" text="Condition" />
-                <TableColumn fx:id="colPrice" prefWidth="100.0" text="Price" />
+                <TableColumn fx:id="colSellPrice" prefWidth="100.0" text="Sell Price" />
+                  <TableColumn fx:id="colBuyPrice" prefWidth="100.0" text="Buy Price" />
                 <TableColumn fx:id="colWarranty" prefWidth="100.0" text="Warranty" />
                 <TableColumn fx:id="colQty" prefWidth="80.0" text="Qty" />
                 <TableColumn fx:id="colDesc" prefWidth="350.0" text="Description" />
               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
                </TableView>
          </children>
          <padding>

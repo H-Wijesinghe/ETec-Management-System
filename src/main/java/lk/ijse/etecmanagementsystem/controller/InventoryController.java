@@ -4,12 +4,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.component.ProductCard;
 import lk.ijse.etecmanagementsystem.component.SkeletonCard;
@@ -22,6 +25,7 @@ import lk.ijse.etecmanagementsystem.service.MenuBar; // Assuming you have this
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,7 +87,10 @@ public class InventoryController {
 
         setupListeners();
 
-        refreshData();
+
+        switchToGridView();
+
+        System.out.println(ProductUtil.productCache);
     }
 
 
@@ -199,7 +206,7 @@ public class InventoryController {
             @Override
             protected List<ProductDTO> call() throws Exception {
                 // Simulate network/DB delay (Remove this in production)
-                Thread.sleep(600);
+                Thread.sleep(100);
 
                 // Fetch ALL matching data from Service
                 return inventoryService.getFilteredProducts(txtSearch.getText(), cmbCategory.getValue(), cmbCondition.getValue());
@@ -208,7 +215,7 @@ public class InventoryController {
 
 
         currentLoadTask.setOnSucceeded(event -> {
-            if(currentLoadTask.valueProperty().get() != null) {
+            if (currentLoadTask.valueProperty().get() != null) {
                 allFetchedData = currentLoadTask.getValue(); // Store master list
             }
 
@@ -221,8 +228,8 @@ public class InventoryController {
 
         currentLoadTask.setOnFailed(event -> {
             Throwable e = currentLoadTask.getException();
-            System.out.println("   eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee Error loading inventory: " + e.getMessage());
-            e.printStackTrace(); // Log for developer
+            System.out.println(" Error loading inventory: " + e.getMessage());
+            new Alert(Alert.AlertType.ERROR, "Error loading inventory: " + e.getMessage()).show();
 
             if (isGridView) productGrid.getChildren().clear();
 
@@ -280,6 +287,7 @@ public class InventoryController {
         cmbCondition.getSelectionModel().select(ProductCondition.BOTH);
         btnLoadMore.setVisible(false);
 
+
     }
 
     private void setCategoryStage() {
@@ -306,6 +314,45 @@ public class InventoryController {
         txtSearch.textProperty().addListener((obs, old, newVal) -> refreshData());
         cmbCategory.valueProperty().addListener((obs, old, newVal) -> refreshData());
         cmbCondition.valueProperty().addListener((obs, old, newVal) -> refreshData());
+
+    }
+
+    @FXML
+    private void getTableSelectedItem(MouseEvent event) {
+        if(event.getClickCount() == 2) {
+
+            ProductDTO selectedProduct = productTable.getSelectionModel().getSelectedItem();
+            if (selectedProduct != null) {
+                System.out.println("Selected Product: " + selectedProduct);
+
+                try {
+                    // 1. Create the Loader manually (Don't use App.loadFXML)
+                    FXMLLoader loader = new FXMLLoader(App.class.getResource("view/product.fxml"));
+                    Parent root = loader.load();
+
+                    // 2. Get the Controller from the loader
+                    ProductController controller = loader.getController();
+
+                    // 3. Pass the data
+                    System.out.println("Passing selected product to ProductController: " + selectedProduct);
+                    controller.populateFields(selectedProduct);
+
+                    // 4. Show the window
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root, 1000, 700));
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.setTitle("Product Management");
+                    stage.show();
+
+
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Product Management navigated window: " + e.getMessage());
+                    alert.showAndWait();
+                }
+
+            }
+        }
+
     }
 
     private void setupTableColumns() {

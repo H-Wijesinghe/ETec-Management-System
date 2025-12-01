@@ -5,8 +5,8 @@ module lk.ijse.etecmanagementsystem {
 
     requires org.controlsfx.controls;
     requires java.sql;
-    requires jdk.jfr;
-    requires javafx.graphics;
+
+
 
 
 

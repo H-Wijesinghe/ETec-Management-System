@@ -8,17 +8,21 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.model.CategoryModel;
+import lk.ijse.etecmanagementsystem.model.ProductModel;
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
 
+import javafx.scene.input.KeyEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -29,7 +33,8 @@ public class ProductController implements Initializable {
     @FXML private TextArea txtName;
     @FXML private ComboBox<String> cmbCategory;
     @FXML private ComboBox<ProductCondition> cmbCondition;
-    @FXML private TextField txtPrice;
+    @FXML private TextField txtSellPrice;
+    @FXML private TextField txtBuyPrice;
     @FXML private TextField txtWarranty;
     @FXML private TextField txtQty;
     @FXML private TextArea txtDescription;
@@ -46,7 +51,8 @@ public class ProductController implements Initializable {
     @FXML private TableColumn<ProductDTO, String> colName;
     @FXML private TableColumn<ProductDTO, String> colCategory;
     @FXML private TableColumn<ProductDTO, String> colCondition;
-    @FXML private TableColumn<ProductDTO, Double> colPrice;
+    @FXML private TableColumn<ProductDTO, Double> colSellPrice;
+    @FXML private TableColumn<ProductDTO, Double> colBuyPrice;
     @FXML private TableColumn<ProductDTO, Integer> colWarranty;
     @FXML private TableColumn<ProductDTO, Integer> colQty;
     @FXML private TableColumn<ProductDTO, String> colDesc;
@@ -54,6 +60,8 @@ public class ProductController implements Initializable {
 
     private final ObservableList<ProductDTO> productList = FXCollections.observableArrayList();
     private String selectedImagePath = "";
+
+    private ProductModel productModel = new ProductModel();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -80,7 +88,8 @@ public class ProductController implements Initializable {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
         colCondition.setCellValueFactory(new PropertyValueFactory<>("condition"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("sellPrice"));
+        colSellPrice.setCellValueFactory(new PropertyValueFactory<>("sellPrice"));
+        colBuyPrice.setCellValueFactory(new PropertyValueFactory<>("buyPrice"));
         colWarranty.setCellValueFactory(new PropertyValueFactory<>("warrantyMonth"));
         colQty.setCellValueFactory(new PropertyValueFactory<>("qty"));
         colDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -138,20 +147,26 @@ public class ProductController implements Initializable {
                 txtId.getText(),
                 txtName.getText(),
                 txtDescription.getText(),
-                Double.parseDouble(txtPrice.getText()),
+                Double.parseDouble(txtSellPrice.getText()),
                 cmbCategory.getValue(),
                 cmbCondition.getValue(),
+                Double.parseDouble(txtBuyPrice.getText()),
                 Integer.parseInt(txtWarranty.getText()),
                 Integer.parseInt(txtQty.getText()),
                 selectedImagePath
         );
+        try{
+            boolean result = productModel.save(newProduct);
 
-        // TODO: Insert into Database here (JDBC)
-        ProductUtil.productCache.add(newProduct);
-        tableProducts.setItems(ProductUtil.productCache);
-
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
-        clearForm();
+            if (result) {
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
+                reFresh();
+            }else {
+                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
+            }
+        } catch (Exception e){
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
+        }
     }
 
     private void updateProduct() {
@@ -160,7 +175,6 @@ public class ProductController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
             return;
         }
-
         if (!validateFields()) return;
 
         // Update the object
@@ -168,17 +182,26 @@ public class ProductController implements Initializable {
         selected.setName(txtName.getText());
         selected.setCategory(cmbCategory.getValue());
         selected.setCondition(cmbCondition.getValue());
-        selected.setSellPrice(Double.parseDouble(txtPrice.getText()));
+        selected.setSellPrice(Double.parseDouble(txtSellPrice.getText()));
+        selected.setBuyPrice(Double.parseDouble(txtBuyPrice.getText()));
         selected.setWarrantyMonth(Integer.parseInt(txtWarranty.getText()));
         selected.setQty(Integer.parseInt(txtQty.getText()));
         selected.setDescription(txtDescription.getText());
         selected.setImagePath(selectedImagePath);
 
-        // TODO: Update Database here (JDBC) -> "UPDATE products SET..."
+        try{
+            boolean result = productModel.update(selected);
 
-        tableProducts.refresh(); // Refresh UI
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
-        clearForm();
+            if (result) {
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
+                reFresh();
+            }else {
+                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
+            }
+        } catch (Exception e){
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to update product: " + e.getMessage());
+        }
+
     }
 
     private void deleteProduct() {
@@ -187,15 +210,78 @@ public class ProductController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
             return;
         }
+        selected.setId(txtId.getText());
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
 
         if (alert.getResult() == ButtonType.YES) {
-            // TODO: Delete from Database here (JDBC) -> "DELETE FROM products..."
-            ProductUtil.productCache.remove(selected);
-            clearForm();
+            try {
+                boolean result = productModel.deleteById(selected.getId());
+                if (result) {
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Product Deleted Successfully!");
+                    reFresh();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete product.");
+                }
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to delete product: " + e.getMessage());
+            }
         }
+    }
+
+    @FXML
+    private void getEnterKeyNav(KeyEvent Event){
+        if (Event.getCode() == KeyCode.ENTER) {
+            String id = txtId.getText();
+            try {
+                ResultSet product = productModel.findById(id);
+                ProductDTO p;
+
+                if (product.next()) {
+                    p = new ProductDTO(
+                            product.getString("stock_id"),
+                            product.getString("name"),
+                            product.getString("description"),
+                            product.getDouble("sell_price"),
+                            product.getString("category"),
+                            fromConditionString(product.getString("p_condition")),
+                            product.getDouble("buy_price"),
+                            product.getInt("warranty_months"),
+                            product.getInt("qty"),
+                            product.getString("image_path")
+                    );
+                    populateFields(p);
+                } else {
+                    new Alert(Alert.AlertType.INFORMATION, "No product found with ID: " + id).show();
+                }
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Error retrieving product: " + e.getMessage()).show();
+            }
+        }
+    }
+
+    private void loadProducts() {
+        try {
+
+            List<ProductDTO> rawData = productModel.findAll();
+            if (rawData != null) {
+                ProductUtil.productCache.setAll(rawData);
+            } else {
+                ProductUtil.productCache.clear();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "No products found in the database.");
+                alert.show();
+            }
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading products: " + e.getMessage());
+            alert.show();
+        }
+    }
+
+    private void reFresh(){
+        loadProducts();
+        clearForm();
     }
 
     private void clearForm() {
@@ -203,7 +289,8 @@ public class ProductController implements Initializable {
         txtName.clear();
         cmbCategory.getSelectionModel().clearSelection();
         cmbCondition.getSelectionModel().clearSelection();
-        txtPrice.clear();
+        txtSellPrice.clear();
+        txtBuyPrice.clear();
         txtWarranty.clear();
         txtQty.clear();
         txtDescription.clear();
@@ -213,12 +300,13 @@ public class ProductController implements Initializable {
 
     // --- Helper Methods ---
 
-    private void populateFields(ProductDTO p) {
+    void populateFields(ProductDTO p) {
         txtId.setText(p.getId());
         txtName.setText(p.getName());
         cmbCategory.setValue(p.getCategory());
         cmbCondition.setValue(p.getCondition());
-        txtPrice.setText(String.valueOf(p.getSellPrice()));
+        txtSellPrice.setText(String.valueOf(p.getSellPrice()));
+        txtBuyPrice.setText(String.valueOf(p.getBuyPrice()));
         txtWarranty.setText(String.valueOf(p.getWarrantyMonth()));
         txtQty.setText(String.valueOf(p.getQty()));
         txtDescription.setText(p.getDescription());
@@ -226,12 +314,12 @@ public class ProductController implements Initializable {
     }
 
     private boolean validateFields() {
-        if (txtId.getText().isEmpty() || txtName.getText().isEmpty() || txtPrice.getText().isEmpty()) {
+        if (txtId.getText().isEmpty() || txtName.getText().isEmpty() || txtSellPrice.getText().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "ID, Name, and Price are required!");
             return false;
         }
         try {
-            Double.parseDouble(txtPrice.getText());
+            Double.parseDouble(txtSellPrice.getText());
             Integer.parseInt(txtQty.getText());
             Integer.parseInt(txtWarranty.getText());
         } catch (NumberFormatException e) {
@@ -280,6 +368,19 @@ public class ProductController implements Initializable {
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
             alert.showAndWait();
+        }
+    }
+    private ProductCondition fromConditionString(String s) {
+        if (s == null) return null;
+        try {
+            if(s.equals("Used")){
+                return ProductCondition.USED;
+            }else if(s.equals("Brand New")){
+                return ProductCondition.BRAND_NEW;
+            }
+            return ProductCondition.BOTH;
+        } catch (IllegalArgumentException ex) {
+            return ProductCondition.BOTH; // unknown condition value
         }
     }
 }

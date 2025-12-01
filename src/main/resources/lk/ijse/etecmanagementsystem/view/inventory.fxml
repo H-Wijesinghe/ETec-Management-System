@@ -155,11 +155,11 @@
                                         </HBox>
                                     </children>
                                 </VBox>
-                                <TableView fx:id="productTable" visible="false" StackPane.alignment="CENTER">
+                                <TableView fx:id="productTable" onMouseClicked="#getTableSelectedItem" tableMenuButtonVisible="true" visible="false" StackPane.alignment="CENTER">
                                     <columns>
                                         <TableColumn fx:id="colId" minWidth="45.0" prefWidth="75.0" text="Stock_ID" />
                                         <TableColumn fx:id="colName" minWidth="-1.0" prefWidth="322.0" text="Product_Name" />
-                                        <TableColumn fx:id="colCategory" minWidth="-1.0" prefWidth="171.0" text="Catogary" />
+                                        <TableColumn fx:id="colCategory" minWidth="-1.0" prefWidth="171.0" text="Category" />
                                         <TableColumn fx:id="colSellPrice" minWidth="-1.0" prefWidth="187.0" text="Sell_Price" />
                                         <TableColumn fx:id="colWarrantyMonth" minWidth="-1.0" prefWidth="125.0" text="Warranty_Month" />
                                         <TableColumn fx:id="colQty" minWidth="40.0" prefWidth="64.0" text="Qty" />
