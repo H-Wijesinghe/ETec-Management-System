@@ -4,6 +4,7 @@ package lk.ijse.etecmanagementsystem.model;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,14 +15,15 @@ public class InventoryModel {
     public List<ProductDTO> findAll() throws Exception {
         String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
 
-            ResultSet rs = CrudUtil.execute(sql);
-            List<ProductDTO> products = new ArrayList<>();
+        List<ProductDTO> products = new ArrayList<>();
+
+        try (ResultSet rs = CrudUtil.execute(sql)) {
             while (rs.next()) {
                 products.add(mapRow(rs));
             }
-            return products;
+        }
+        return products;
     }
-
 
 
     private ProductDTO mapRow(ResultSet rs) throws SQLException {
@@ -44,9 +46,9 @@ public class InventoryModel {
     private ProductCondition fromConditionString(String s) {
         if (s == null) return null;
         try {
-            if(s.equals("Used")){
+            if (s.equals("Used")) {
                 return ProductCondition.USED;
-            }else if(s.equals("Brand New")){
+            } else if (s.equals("Brand New")) {
                 return ProductCondition.BRAND_NEW;
             }
             return ProductCondition.BOTH;

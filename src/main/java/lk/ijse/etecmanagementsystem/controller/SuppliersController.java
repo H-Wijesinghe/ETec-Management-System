@@ -22,8 +22,7 @@ public class SuppliersController {
     @FXML private Button btnUser;
 
 
-    // We need a list to easily loop through them
-    private List<Button> menuButtons = new ArrayList<>();
+
 
     MenuBar menuBar = new MenuBar();
 
@@ -31,21 +30,24 @@ public class SuppliersController {
     public void initialize() {
 
 
-        // Set Default Active Button (e.g., Dashboard)
-        menuBar.setActive(btnSuppliers);
-
-        menuBar.setupButton(btnDashboard);
-        menuBar.setupButton(btnInventory);
-        menuBar.setupButton(btnRepairs);
-        menuBar.setupButton(btnSuppliers);
-        menuBar.setupButton(btnCustomers);
-        menuBar.setupButton(btnTransactions);
-        menuBar.setupButton(btnWarranty);
-        menuBar.setupButton(btnSettings);
-        menuBar.setupButton(btnUser);
-
-        String username = Login.getUserName();
-        btnUser.setText(username);
 
     }
+    @FXML
+    private void handleSave(){
+
+    }
+    @FXML
+    private void handleUpdate(){
+
+    }
+    @FXML
+    private void handleDelete(){
+
+    }
+    @FXML
+    private void handleClear(){}
+    @FXML
+    private void handleSearch(){}
+    @FXML
+    private void handleTableClick(){}
 }

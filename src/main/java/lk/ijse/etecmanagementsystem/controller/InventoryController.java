@@ -78,8 +78,8 @@ public class InventoryController {
     @FXML
     public void initialize() {
 
-        loadProducts();
-        loadCategories();
+//        loadProducts();
+//        loadCategories();
 
         setupTableColumns();
         setupControls();
@@ -109,6 +109,31 @@ public class InventoryController {
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading products: " + e.getMessage());
             alert.show();
+        }
+    }
+
+    @FXML
+    private void manageUnite() {
+
+        System.out.println("Unit Manager button clicked.");
+
+        try {
+
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Unit Management");
+            stage.setScene(new Scene(App.loadFXML("unitManagement"), 1000, 700));
+            stage.showAndWait();
+
+
+            loadProducts();
+            loadCategories(); // Refresh categories in case new ones were added
+            setupCategoryComboBox();
+
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Unit Management window: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -207,6 +232,9 @@ public class InventoryController {
             protected List<ProductDTO> call() throws Exception {
                 // Simulate network/DB delay (Remove this in production)
                 Thread.sleep(100);
+
+                loadProducts();
+                loadCategories();
 
                 // Fetch ALL matching data from Service
                 return inventoryService.getFilteredProducts(txtSearch.getText(), cmbCategory.getValue(), cmbCondition.getValue());

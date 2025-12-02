@@ -203,7 +203,7 @@
                         <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                      </padding>
                   </Button>
-                  <Button style="-fx-background-color: #f39c12; -fx-cursor: hand;" text="Set Item Wise Warranty Details" textFill="WHITE">
+                  <Button onAction="#manageUnite" style="-fx-background-color: #f39c12; -fx-cursor: hand;" text="Set Item Wise Warranty Details" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>

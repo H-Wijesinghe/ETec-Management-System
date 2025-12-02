@@ -45,7 +45,7 @@
                   <Label text="📦" textFill="#cbd5e1" />
                </graphic>
             </Button>
-            <Button fx:id="btnRepairs" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="254.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Repairs" textFill="#cbd5e1">
+            <Button fx:id="btnRepairs" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="254.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnRepairsClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Repairs" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                </padding>
@@ -56,7 +56,7 @@
                   <Label text="🛠" textFill="#cbd5e1" />
                </graphic>
             </Button>
-            <Button fx:id="btnSuppliers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="122.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Suppliers" textFill="#cbd5e1">
+            <Button fx:id="btnSuppliers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="122.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnSuppliersClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Suppliers" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                </padding>
@@ -67,7 +67,7 @@
                   <Label text="🚚" textFill="#cbd5e1" />
                </graphic>
             </Button>
-            <Button fx:id="btnCustomers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="166.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Customers" textFill="#cbd5e1">
+            <Button fx:id="btnCustomers" alignment="BASELINE_LEFT" graphicTextGap="15.0" layoutX="10.0" layoutY="166.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnCustomersClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Customers" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
                </padding>

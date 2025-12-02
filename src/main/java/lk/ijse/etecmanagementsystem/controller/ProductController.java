@@ -222,14 +222,7 @@ public class ProductController implements Initializable {
         try {
             ResultSet product = productModel.findById(id);
             if(!product.next()){
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Record does not exist this id, are you want to add new product for " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
-                alert.showAndWait();
-
-                if (alert.getResult() == ButtonType.YES) {
-
-                    new Alert(Alert.AlertType.INFORMATION, "Sorry! This Option Not Set Yet").show();
-
-                }
+                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " not found for update.");
                 return;
             }
 
