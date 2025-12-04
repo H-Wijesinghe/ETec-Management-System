@@ -5,9 +5,10 @@ module lk.ijse.etecmanagementsystem {
 
     requires org.controlsfx.controls;
     requires java.sql;
-
-
-
+    requires java.sql.rowset;
+    requires java.desktop;
+    requires javafx.base;
+    requires javafx.graphics;
 
 
     exports lk.ijse.etecmanagementsystem;
@@ -24,8 +25,7 @@ module lk.ijse.etecmanagementsystem {
 
     exports lk.ijse.etecmanagementsystem.service;
     opens lk.ijse.etecmanagementsystem.service to javafx.fxml;
-    exports lk.ijse.etecmanagementsystem.model.tm;
-    opens lk.ijse.etecmanagementsystem.model.tm to java.base;
+
 
 
 }

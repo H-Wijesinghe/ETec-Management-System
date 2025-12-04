@@ -8,10 +8,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
-import lk.ijse.etecmanagementsystem.model.tm.ProductItemTM;
+import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class UnitManagementController {
 
     // --- TAB 1: VIEW ---
     @FXML private ComboBox<String> cmbViewProduct;
-    @FXML private TableView<ProductItemTM> tblView;
+    @FXML private TableView<ProductItemDTO> tblView;
     @FXML private TableColumn<?, ?> colViewSerial, colViewSupplier, colViewRemaining, colViewSupWar, colViewCustWar, colViewStatus;
 
     // --- TAB 2: ADD ---
@@ -30,7 +31,7 @@ public class UnitManagementController {
     @FXML private TableColumn<String, String> colStagedSerial;
     @FXML private Button btnSaveAll;
 
-    @FXML private TableView<ProductItemTM> tblHistory;
+    @FXML private TableView<ProductItemDTO> tblHistory;
     @FXML private TableColumn<?, ?> colHistSerial, colHistSupplier, colHistSupWar, colHistCustWar, colHistStatus;
 
     // --- TAB 3: CORRECTION ---
@@ -56,8 +57,8 @@ public class UnitManagementController {
     private final UnitManagementModel model = new UnitManagementModel();
 
     private final ObservableList<String> stagingList = FXCollections.observableArrayList();
-    private final ObservableList<ProductItemTM> historyList = FXCollections.observableArrayList();
-    private final ObservableList<ProductItemTM> viewList = FXCollections.observableArrayList();
+    private final ObservableList<ProductItemDTO> historyList = FXCollections.observableArrayList();
+    private final ObservableList<ProductItemDTO> viewList = FXCollections.observableArrayList();
 
     public void initialize() {
         setupTables();
@@ -120,7 +121,7 @@ public class UnitManagementController {
             UnitManagementModel.ProductMeta meta = model.getProductMeta(p);
             if (meta != null) {
                 viewList.clear();
-                viewList.addAll(model.getUnitsByStockId(meta.getStockId()));
+                viewList.addAll(model.getUnitsByStockId(meta.getStockId(),p));
             }
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
@@ -136,7 +137,13 @@ public class UnitManagementController {
                 selectedStockId = meta.getStockId();
                 txtCustomerWarranty.setText(String.valueOf(meta.getDefaultWarranty()));
                 historyList.clear();
-                historyList.addAll(model.getUnitsByStockId(selectedStockId));
+
+                String pName = cmbProduct.getValue();
+                if (pName != null && pName.equals(name)) {
+                    historyList.addAll(model.getUnitsByStockId(selectedStockId, pName));
+                } else{
+                    historyList.addAll(model.getUnitsByStockId(selectedStockId, ""));
+                }
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -182,7 +189,8 @@ public class UnitManagementController {
                 lblStagingCount.setText("0 Items");
                 btnSaveAll.setDisable(true);
                 historyList.clear();
-                historyList.addAll(model.getUnitsByStockId(selectedStockId));
+                String pName = cmbFixProduct.getValue();
+                historyList.addAll(model.getUnitsByStockId(selectedStockId, pName != null ? pName : ""));
                 if (cmbViewProduct.getValue() != null && cmbViewProduct.getValue().equals(cmbProduct.getValue())) handleViewFilter(null);
             }
         } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
@@ -193,7 +201,7 @@ public class UnitManagementController {
         String s = txtFixSearch.getText().trim();
         if (s.isEmpty()) return;
         try {
-            ProductItemTM item = model.getItemBySerial(s);
+            ProductItemDTO item = model.getItemBySerial(s);
             if (item != null) {
                 currentFixingSerial = item.getSerialNumber();
                 vboxFixDetails.setDisable(false);
@@ -229,7 +237,7 @@ public class UnitManagementController {
         String s = txtStatusSearch.getText().trim();
         if (s.isEmpty()) return;
         try {
-            ProductItemTM item = model.getItemBySerial(s);
+            ProductItemDTO item = model.getItemBySerial(s);
             if (item != null) {
                 currentStatusSerial = item.getSerialNumber();
                 vboxStatusUpdate.setDisable(false);

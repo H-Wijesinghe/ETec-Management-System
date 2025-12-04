@@ -89,10 +89,8 @@ public class ProductController implements Initializable {
 
     private final ProductModel productModel = new ProductModel();
 
-    // Added '-' and '_' support for product names like "Dell-XPS"
-    private final String NAME_REGEX = "^[a-zA-Z0-9\\- ]{3,50}$";
-    // Added numbers, '.', ',', '-', and ':' to allow detailed descriptions
-    // Example: "Intel i7, 16GB RAM."
+    private final String NAME_REGEX = "^[ -~]{3,30}$"; // Alphanumeric and special characters, 3-50 chars
+
     private final String DESCRIPTION_REGEX = "^[a-zA-Z0-9.,\\-: ]{3,150}$";
     // Price is generally good, but \\d is cleaner than [0-9]
     private final String PRICE_REGEX = "^\\d+(\\.\\d{1,2})?$";
@@ -214,7 +212,7 @@ public class ProductController implements Initializable {
         if(selected == null){
             selected = new ProductDTO();
         }
-        if (txtId.getText().isEmpty()) {
+        if (txtId.getText() == null || txtId.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
             return;
         }
@@ -265,7 +263,7 @@ public class ProductController implements Initializable {
         if(selected == null){
             selected = new ProductDTO();
         }
-        if (txtId.getText().isEmpty()) {
+        if (txtId.getText() == null || txtId.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
             return;
         }
@@ -293,7 +291,13 @@ public class ProductController implements Initializable {
     private void getEnterKeyNav(KeyEvent Event) {
         if (Event.getCode() == KeyCode.ENTER) {
             String id = txtId.getText();
+
             try {
+                if (id == null || id.isEmpty()) {
+                    new Alert(Alert.AlertType.WARNING, "Please enter a Product ID to search.").show();
+                    return;
+                }
+
                 ResultSet product = productModel.findById(id);
                 ProductDTO p;
 
@@ -344,15 +348,15 @@ public class ProductController implements Initializable {
     }
 
     private void clearForm() {
-        txtId.clear();
-        txtName.clear();
+        txtId.setText("");
+        txtName.setText("");
         cmbCategory.getSelectionModel().clearSelection();
         cmbCondition.getSelectionModel().clearSelection();
-        txtSellPrice.clear();
-        txtBuyPrice.clear();
-        txtWarranty.clear();
-        txtQty.clear();
-        txtDescription.clear();
+        txtSellPrice.setText("");
+        txtBuyPrice.setText("");
+        txtWarranty.setText("");
+        txtQty.setText("");
+        txtDescription.setText("");
         selectedImagePath = "";
         tableProducts.getSelectionModel().clearSelection();
     }
@@ -373,35 +377,25 @@ public class ProductController implements Initializable {
     }
 
     private boolean validateFields() {
-        if (txtId.getText().isEmpty() || txtName.getText().isEmpty() || txtSellPrice.getText().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "ID, Name, and Price are required!");
-            return true;
-        }
-        try {
-            Double.parseDouble(txtSellPrice.getText());
-            Integer.parseInt(txtQty.getText());
-            Integer.parseInt(txtWarranty.getText());
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Input Error", "Price, Qty, and Warranty must be numbers.");
-            return true;
-        }
-        if (!txtName.getText().matches(NAME_REGEX)) {
+
+        if ((txtName.getText() == null) || !(txtName.getText().matches(NAME_REGEX))) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Name must be 3-50 alphanumeric characters.");
             return true;
         }
-        if (!txtDescription.getText().matches(DESCRIPTION_REGEX)) {
+        if ((txtDescription.getText() == null) || !txtDescription.getText().matches(DESCRIPTION_REGEX)) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Desc must be 3-150 alphabetic characters.");
             return true;
         }
-        if (!txtSellPrice.getText().matches(PRICE_REGEX) || !txtBuyPrice.getText().matches(PRICE_REGEX)) {
+        if ((txtSellPrice.getText() == null || txtBuyPrice.getText() == null)
+                || !txtSellPrice.getText().matches(PRICE_REGEX) || !txtBuyPrice.getText().matches(PRICE_REGEX)) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Invalid  Price format.");
             return true;
         }
-        if (!txtWarranty.getText().matches(WARRANTY_REGEX)) {
+        if (txtWarranty.getText() == null || !txtWarranty.getText().matches(WARRANTY_REGEX)) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Warranty must be 1-2 digit number.");
             return true;
         }
-        if (!txtQty.getText().matches(QTY_REGEX)) {
+        if (txtQty.getText() == null || !txtQty.getText().matches(QTY_REGEX)) {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Qty must be 1-5 digit number.");
             return true;
         }

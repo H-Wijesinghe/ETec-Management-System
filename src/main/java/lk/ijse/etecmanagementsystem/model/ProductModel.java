@@ -101,12 +101,14 @@ public class ProductModel {
     public List<ProductDTO> findAll() throws Exception {
         String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
 
-        ResultSet rs = CrudUtil.execute(sql);
         List<ProductDTO> products = new ArrayList<>();
-        while (rs.next()) {
-            products.add(mapRow(rs));
+
+        try(ResultSet rs = CrudUtil.execute(sql)) {
+            while (rs.next()) {
+                products.add(mapRow(rs));
+            }
         }
-        rs.getStatement().close();
+
         return products;
     }
 
@@ -127,16 +129,16 @@ public class ProductModel {
     }
 
     private ProductCondition fromConditionString(String s) {
-        if (s == null) return null;
+        if (s == null) return ProductCondition.BOTH;
         try {
-            if(s.equals("Used")){
+            if(s.equalsIgnoreCase("USED")){
                 return ProductCondition.USED;
-            }else if(s.equals("Brand New")){
+            }else if(s.equalsIgnoreCase("BRAND NEW")){
                 return ProductCondition.BRAND_NEW;
             }
-            return null;
+            return ProductCondition.BOTH;
         } catch (IllegalArgumentException ex) {
-            return null; // unknown condition value
+            return ProductCondition.BOTH; // unknown condition value
         }
     }
 

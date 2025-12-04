@@ -80,24 +80,20 @@ package lk.ijse.etecmanagementsystem.service;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
+import lk.ijse.etecmanagementsystem.util.Stock;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class InventoryService {
 
-    // Removed 'masterList' to prevent stale data.
-    // We will stream directly from the static ProductUtil.productCache
-
-    public List<ProductDTO> getFilteredProducts(String searchText, String category, ProductCondition conditionFilter) {
+    public List<ProductDTO> getFilteredProducts(String searchText, String category, ProductCondition conditionFilter, Stock stockFilter) {
 
         String finalSearch = (searchText == null) ? "" : searchText.toLowerCase();
 
         return ProductUtil.productCache.stream()
-                // 1. Filter by Name (or ID)
-                .filter(p -> p.getName().toLowerCase().contains(finalSearch)
-//                        || p.getId().toLowerCase().contains(finalSearch)
-                )
+                // 1. Filter by Name
+                .filter(p -> p.getName().toLowerCase().contains(finalSearch))
 
                 // 2. Filter by Category
                 .filter(p -> isCategoryMatch(p, category))
@@ -105,30 +101,36 @@ public class InventoryService {
                 // 3. Filter by Condition (Enum)
                 .filter(p -> isConditionMatch(p, conditionFilter))
 
+                // 4. Filter by Stock Status
+                .filter(p -> isStockMatch(p, stockFilter))
+
                 .collect(Collectors.toList());
     }
 
     private boolean isCategoryMatch(ProductDTO p, String category) {
-        // If category is null or "All Categories", return true (show all)
         return category == null
                 || category.equals("All Categories")
                 || p.getCategory().equals(category);
     }
 
     private boolean isConditionMatch(ProductDTO p, ProductCondition filterValue) {
-        // 1. If filter is "BOTH" (the wildcard) or null, return true (show all)
         if (filterValue == null || filterValue == ProductCondition.BOTH) {
             return true;
         }
-
-        // 2. Safety check: If product has no condition set, decide if you want to show it.
-        // Returning false hides invalid data.
         if (p.getCondition() == null) {
             return false;
         }
-
-        // 3. Strict match (e.g., USED == USED)
-        // Note: '==' works fine for Enums and avoids NullPointerException
         return p.getCondition() == filterValue;
+    }
+
+    private boolean isStockMatch(ProductDTO p, Stock stock) {
+        if (stock == null || stock == Stock.ALL) {
+            return true;
+        } else if (stock == Stock.IN) {
+            return p.getQty() > 0;
+        } else if (stock == Stock.OUT) {
+            return p.getQty() == 0;
+        }
+        return true;
     }
 }

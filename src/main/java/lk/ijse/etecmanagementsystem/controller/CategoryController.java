@@ -82,12 +82,17 @@ public class CategoryController {
 
                 try {
 
-                    categoryModel.saveCategory(name);
-                    lblMsg.setText("Category " + name + " added successfully.");
-                    lblMsg.setStyle("-fx-text-fill: green;");
+                    if(categoryModel.saveCategory(name)){
+                        lblMsg.setText("Category " + name + " added successfully.");
+                        lblMsg.setStyle("-fx-text-fill: green;");
 
-                    categoryName.clear();
-                    loadCategories();
+                        categoryName.clear();
+                        loadCategories();
+                        return;
+                    }
+
+                    lblMsg.setText("Category add failed.");
+                    lblMsg.setStyle("-fx-text-fill: red;");
 
                 } catch (Exception e) {
                     new Alert(Alert.AlertType.ERROR, "Failed to save category: " + e.getMessage()).show();

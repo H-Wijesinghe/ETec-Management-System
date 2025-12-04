@@ -21,11 +21,11 @@ import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.InventoryModel;
 import lk.ijse.etecmanagementsystem.service.InventoryService;
 import lk.ijse.etecmanagementsystem.service.ThreadService;
-import lk.ijse.etecmanagementsystem.service.MenuBar; // Assuming you have this
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
 import javafx.scene.input.MouseEvent;
+import lk.ijse.etecmanagementsystem.util.Stock;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +56,12 @@ public class InventoryController {
     private ComboBox<ProductCondition> cmbCondition;
 
     @FXML
+    private ComboBox<Stock> cmbStock;
+
+    @FXML
     private Button btnProductManager;
+
+    @FXML private  Button btnReset;
 
 
     private final InventoryService inventoryService = new InventoryService();
@@ -78,8 +83,8 @@ public class InventoryController {
     @FXML
     public void initialize() {
 
-//        loadProducts();
-//        loadCategories();
+        loadProducts();
+        loadCategories();
 
         setupTableColumns();
         setupControls();
@@ -90,7 +95,6 @@ public class InventoryController {
 
         switchToGridView();
 
-        System.out.println(ProductUtil.productCache);
     }
 
 
@@ -127,10 +131,6 @@ public class InventoryController {
             stage.showAndWait();
 
 
-            loadProducts();
-            loadCategories(); // Refresh categories in case new ones were added
-            setupCategoryComboBox();
-
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Unit Management window: " + e.getMessage());
             alert.showAndWait();
@@ -151,10 +151,6 @@ public class InventoryController {
             stage.setScene(new Scene(App.loadFXML("product"), 1000, 700));
             stage.showAndWait();
 
-
-            loadProducts();
-            loadCategories(); // Refresh categories in case new ones were added
-            setupCategoryComboBox();
 
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Product Management window: " + e.getMessage());
@@ -233,11 +229,8 @@ public class InventoryController {
                 // Simulate network/DB delay (Remove this in production)
                 Thread.sleep(100);
 
-                loadProducts();
-                loadCategories();
-
                 // Fetch ALL matching data from Service
-                return inventoryService.getFilteredProducts(txtSearch.getText(), cmbCategory.getValue(), cmbCondition.getValue());
+                return inventoryService.getFilteredProducts(txtSearch.getText(), cmbCategory.getValue(), cmbCondition.getValue(), cmbStock.getValue());
             }
         };
 
@@ -267,7 +260,6 @@ public class InventoryController {
             alert.setContentText("Please check your database connection.\nDetails: " + e.getMessage());
             alert.showAndWait();
         });
-
 
         ThreadService.setInventoryLoadingThread(new Thread(currentLoadTask));
         ThreadService.getInventoryLoadingThread().start();
@@ -313,6 +305,8 @@ public class InventoryController {
 
         cmbCondition.getItems().setAll(ProductCondition.values());
         cmbCondition.getSelectionModel().select(ProductCondition.BOTH);
+        cmbStock.getItems().setAll(Stock.values());
+        cmbStock.getSelectionModel().select(Stock.ALL);
         btnLoadMore.setVisible(false);
 
 
@@ -328,9 +322,6 @@ public class InventoryController {
             newStage.setResizable(false);
             newStage.showAndWait();
 
-            // After closing, refresh categories
-            setupCategoryComboBox();
-
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
             alert.showAndWait();
@@ -342,6 +333,7 @@ public class InventoryController {
         txtSearch.textProperty().addListener((obs, old, newVal) -> refreshData());
         cmbCategory.valueProperty().addListener((obs, old, newVal) -> refreshData());
         cmbCondition.valueProperty().addListener((obs, old, newVal) -> refreshData());
+        cmbStock.valueProperty().addListener((obs, old, newVal) -> refreshData());
 
     }
 
@@ -401,7 +393,7 @@ public class InventoryController {
             if (!list.isEmpty()) {
                 Category.getCategories().setAll(list);
 
-                System.out.println("Categories loaded from DB: " + list);
+                System.out.println("Categories loaded from DB: ");
             } else {
                 System.out.println("No categories found in the database.");
             }
@@ -423,6 +415,15 @@ public class InventoryController {
         cmbCategory.setItems(listData);
 
         cmbCategory.getSelectionModel().select("All Categories");
+    }
+
+    @FXML
+    private void handleReset(){
+        txtSearch.clear();
+        setupCategoryComboBox();
+        cmbCondition.getSelectionModel().select(ProductCondition.BOTH);
+        cmbStock.getSelectionModel().select(Stock.ALL);
+        refreshData();
     }
 
 }

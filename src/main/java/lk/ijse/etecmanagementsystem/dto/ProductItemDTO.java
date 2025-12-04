@@ -1,10 +1,10 @@
-package lk.ijse.etecmanagementsystem.model.tm;
+package lk.ijse.etecmanagementsystem.dto;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-public class ProductItemTM {
+public class ProductItemDTO {
     private String serialNumber;
     private String productName;   // Added for Tab 3/4 context
     private String supplierName;
@@ -17,9 +17,9 @@ public class ProductItemTM {
     private Date soldDate;
 
     // Full Constructor
-    public ProductItemTM(String serialNumber, String productName, String supplierName,
-                         int supplierWarranty, int customerWarranty, String status,
-                         Date addedDate, Date soldDate) {
+    public ProductItemDTO(String serialNumber, String productName, String supplierName,
+                          int supplierWarranty, int customerWarranty, String status,
+                          Date addedDate, Date soldDate) {
         this.serialNumber = serialNumber;
         this.productName = productName;
         this.supplierName = supplierName;
