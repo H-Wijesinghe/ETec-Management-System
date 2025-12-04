@@ -25,6 +25,7 @@ public class UnitManagementController {
 
     // --- TAB 2: ADD ---
     @FXML private ComboBox<String> cmbProduct, cmbSupplier;
+    @FXML private Label lblProductId; // <--- NEW: Add this to FXML (fx:id="lblProductId")
     @FXML private TextField txtSupplierWarranty, txtCustomerWarranty, txtSerialNumber;
     @FXML private Label lblStagingCount;
     @FXML private TableView<String> tblStaging;
@@ -39,21 +40,28 @@ public class UnitManagementController {
     @FXML private ComboBox<String> cmbFixProduct, cmbFixSupplier;
     @FXML private VBox vboxFixDetails;
 
-    // --- TAB 4: STATUS (Updated Fields) ---
+    // --- TAB 4: STATUS ---
     @FXML private TextField txtStatusSearch;
     @FXML private VBox vboxStatusUpdate;
     @FXML private Label lblCurrentStatus;
-    @FXML private Label lblUpdateProductName; // <--- NEW
-    @FXML private Label lblUpdateSupplier;    // <--- NEW
+    @FXML private Label lblUpdateProductName;
+    @FXML private Label lblUpdateSupplier;
     @FXML private ComboBox<String> cmbNewStatus;
 
     // --- DATA ---
     private int selectedStockId = -1;
     private String currentFixingSerial = "";
     private String currentStatusSerial = "";
-    private Map<String, Integer> supplierMap;
 
-    // MODEL INSTANCE
+    // Maps to handle Name(ID) -> ID conversion
+    // Key: "Cable (ID: 55)", Value: 55
+    private Map<String, Integer> productSelectionMap = new HashMap<>();
+    private Map<String, Integer> supplierSelectionMap = new HashMap<>();
+
+    // Reverse Maps to handle ID -> Name(ID) conversion (For Fix Tab)
+    private Map<Integer, String> idToProductDisplayMap = new HashMap<>();
+    private Map<Integer, String> idToSupplierDisplayMap = new HashMap<>();
+
     private final UnitManagementModel model = new UnitManagementModel();
 
     private final ObservableList<String> stagingList = FXCollections.observableArrayList();
@@ -90,24 +98,62 @@ public class UnitManagementController {
 
     private void loadInitialData() {
         try {
-            List<String> products = model.getAllProductNames();
-            ObservableList<String> prodObList = FXCollections.observableArrayList(products);
+            // --- LOAD PRODUCTS (BY ID) ---
+            productSelectionMap.clear();
+            idToProductDisplayMap.clear();
+
+            Map<Integer, String> dbProducts = model.getAllProductMap();
+            ObservableList<String> prodObList = FXCollections.observableArrayList();
+
+            for (Map.Entry<Integer, String> entry : dbProducts.entrySet()) {
+                int id = entry.getKey();
+                String name = entry.getValue();
+
+                // Format: Name (ID: 123)
+                String displayStr = name + " (ID: " + id + ")";
+
+                productSelectionMap.put(displayStr, id);
+                idToProductDisplayMap.put(id, displayStr);
+                prodObList.add(displayStr);
+            }
+
             cmbProduct.setItems(prodObList);
             cmbViewProduct.setItems(prodObList);
-            cmbFixProduct.setItems(prodObList); // Tab 3
+            cmbFixProduct.setItems(prodObList);
 
-            supplierMap = model.getAllSuppliers();
-            ObservableList<String> supObList = FXCollections.observableArrayList(supplierMap.keySet());
+            // --- LOAD SUPPLIERS (BY ID) ---
+            supplierSelectionMap.clear();
+            idToSupplierDisplayMap.clear();
+
+            Map<Integer, String> dbSuppliers = model.getAllSuppliersMap();
+            ObservableList<String> supObList = FXCollections.observableArrayList();
+
+            for (Map.Entry<Integer, String> entry : dbSuppliers.entrySet()) {
+                int id = entry.getKey();
+                String name = entry.getValue();
+
+                String displayStr = name + " (ID: " + id + ")";
+
+                supplierSelectionMap.put(displayStr, id);
+                idToSupplierDisplayMap.put(id, displayStr);
+                supObList.add(displayStr);
+            }
+
             cmbSupplier.setItems(supObList);
-            cmbFixSupplier.setItems(supObList); // Tab 3
+            cmbFixSupplier.setItems(supObList);
 
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
     private void setupListeners() {
+        // Look up ID based on Selection String
         cmbProduct.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
-            if (newVal != null) handleProductSelection(newVal);
+            if (newVal != null) {
+                Integer id = productSelectionMap.get(newVal);
+                if (id != null) handleProductSelection(id, newVal);
+            }
         });
+
         cmbViewProduct.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
             if (newVal != null) handleViewFilter(null);
         });
@@ -115,35 +161,40 @@ public class UnitManagementController {
 
     // --- TAB 1 LOGIC ---
     @FXML void handleViewFilter(ActionEvent e) {
-        String p = cmbViewProduct.getValue();
-        if (p == null) return;
+        String selection = cmbViewProduct.getValue();
+        if (selection == null) return;
+
+        Integer stockId = productSelectionMap.get(selection);
+        if (stockId == null) return;
+
         try {
-            UnitManagementModel.ProductMeta meta = model.getProductMeta(p);
-            if (meta != null) {
-                viewList.clear();
-                viewList.addAll(model.getUnitsByStockId(meta.getStockId(),p));
-            }
+            // Get Name just for the DTO display (optional, can extract from selection string too)
+            String name = selection.substring(0, selection.lastIndexOf(" (ID:"));
+
+            viewList.clear();
+            viewList.addAll(model.getUnitsByStockId(stockId, name));
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
+
     @FXML void handleRefreshView(ActionEvent e) { handleViewFilter(null); }
 
     // --- TAB 2 LOGIC ---
     @FXML void handleClearSupplier(ActionEvent e) { cmbSupplier.getSelectionModel().clearSelection(); }
 
-    private void handleProductSelection(String name) {
+    private void handleProductSelection(int stockId, String fullDisplayName) {
         try {
-            UnitManagementModel.ProductMeta meta = model.getProductMeta(name);
+            // Update Label to show ID side-by-side
+            if (lblProductId != null) lblProductId.setText("ID: " + stockId);
+
+            UnitManagementModel.ProductMeta meta = model.getProductMetaById(stockId);
             if (meta != null) {
                 selectedStockId = meta.getStockId();
                 txtCustomerWarranty.setText(String.valueOf(meta.getDefaultWarranty()));
-                historyList.clear();
 
-                String pName = cmbProduct.getValue();
-                if (pName != null && pName.equals(name)) {
-                    historyList.addAll(model.getUnitsByStockId(selectedStockId, pName));
-                } else{
-                    historyList.addAll(model.getUnitsByStockId(selectedStockId, ""));
-                }
+                historyList.clear();
+                // Pass name for display
+                String cleanName = fullDisplayName.substring(0, fullDisplayName.lastIndexOf(" (ID:"));
+                historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -178,7 +229,9 @@ public class UnitManagementController {
     @FXML void handleSaveAll(ActionEvent e) {
         if (selectedStockId == -1) return;
         try {
-            Integer supId = (cmbSupplier.getValue() != null) ? supplierMap.get(cmbSupplier.getValue()) : null;
+            // Get ID from Map
+            Integer supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : null;
+
             int supWar = txtSupplierWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtSupplierWarranty.getText());
             int custWar = Integer.parseInt(txtCustomerWarranty.getText());
             List<String> list = new ArrayList<>(stagingList);
@@ -188,10 +241,17 @@ public class UnitManagementController {
                 stagingList.clear();
                 lblStagingCount.setText("0 Items");
                 btnSaveAll.setDisable(true);
-                historyList.clear();
-                String pName = cmbFixProduct.getValue();
-                historyList.addAll(model.getUnitsByStockId(selectedStockId, pName != null ? pName : ""));
-                if (cmbViewProduct.getValue() != null && cmbViewProduct.getValue().equals(cmbProduct.getValue())) handleViewFilter(null);
+
+                // Refresh History
+                String currentComboVal = cmbProduct.getValue();
+                if(currentComboVal != null) {
+                    historyList.clear();
+                    String cleanName = currentComboVal.substring(0, currentComboVal.lastIndexOf(" (ID:"));
+                    historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
+                }
+
+                // Refresh View if match
+                if (cmbViewProduct.getValue() != null && cmbViewProduct.getValue().equals(currentComboVal)) handleViewFilter(null);
             }
         } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
     }
@@ -206,9 +266,22 @@ public class UnitManagementController {
                 currentFixingSerial = item.getSerialNumber();
                 vboxFixDetails.setDisable(false);
                 txtFixSerial.setText(item.getSerialNumber());
-                cmbFixProduct.setValue(item.getProductName()); // Auto-Select Product
-                cmbFixSupplier.setValue(item.getSupplierName()); // Auto-Select Supplier
                 txtFixSupWar.setText(String.valueOf(item.getSupplierWarranty()));
+
+                // --- CRITICAL FIX: Select correct ID in ComboBox ---
+                UnitManagementModel.ItemIds ids = model.getIdsBySerial(s);
+                if (ids != null) {
+                    // Find the string "Cable (ID: 5)" using the ID
+                    String prodStr = idToProductDisplayMap.get(ids.stockId);
+                    if (prodStr != null) cmbFixProduct.setValue(prodStr);
+
+                    if (ids.supplierId != 0) {
+                        String supStr = idToSupplierDisplayMap.get(ids.supplierId);
+                        if (supStr != null) cmbFixSupplier.setValue(supStr);
+                    } else {
+                        cmbFixSupplier.setValue(null);
+                    }
+                }
             } else { showAlert(Alert.AlertType.WARNING, "Not Found"); vboxFixDetails.setDisable(true); }
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
@@ -216,11 +289,12 @@ public class UnitManagementController {
     @FXML void handleFixSave(ActionEvent e) {
         try {
             String newSerial = txtFixSerial.getText().trim();
-            String pName = cmbFixProduct.getValue();
-            if (newSerial.isEmpty() || pName == null) return;
+            String pVal = cmbFixProduct.getValue();
+            if (newSerial.isEmpty() || pVal == null) return;
 
-            int newStockId = model.getProductMeta(pName).getStockId();
-            Integer newSupId = (cmbFixSupplier.getValue() != null) ? supplierMap.get(cmbFixSupplier.getValue()) : null;
+            // Get IDs
+            int newStockId = productSelectionMap.get(pVal);
+            Integer newSupId = (cmbFixSupplier.getValue() != null) ? supplierSelectionMap.get(cmbFixSupplier.getValue()) : null;
             int newSupWar = Integer.parseInt(txtFixSupWar.getText());
 
             if (model.correctItemMistake(currentFixingSerial, newSerial, newStockId, newSupId, newSupWar)) {
@@ -232,7 +306,7 @@ public class UnitManagementController {
         } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
     }
 
-    // --- TAB 4: STATUS (With Product Name Display) ---
+    // --- TAB 4: STATUS ---
     @FXML void handleStatusSearch(ActionEvent e) {
         String s = txtStatusSearch.getText().trim();
         if (s.isEmpty()) return;
@@ -242,10 +316,9 @@ public class UnitManagementController {
                 currentStatusSerial = item.getSerialNumber();
                 vboxStatusUpdate.setDisable(false);
 
-                // Show Details
                 lblCurrentStatus.setText(item.getStatus());
-                lblUpdateProductName.setText(item.getProductName()); // <--- FIXED
-                lblUpdateSupplier.setText(item.getSupplierName());   // <--- FIXED
+                lblUpdateProductName.setText(item.getProductName());
+                lblUpdateSupplier.setText(item.getSupplierName());
 
                 cmbNewStatus.setValue(item.getStatus());
             } else { showAlert(Alert.AlertType.WARNING, "Not Found"); vboxStatusUpdate.setDisable(true); }

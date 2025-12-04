@@ -7,7 +7,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
+import lk.ijse.etecmanagementsystem.model.CustomersModel;
 import lk.ijse.etecmanagementsystem.model.SuppliersModel;
 import lk.ijse.etecmanagementsystem.service.MenuBar;
 import lk.ijse.etecmanagementsystem.util.Login;
@@ -38,17 +40,17 @@ public class CustomersController {
     private Button btnSearch;
 
     @FXML
-    private TableView<SupplierDTO> tblCustomer;
+    private TableView<CustomerDTO> tblCustomer;
     @FXML
-    private TableColumn<SupplierDTO, Integer> colId;
+    private TableColumn<CustomerDTO, Integer> colId;
     @FXML
-    private TableColumn<SupplierDTO, String> colName;
+    private TableColumn<CustomerDTO, String> colName;
     @FXML
-    private TableColumn<SupplierDTO, String> colContact;
+    private TableColumn<CustomerDTO, String> colContact;
     @FXML
-    private TableColumn<SupplierDTO, String> colEmail;
+    private TableColumn<CustomerDTO, String> colEmail;
     @FXML
-    private TableColumn<SupplierDTO, String> colAddress;
+    private TableColumn<CustomerDTO, String> colAddress;
 
     @FXML
     private Button btnSave;
@@ -59,14 +61,14 @@ public class CustomersController {
     @FXML
     private Button btnReset;
 
-    private final SuppliersModel suppliersModel = new SuppliersModel();
-    private final ObservableList<SupplierDTO> suppliersObservableList = FXCollections.observableArrayList();
+    private final CustomersModel customerModel = new CustomersModel();
+    private final ObservableList<CustomerDTO> customerObservableList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         setCellValueFactories();
         loadProducts();
-        tblCustomer.setItems(suppliersObservableList);
+        tblCustomer.setItems(customerObservableList);
 
         // Listener to handle selection changes
         tblCustomer.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -78,9 +80,9 @@ public class CustomersController {
 
     private void setCellValueFactories() {
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("supplierId"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
-        colContact.setCellValueFactory(new PropertyValueFactory<>("contactNumber"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colContact.setCellValueFactory(new PropertyValueFactory<>("number"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("emailAddress"));
         colAddress.setCellValueFactory(new PropertyValueFactory<>("address"));
     }
@@ -91,7 +93,7 @@ public class CustomersController {
 
         try {
 
-            SupplierDTO supplier = new SupplierDTO(
+            CustomerDTO customer = new CustomerDTO(
                     0,
                     txtName.getText().trim(),
                     txtContact.getText().trim(),
@@ -99,12 +101,12 @@ public class CustomersController {
                     txtAddress.getText().trim()
             );
 
-            boolean isSaved = suppliersModel.saveSuppliers(supplier);
+            boolean isSaved = customerModel.saveCustomer(customer);
             if (isSaved) {
-                new Alert(Alert.AlertType.INFORMATION, "Supplier Saved Successfully!").show();
+                new Alert(Alert.AlertType.INFORMATION, "Customer Saved Successfully!").show();
                 handleReset();
             } else {
-                new Alert(Alert.AlertType.ERROR, "Failed to Save Supplier.").show();
+                new Alert(Alert.AlertType.ERROR, "Failed to Save Customer.").show();
             }
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "DB Error: " + e.getMessage()).show();
@@ -114,14 +116,14 @@ public class CustomersController {
     @FXML
     private void handleUpdate() {
         if (txtId.getText().isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Please select a supplier to update.").show();
+            new Alert(Alert.AlertType.ERROR, "Please select a customer to update.").show();
             return;
         }
         if (!validateFields()) return;
 
         try {
             int id = Integer.parseInt(txtId.getText().trim());
-            SupplierDTO supplier = new SupplierDTO(
+            CustomerDTO customer = new CustomerDTO(
                     id,
                     txtName.getText(),
                     txtContact.getText(),
@@ -129,12 +131,12 @@ public class CustomersController {
                     txtAddress.getText()
             );
 
-            boolean isUpdated = suppliersModel.updateSuppliers(supplier);
+            boolean isUpdated = customerModel.updateCustomer(customer);
             if (isUpdated) {
-                new Alert(Alert.AlertType.INFORMATION, "Supplier Updated Successfully!").show();
+                new Alert(Alert.AlertType.INFORMATION, "Customer Updated Successfully!").show();
                 handleReset();
             } else {
-                new Alert(Alert.AlertType.ERROR, "Failed to Update Supplier.").show();
+                new Alert(Alert.AlertType.ERROR, "Failed to Update Customer.").show();
             }
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "DB Error: " + e.getMessage()).show();
@@ -146,22 +148,22 @@ public class CustomersController {
     @FXML
     private void handleDelete() {
         if (txtId.getText().isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Please select a supplier to delete.").show();
+            new Alert(Alert.AlertType.ERROR, "Please select a customer to delete.").show();
             return;
         }
 
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this supplier?", ButtonType.YES, ButtonType.NO);
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete this customer?", ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> result = confirmation.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
             try {
                 int id = Integer.parseInt(txtId.getText().trim());
-                boolean isDeleted = suppliersModel.deleteSuppliers(id);
+                boolean isDeleted = customerModel.deleteCustomer(id);
                 if (isDeleted) {
-                    new Alert(Alert.AlertType.INFORMATION, "Supplier Deleted Successfully!").show();
+                    new Alert(Alert.AlertType.INFORMATION, "Customer Deleted Successfully!").show();
                     handleReset();
                 } else {
-                    new Alert(Alert.AlertType.ERROR, "Failed to Delete Supplier.").show();
+                    new Alert(Alert.AlertType.ERROR, "Failed to Delete Customer.").show();
                 }
             } catch (SQLException e) {
                 new Alert(Alert.AlertType.ERROR, "DB Error: " + e.getMessage()).show();
@@ -178,7 +180,7 @@ public class CustomersController {
             String idText = txtSearchByID.getText().trim();
 
             if (idText.isEmpty()) {
-                new Alert(Alert.AlertType.ERROR, "Please enter supplier ID").show();
+                new Alert(Alert.AlertType.ERROR, "Please enter customer ID").show();
                 return;
             }
             if (!idText.matches(ID_REGEX)) {
@@ -187,14 +189,14 @@ public class CustomersController {
             }
 
             try {
-                int sID = Integer.parseInt(idText);
+                int cID = Integer.parseInt(idText);
 
-                SupplierDTO s = suppliersModel.getSupplierById(sID);
+                CustomerDTO c = customerModel.getCustomerById(cID);
 
-                if (s != null) {
-                    populateFields(s);
+                if (c != null) {
+                    populateFields(c);
                 } else {
-                    new Alert(Alert.AlertType.ERROR, "Supplier ID does not exist").show();
+                    new Alert(Alert.AlertType.ERROR, "Customer ID does not exist").show();
                 }
 
             } catch (NumberFormatException e) {
@@ -221,17 +223,17 @@ public class CustomersController {
     private void handleSearch() {
         String search = txtSearch.getText().toLowerCase();
         if (!search.isEmpty() ) {
-            ObservableList<SupplierDTO> filteredList = filterData(search);
+            ObservableList<CustomerDTO> filteredList = filterData(search);
             tblCustomer.setItems(filteredList);
         } else {
-            tblCustomer.setItems(suppliersObservableList);
+            tblCustomer.setItems(customerObservableList);
         }
     }
 
 
     @FXML
     private void handleTableClick() {
-        SupplierDTO selectedItem = tblCustomer.getSelectionModel().getSelectedItem();
+        CustomerDTO selectedItem = tblCustomer.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             populateFields(selectedItem);
         }
@@ -292,40 +294,40 @@ public class CustomersController {
 
     private void reloadTable() {
         loadProducts();
-        tblCustomer.setItems(suppliersObservableList);
+        tblCustomer.setItems(customerObservableList);
     }
 
     private void loadProducts() {
         try {
-            List<SupplierDTO> rawData = suppliersModel.getAllSuppliers();
-            suppliersObservableList.clear(); // Always clear before adding
+            List<CustomerDTO> rawData = customerModel.getAllCustomers();
+            customerObservableList.clear(); // Always clear before adding
             if (rawData != null) {
-                suppliersObservableList.addAll(rawData);
+                customerObservableList.addAll(rawData);
             }
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error loading Suppliers: " + e.getMessage()).show();
         }
     }
 
-    private ObservableList<SupplierDTO> filterData(String search) {
+    private ObservableList<CustomerDTO> filterData(String search) {
         String searchLower = search.toLowerCase();
 
-        return suppliersObservableList.stream()
-                .filter(s -> {
-                    boolean matchesName = s.getSupplierName() != null && s.getSupplierName().toLowerCase().contains(searchLower);
-                    boolean matchesContact = s.getContactNumber() != null && s.getContactNumber().contains(search);
-                    boolean matchesEmail = s.getEmailAddress() != null && s.getEmailAddress().toLowerCase().contains(searchLower);
+        return customerObservableList.stream()
+                .filter(c -> {
+                    boolean matchesName = c.getName() != null && c.getName().toLowerCase().contains(searchLower);
+                    boolean matchesContact = c.getNumber() != null && c.getNumber().contains(search);
+                    boolean matchesEmail = c.getEmailAddress() != null && c.getEmailAddress().toLowerCase().contains(searchLower);
 
                     return matchesName || matchesContact || matchesEmail;
                 })
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 
-    private void populateFields(SupplierDTO s) {
-        txtId.setText(String.valueOf(s.getSupplierId()));
-        txtName.setText(s.getSupplierName());
-        txtContact.setText(s.getContactNumber());
-        txtEmail.setText(s.getEmailAddress());
-        txtAddress.setText(s.getAddress());
+    private void populateFields(CustomerDTO c) {
+        txtId.setText(String.valueOf(c.getId()));
+        txtName.setText(c.getName());
+        txtContact.setText(c.getNumber());
+        txtEmail.setText(c.getEmailAddress());
+        txtAddress.setText(c.getAddress());
     }
 }

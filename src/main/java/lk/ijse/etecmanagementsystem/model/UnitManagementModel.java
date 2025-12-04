@@ -12,37 +12,62 @@ import java.util.Map;
 
 public class UnitManagementModel {
 
-    public List<String> getAllProductNames() throws SQLException {
-        List<String> list = new ArrayList<>();
-        ResultSet rs = CrudUtil.execute("SELECT name FROM Product");
+    // --- 1. CHANGED: Get Map of ID -> Name ---
+    public Map<Integer, String> getAllProductMap() throws SQLException {
+        Map<Integer, String> map = new HashMap<>();
+        ResultSet rs = CrudUtil.execute("SELECT stock_id, name FROM Product");
         try {
-            while (rs.next()) list.add(rs.getString("name"));
-        } finally {
-            if (rs != null) rs.close();
-        }
-        return list;
-    }
-
-    public Map<String, Integer> getAllSuppliers() throws SQLException {
-        Map<String, Integer> map = new HashMap<>();
-        ResultSet rs = CrudUtil.execute("SELECT supplier_id, supplier_name FROM Supplier");
-        try {
-            while (rs.next()) map.put(rs.getString("supplier_name"), rs.getInt("supplier_id"));
+            while (rs.next()) {
+                map.put(rs.getInt("stock_id"), rs.getString("name"));
+            }
         } finally {
             if (rs != null) rs.close();
         }
         return map;
     }
 
-    public ProductMeta getProductMeta(String productName) throws SQLException {
-        ResultSet rs = CrudUtil.execute("SELECT stock_id, warranty_months FROM Product WHERE name = ?", productName);
+    // --- 2. CHANGED: Get Map of ID -> Name ---
+    public Map<Integer, String> getAllSuppliersMap() throws SQLException {
+        Map<Integer, String> map = new HashMap<>();
+        ResultSet rs = CrudUtil.execute("SELECT supplier_id, supplier_name FROM Supplier");
         try {
-            if (rs.next()) return new ProductMeta(rs.getInt("stock_id"), rs.getInt("warranty_months"));
+            while (rs.next()) {
+                map.put(rs.getInt("supplier_id"), rs.getString("supplier_name"));
+            }
+        } finally {
+            if (rs != null) rs.close();
+        }
+        return map;
+    }
+
+    // --- 3. NEW: Get Meta by ID ---
+    public ProductMeta getProductMetaById(int stockId) throws SQLException {
+        ResultSet rs = CrudUtil.execute("SELECT name, warranty_months FROM Product WHERE stock_id = ?", stockId);
+        try {
+            if (rs.next()) {
+                return new ProductMeta(stockId, rs.getInt("warranty_months"));
+            }
         } finally {
             if (rs != null) rs.close();
         }
         return null;
     }
+
+    // --- 4. NEW: Helper to get specific IDs for a serial (Used in Fix Tab) ---
+    public ItemIds getIdsBySerial(String serial) throws SQLException {
+        String sql = "SELECT stock_id, supplier_id FROM ProductItem WHERE serial_number = ?";
+        ResultSet rs = CrudUtil.execute(sql, serial);
+        try {
+            if (rs.next()) {
+                return new ItemIds(rs.getInt("stock_id"), rs.getInt("supplier_id"));
+            }
+        } finally {
+            if (rs != null) rs.close();
+        }
+        return null;
+    }
+
+    // --- EXISTING METHODS (Optimized) ---
 
     public boolean saveBatch(int stockId, Integer supplierId, int supWar, int custWar, List<String> serials) throws SQLException {
         if (serials.isEmpty()) return false;
@@ -81,10 +106,8 @@ public class UnitManagementModel {
         }
     }
 
-    public List<ProductItemDTO> getUnitsByStockId(int stockId,String productName) throws SQLException {
+    public List<ProductItemDTO> getUnitsByStockId(int stockId, String productName) throws SQLException {
         List<ProductItemDTO> list = new ArrayList<>();
-
-
         String sql = "SELECT pi.serial_number, pi.supplier_warranty_mo, pi.customer_warranty_mo, " +
                 "pi.status, pi.added_date, pi.sold_date, s.supplier_name " +
                 "FROM ProductItem pi " +
@@ -97,13 +120,12 @@ public class UnitManagementModel {
         ResultSet rs = pstm.executeQuery();
 
         while (rs.next()) {
-
             String supName = rs.getString("supplier_name");
             if (supName == null) supName = "No Supplier";
 
             list.add(new ProductItemDTO(
                     rs.getString("serial_number"),
-                    productName,  // <--- Use the parameter directly!
+                    productName,
                     supName,
                     rs.getInt("supplier_warranty_mo"),
                     rs.getInt("customer_warranty_mo"),
@@ -112,13 +134,10 @@ public class UnitManagementModel {
                     rs.getDate("sold_date")
             ));
         }
-
         rs.close();
         pstm.close();
-
         return list;
     }
-
 
     public ProductItemDTO getItemBySerial(String serial) throws SQLException {
         String sql = "SELECT pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
@@ -128,12 +147,9 @@ public class UnitManagementModel {
                 "JOIN Product p ON pi.stock_id = p.stock_id " +
                 "WHERE pi.serial_number = ?";
 
-
         Connection conn = DBConnection.getInstance().getConnection();
         PreparedStatement pstm = conn.prepareStatement(sql);
-
         pstm.setString(1, serial);
-
         ResultSet rs = pstm.executeQuery();
 
         if (rs.next()) {
@@ -143,10 +159,8 @@ public class UnitManagementModel {
                     rs.getString("status"), rs.getDate("added_date"), rs.getDate("sold_date")
             );
         }
-
         pstm.close();
         rs.close();
-
         return null;
     }
 
@@ -175,6 +189,7 @@ public class UnitManagementModel {
                 ps.executeUpdate();
             }
 
+            // Adjust stock counts if the product type changed
             if (oldStockId != -1 && oldStockId != newStockId) {
                 try (PreparedStatement p1 = con.prepareStatement("UPDATE Product SET qty = qty - 1 WHERE stock_id = ?")) {
                     p1.setInt(1, oldStockId);
@@ -201,21 +216,18 @@ public class UnitManagementModel {
         return CrudUtil.execute(sql, newStatus, newStatus, serial);
     }
 
+    // --- Data Classes ---
     public static class ProductMeta {
         public final int stockId;
         public final int defaultWarranty;
+        public ProductMeta(int id, int war) { this.stockId = id; this.defaultWarranty = war; }
+        public int getStockId() { return stockId; }
+        public int getDefaultWarranty() { return defaultWarranty; }
+    }
 
-        public ProductMeta(int id, int war) {
-            this.stockId = id;
-            this.defaultWarranty = war;
-        }
-
-        public int getStockId() {
-            return stockId;
-        }
-
-        public int getDefaultWarranty() {
-            return defaultWarranty;
-        }
+    public static class ItemIds {
+        public final int stockId;
+        public final int supplierId;
+        public ItemIds(int stId, int supId) { this.stockId = stId; this.supplierId = supId; }
     }
 }

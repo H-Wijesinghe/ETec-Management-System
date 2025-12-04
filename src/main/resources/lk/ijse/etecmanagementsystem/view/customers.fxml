@@ -75,7 +75,7 @@
 
                         <VBox spacing="5.0">
                             <children>
-                                <Label text="Company / Supplier Name" textFill="#64748b">
+                                <Label text="Customer Name" textFill="#64748b">
                                     <font>
                                         <Font name="System Bold" size="12.0" />
                                     </font>

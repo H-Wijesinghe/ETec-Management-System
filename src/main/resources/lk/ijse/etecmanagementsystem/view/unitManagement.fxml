@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.UnitManagementController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.UnitManagementController">
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="600.0" style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);" BorderPane.alignment="CENTER">
             <children>
@@ -67,7 +67,20 @@
                                             <children>
                                                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                                     <children>
-                                                        <Label text="Select Product" textFill="#64748b"><font><Font name="System Bold" size="12.0" /></font></Label>
+                                          <HBox prefHeight="0.0" prefWidth="185.0" spacing="5.0">
+                                             <children>
+                                                              <Label text="Select Product" textFill="#64748b">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label fx:id="lblProductId" text="ID: --" style="-fx-text-fill: gray; -fx-font-size: 12px;">
+                                                   <font>
+                                                      <Font name="System Bold" size="12.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
                                                         <ComboBox fx:id="cmbProduct" maxWidth="1.7976931348623157E308" prefHeight="35.0" promptText="Choose Product..." style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 4;" />
                                                     </children>
                                                 </VBox>
