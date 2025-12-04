@@ -67,7 +67,7 @@ public class ProductCard extends StackPane {
         lblCode.setStyle("-fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: black;");
 
 
-        Label lblPrice = new Label("Rs. " + String.format("%,.2f", p.getPrice()));
+        Label lblPrice = new Label("Rs. " + String.format("%,.2f", p.getSellPrice()));
         lblPrice.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-font-size: 14px;");
 
 

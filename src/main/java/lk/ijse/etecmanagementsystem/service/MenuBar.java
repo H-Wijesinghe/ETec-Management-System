@@ -28,32 +28,32 @@ public class MenuBar {
             }
         });
 
-        btn.setOnAction(e -> {
-            Button pBtn = currentActiveButton;
-
-
-            String key = btn.getId() != null ? btn.getId() : btn.getText();
-
-            if (btn != pBtn) {
-                String btnText = btn.getText().toLowerCase();
-                System.out.println(key+"-"+btnText);
-
-                if (key.equals("btnUser")) {
-                    btnText = "user";
-                }
-                if (!btnText.equals("inventory")) {
-                    System.out.println(ThreadService.getInventoryLoadingThread().isAlive());
-                }
-
-                try {
-                    App.setRoot(btnText);
-                    System.gc();
-
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
+//        btn.setOnAction(e -> {
+//            Button pBtn = currentActiveButton;
+//
+//
+//            String key = btn.getId() != null ? btn.getId() : btn.getText();
+//
+//            if (btn != pBtn) {
+//                String btnText = btn.getText().toLowerCase();
+//                System.out.println(key+"-"+btnText);
+//
+//                if (key.equals("btnUser")) {
+//                    btnText = "user";
+//                }
+//                if (!btnText.equals("inventory")) {
+//                    System.out.println(ThreadService.getInventoryLoadingThread().isAlive());
+//                }
+//
+//                try {
+//                    App.setRoot(btnText);
+//                    System.gc();
+//
+//                } catch (Exception e1) {
+//                    e1.printStackTrace();
+//                }
+//            }
+//        });
     }
 
     public  void setActive(Button btn) {

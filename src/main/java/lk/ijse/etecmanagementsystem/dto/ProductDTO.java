@@ -9,118 +9,77 @@ public class ProductDTO {
     private double sellPrice;
     private String category;
     private ProductCondition condition;
-    private String imagePath;
     private double buyPrice;
     private int warrantyMonth;
     private int qty;
+    private String imagePath;
 
-    public ProductDTO(String name, double price, String category, String imagePath) {
-        this.name = name;
-        this.sellPrice = price;
-        this.category = category;
-        this.imagePath = imagePath;
+    public ProductDTO() {
     }
 
-    public ProductDTO(String id, String name, String category, double sellPrice, int warrantyMonth, int qty) {
-        this.id = id;
+    public ProductDTO(String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty, String imagePath) {
         this.name = name;
+        this.description = description;
         this.sellPrice = sellPrice;
         this.category = category;
-        this.warrantyMonth = warrantyMonth;
-        this.qty = qty;
-    }
-
-    public ProductDTO(String id, String name, double sellPrice, String category, String imagePath, double buyPrice, int warrantyMonth,ProductCondition condition, int qty) {
-        this.id = id;
-        this.name = name;
-        this.sellPrice = sellPrice;
-        this.category = category;
-        this.imagePath = imagePath;
+        this.condition = condition;
         this.buyPrice = buyPrice;
         this.warrantyMonth = warrantyMonth;
-        this.condition = condition;
         this.qty = qty;
+        this.imagePath = imagePath;
     }
-    public ProductDTO(String id, String name, String description, double sellPrice, String category, String imagePath, double buyPrice, int warrantyMonth,ProductCondition condition, int qty) {
+
+    public ProductDTO(String id, String name, String description, double sellPrice, String category, ProductCondition condition, double buyPrice, int warrantyMonth, int qty, String imagePath) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.sellPrice = sellPrice;
         this.category = category;
-        this.imagePath = imagePath;
+        this.condition = condition;
         this.buyPrice = buyPrice;
         this.warrantyMonth = warrantyMonth;
-        this.condition = condition;
         this.qty = qty;
+        this.imagePath = imagePath;
     }
 
-    // Getters
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getPrice() {
-        return sellPrice;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCategory() {
-        return category;
+    public String getDescription() {
+        return description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public double getSellPrice() {
         return sellPrice;
     }
 
-    public double getBuyPrice() {
-        return buyPrice;
-    }
-
-    public int getWarrantyMonth() {
-        return warrantyMonth;
-    }
-
-    public int getQty() {
-        return qty;
-    }
-
-    public  void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void setSellPrice(double sellPrice) {
         this.sellPrice = sellPrice;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    public void setBuyPrice(double buyPrice) {
-        this.buyPrice = buyPrice;
-    }
-
-    public void setWarrantyMonth(int warrantyMonth) {
-        this.warrantyMonth = warrantyMonth;
-    }
-
-    public void setQty(int qty) {
-        this.qty = qty;
     }
 
     public ProductCondition getCondition() {
@@ -131,23 +90,51 @@ public class ProductDTO {
         this.condition = condition;
     }
 
-    public String getDescription() {
-        return description;
+    public double getBuyPrice() {
+        return buyPrice;
     }
-    public void setDescription(String description) {
-        this.description = description;
+
+    public void setBuyPrice(double buyPrice) {
+        this.buyPrice = buyPrice;
+    }
+
+    public int getWarrantyMonth() {
+        return warrantyMonth;
+    }
+
+    public void setWarrantyMonth(int warrantyMonth) {
+        this.warrantyMonth = warrantyMonth;
+    }
+
+    public int getQty() {
+        return qty;
+    }
+
+    public void setQty(int qty) {
+        this.qty = qty;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     @Override
     public String toString() {
         return "ProductDTO{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", sellPrice=" + sellPrice +
                 ", category='" + category + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", condition=" + condition +
                 ", buyPrice=" + buyPrice +
                 ", warrantyMonth=" + warrantyMonth +
                 ", qty=" + qty +
+                ", imagePath='" + imagePath + '\'' +
                 '}';
     }
 }

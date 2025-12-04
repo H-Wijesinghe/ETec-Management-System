@@ -3,8 +3,9 @@ package lk.ijse.etecmanagementsystem.util;
 
 public enum ProductCondition {
 
-    USED("Used"),
-    BRAND_NEW("Brand New");
+    USED("USED"),
+    BRAND_NEW("BRAND NEW"),
+    BOTH("NOT SET");
 
     private final String label;
 
