@@ -310,56 +310,171 @@ public class SalesController {
         calculateTotals();
     }
 
+    @FXML
     private void handleCheckoutAction() {
+        CustomerDTO selectedCustomer = null;
+        if (comboCustomer.getValue() != null) {
+            String selectedKey = comboCustomer.getValue();
+
+            selectedCustomer = customerList.stream()
+                    .filter(customer -> String.valueOf(customer.getId()).equals(selectedKey))
+                    .findFirst()
+                    .orElse(null);
+        }
+        int customerId = handleCustomerFromFields(selectedCustomer);
+
+        if (customerId == -1) {
+            System.out.println("Walk-in Customer or Error in Customer Details.");
+        }else  if(customerId == -2){
+            // Error in customer details
+            return;
+        } else {
+            System.out.println("Customer ID for Transaction: " + customerId);
+        }
         // This is where you OPEN THE POPUP
         System.out.println("Opening Payment Modal...");
+
         // openPaymentModal(currentTotal);
     }
 
-    private  void handleCustomerFromFields(CustomerDTO customer){
-        String cusName = txtCusName.getText().trim() == null ? "" : txtCusName.getText().trim();
-        String cusContact = txtCusContact.getText().trim() == null ? "" : txtCusContact.getText().trim();
-        String cusEmail = txtCusEmail.getText().trim() == null ? "" : txtCusEmail.getText().trim();
-        String cusAddress =  txtCusAddress.getText().trim() == null ? "" : txtCusAddress.getText().trim();
 
-        if (!cusName.isEmpty() && !cusContact.isEmpty()) {
-            if (customer == null || !customer.getName().equalsIgnoreCase(cusName)
-                    || !customer.getNumber().equalsIgnoreCase(cusContact)
-                    || (customer.getEmailAddress() == null ? "" : customer.getEmailAddress()).equalsIgnoreCase(cusEmail)
-                    || (customer.getAddress() == null ? "" : customer.getAddress()).equalsIgnoreCase(cusAddress)) {
+    private int handleCustomerFromFields(CustomerDTO selectedCustomer) {
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are modifying the selected customer details."
-                        + " Do you want to add modified customer?", ButtonType.YES, ButtonType.NO);
-                alert.showAndWait();
-                if(customer != null && !customer.getName().equalsIgnoreCase(cusName)
-                || !customer.getNumber().equalsIgnoreCase(cusContact)){
+        String inputName = txtCusName.getText() == null ? "" : txtCusName.getText().trim();
+        String inputContact = txtCusContact.getText() == null ? "" : txtCusContact.getText().trim();
+        String inputEmail = txtCusEmail.getText() == null ? "" : txtCusEmail.getText().trim();
+        String inputAddress = txtCusAddress.getText() == null ? "" : txtCusAddress.getText().trim();
 
-                }
 
-                if (alert.getResult() == ButtonType.YES) {
-                    // Add or update customer in database
-                    // If new customer, get generated ID from database
-                    int newCustomerId = customerList.size() + 1; // Dummy ID for demo
-                    CustomerDTO newCustomer = new CustomerDTO(
-                            newCustomerId,
-                            cusName,
-                            cusContact,
-                            cusEmail,
-                            cusAddress
-                    );
-                    customerList.add(newCustomer);
-                    customerMap.put(String.valueOf(newCustomerId), cusName);
-                    comboCustomer.getItems().add(String.valueOf(newCustomerId));
-                    comboCustomer.setValue(String.valueOf(newCustomerId));
-                }
-            }
-
+        if ((inputName.isEmpty())
+        && ( !inputContact.isEmpty() || !inputEmail.isEmpty() || !inputAddress.isEmpty()) ) {
+            new Alert(Alert.AlertType.WARNING, "Customer name is required when other details are provided.").showAndWait();
+            return -2;
+        }
+        if( inputName.isEmpty()){
+            // Walk-in Customer
+            return -1;
         }
 
+        boolean isIdentityChanged = selectedCustomer != null && (
+                !inputName.equalsIgnoreCase(selectedCustomer.getName()) ||
+                        !inputContact.equalsIgnoreCase(selectedCustomer.getNumber())
+        );
 
-        // Open Customer Details Modal
-        System.out.println("Opening Customer Details Modal...");
+        if (selectedCustomer == null || isIdentityChanged) {
+
+               // get new customer id from db and return it ***********************************************
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are adding a new customer. Do you want to proceed?", ButtonType.YES, ButtonType.NO);
+            alert.showAndWait();
+            if (alert.getResult() == ButtonType.YES) {
+                return saveNewCustomer(inputName, inputContact, inputEmail, inputAddress);
+            }else {
+                return selectedCustomer == null ? -1 : selectedCustomer.getId();
+            }
+
+
+        } else {
+
+            String currentEmail = selectedCustomer.getEmailAddress() == null ? "" : selectedCustomer.getEmailAddress();
+            String currentAddress = selectedCustomer.getAddress() == null ? "" : selectedCustomer.getAddress();
+
+            boolean isDetailsChanged = !inputEmail.equalsIgnoreCase(currentEmail) ||
+                    !inputAddress.equalsIgnoreCase(currentAddress);
+
+            if (isDetailsChanged) {
+
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are modifying the selected customer's details."
+                            + " Do you want to update the customer?", ButtonType.YES, ButtonType.NO);
+                    alert.showAndWait();
+                    if (alert.getResult() == ButtonType.YES) {
+                        updateExistingCustomer(selectedCustomer, inputEmail, inputAddress);
+                        return selectedCustomer.getId();
+                    }else {
+                        return selectedCustomer.getId();
+                    }
+
+            } else {
+                // Optional: Logic for when nothing changed at all
+                System.out.println("No changes detected.");
+                return selectedCustomer.getId();
+            }
+        }
     }
+
+    private int saveNewCustomer(String name, String contact, String email, String address) {
+        // 1. Database Insert Logic Here
+        // int newId = customerService.add(...);
+
+
+        // 2. UI Update Logic (Dummy code based on your snippet)
+        int newCustomerId = customerList.size() + 1;
+        CustomerDTO newCustomer = new CustomerDTO(newCustomerId, name, contact, email, address);
+
+        customerList.add(newCustomer);
+        customerMap.put(String.valueOf(newCustomerId), name);
+        comboCustomer.getItems().add(String.valueOf(newCustomerId));
+        comboCustomer.setValue(String.valueOf(newCustomerId));
+
+
+        System.out.println("New Customer Added: " + name);
+        return newCustomerId;
+    }
+
+    private void updateExistingCustomer(CustomerDTO customer, String newEmail, String newAddress) {
+        // 1. Update the object
+        customer.setEmailAddress(newEmail);
+        customer.setAddress(newAddress);
+
+        // 2. Database Update Logic Here
+        // customerService.update(customer);
+
+        System.out.println("Customer Updated: " + customer.getName());
+    }
+
+//    private  void handleCustomerFromFields(CustomerDTO customer){
+//        String cusName = txtCusName.getText().trim() == null ? "" : txtCusName.getText().trim();
+//        String cusContact = txtCusContact.getText().trim() == null ? "" : txtCusContact.getText().trim();
+//        String cusEmail = txtCusEmail.getText().trim() == null ? "" : txtCusEmail.getText().trim();
+//        String cusAddress =  txtCusAddress.getText().trim() == null ? "" : txtCusAddress.getText().trim();
+//
+//        if (!cusName.isEmpty() && !cusContact.isEmpty()) {
+//            if (customer == null || !customer.getName().equalsIgnoreCase(cusName)
+//                    || !customer.getNumber().equalsIgnoreCase(cusContact)
+//                    || (customer.getEmailAddress() == null ? "" : customer.getEmailAddress()).equalsIgnoreCase(cusEmail)
+//                    || (customer.getAddress() == null ? "" : customer.getAddress()).equalsIgnoreCase(cusAddress)) {
+//
+//                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are modifying the selected customer details."
+//                        + " Do you want to add modified customer?", ButtonType.YES, ButtonType.NO);
+//                alert.showAndWait();
+//                if(customer != null && !customer.getName().equalsIgnoreCase(cusName)
+//                || !customer.getNumber().equalsIgnoreCase(cusContact)){
+//
+//                }
+//
+//                if (alert.getResult() == ButtonType.YES) {
+//                    // Add or update customer in database
+//                    // If new customer, get generated ID from database
+//                    int newCustomerId = customerList.size() + 1; // Dummy ID for demo
+//                    CustomerDTO newCustomer = new CustomerDTO(
+//                            newCustomerId,
+//                            cusName,
+//                            cusContact,
+//                            cusEmail,
+//                            cusAddress
+//                    );
+//                    customerList.add(newCustomer);
+//                    customerMap.put(String.valueOf(newCustomerId), cusName);
+//                    comboCustomer.getItems().add(String.valueOf(newCustomerId));
+//                    comboCustomer.setValue(String.valueOf(newCustomerId));
+//                }
+//            }
+//
+//        }
+//
+//
+//        // Open Customer Details Modal
+//        System.out.println("Opening Customer Details Modal...");
+//    }
 
     private void calculateTotals() {
         double subTotal = cartItemList.stream()

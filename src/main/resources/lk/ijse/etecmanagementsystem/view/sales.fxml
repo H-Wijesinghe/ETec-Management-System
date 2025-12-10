@@ -292,7 +292,7 @@
                         <HBox spacing="10.0">
                             <children>
                                 <Button fx:id="btnRemoveItem" onAction="#handleRemoveItemAction" prefHeight="50.0" prefWidth="100.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Remove" />
-                                <Button fx:id="btnCheckout" maxWidth="1.7976931348623157E308" prefHeight="50.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="CHECKOUT &amp; PAY" HBox.hgrow="ALWAYS">
+                                <Button fx:id="btnCheckout" maxWidth="1.7976931348623157E308" onAction="#handleCheckoutAction" prefHeight="50.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="CHECKOUT &amp; PAY" HBox.hgrow="ALWAYS">
                                     <font>
                                         <Font name="System Bold" size="18.0" />
                                     </font>
