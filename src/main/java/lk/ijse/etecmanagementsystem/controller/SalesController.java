@@ -48,7 +48,6 @@ public class SalesController {
     private TableColumn<ProductItemDTO, String> colStatus;
 
 
-
     @FXML
     private Button btnAddToCart;
 
@@ -93,13 +92,13 @@ public class SalesController {
     private ToggleButton tglBtnAdd;
 
     @FXML
-    private TextField txtName;
+    private TextField txtCusName;
     @FXML
-    private TextField txtContact;
+    private TextField txtCusContact;
     @FXML
-    private TextField txtEmail;
+    private TextField txtCusEmail;
     @FXML
-    private TextField txtAddress;
+    private TextField txtCusAddress;
 
 
     @FXML
@@ -137,18 +136,18 @@ public class SalesController {
         setupCusCmbBox();
 
         formatTxtFieldAsNumber(txtDiscount, true);
-        formatTxtFieldAsNumber(txtContact, false);
+        formatTxtFieldAsNumber(txtCusContact, false);
+        formatTxtFieldAsNumber(txtWarranty, false);
 
-        txtPrice.setText("10000");
 
         setupListeners();
 
-       setupDiscountFieldListener();
+        setupDiscountFieldListener();
 
     }
 
     @FXML
-    private  void handleProductTableClick() {
+    private void handleProductTableClick() {
         InventoryItemDTO selectedItem = tblProductInventory.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             populateItemFields(selectedItem);
@@ -157,10 +156,41 @@ public class SalesController {
 
     @FXML
     private void handleAddToCartAction() {
-        if(!tblProductInventory.getSelectionModel().isEmpty()) {
-            handleAddToCartFromTbl();
 
-        }else {
+        InventoryItemDTO selectedItem = tblProductInventory.getSelectionModel().getSelectedItem();
+        String itemName = txtItemName.getText().trim();
+        String serialNumber = txtSerialNumber.getText().trim();
+        String warrantyText = txtWarranty.getText().trim();
+        String priceText = txtPrice.getText().trim();
+
+        if (!tblProductInventory.getSelectionModel().isEmpty()) {
+
+            if (!selectedItem.getSerialNumber().equalsIgnoreCase(serialNumber)
+                    || !selectedItem.getProductName().equalsIgnoreCase(itemName)
+                    || selectedItem.getCustomerWarranty() != Integer.parseInt(warrantyText.isEmpty() ? "0" : warrantyText)
+                    || selectedItem.getItemPrice() != Double.parseDouble(priceText)) {
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You ar modifying the selected item in the inventory."
+                        + " Do you want add modified item to cart.", ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.YES) {
+                    handleAddToCartFromFields();
+                } else {
+                    handleAddToCartFromTbl();
+                }
+
+            } else {
+                handleAddToCartFromTbl();
+            }
+
+        } else if (!txtItemName.getText().trim().isEmpty() &&
+                !txtSerialNumber.getText().trim().isEmpty() &&
+                !txtPrice.getText().trim().isEmpty()) {
+
+            handleAddToCartFromFields();
+
+        } else {
             new Alert(Alert.AlertType.WARNING, "Please select a product to add to the cart.").show();
         }
     }
@@ -174,6 +204,13 @@ public class SalesController {
 
         String discount = txtDiscount.getText().trim() == null || txtDiscount.getText().trim().isEmpty() ? "0" : txtDiscount.getText().trim();
 
+
+        for (ItemCartDTO item : cartItemList) {
+            if (item.getSerialNo().equalsIgnoreCase(selectedItem.getSerialNumber())) {
+                new Alert(Alert.AlertType.WARNING, "This item is already in the cart.").show();
+                return;
+            }
+        }
         cartItemList.add(new ItemCartDTO(
                 selectedItem.getItemId(),
                 selectedItem.getProductName(),
@@ -184,6 +221,80 @@ public class SalesController {
         ));
 
 
+        calculateTotals();
+    }
+
+    private void handleAddToCartFromFields() {
+        String itemName = txtItemName.getText().trim();
+        String serialNumber = txtSerialNumber.getText().trim();
+        String warrantyText = txtWarranty.getText().trim();
+        String priceText = txtPrice.getText().trim();
+        String discountText = txtDiscount.getText().trim();
+
+        if (itemName.isEmpty() || serialNumber.isEmpty() || priceText.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Please fill in all item fields before adding to the cart.").show();
+            return;
+        }
+
+        double price;
+        double discount = 0;
+        int warranty = 0;
+
+        try {
+            price = Double.parseDouble(priceText);
+            warranty = Integer.parseInt(warrantyText.isEmpty() ? "0" : warrantyText);
+
+            if (!discountText.isEmpty()) {
+                discount = Double.parseDouble(discountText);
+            }
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Please enter valid numbers for price and discount.").show();
+            return;
+        }
+
+        InventoryItemDTO newItem = new InventoryItemDTO(
+                -1,
+                itemName,
+                serialNumber,
+                warranty,
+                price,
+                "Available"
+        );
+
+        boolean itemExists = false;
+        // Check if serial number already exists in inventory
+        for (InventoryItemDTO item : inventoryItemsList) {
+            if (item.getSerialNumber().equalsIgnoreCase(serialNumber)) {
+                itemExists = true;
+                break;
+            }
+        }
+        if (!itemExists) {
+            // Serial number is unique, proceed ,add to inventory
+            inventoryItemsList.add(newItem);
+            // In real application, you would also save this new item to the database
+            // For now, we just add it to the local list
+            // and get that item id from database
+            // newItem.setItemId(database.saveNewInventoryItem(newItem));           *******************************
+            // For demo, we assign a random id
+            newItem.setItemId(inventoryItemsList.size() + 100); // Dummy ID
+        }
+
+        for (ItemCartDTO item : cartItemList) {
+            if (item.getSerialNo().equalsIgnoreCase(newItem.getSerialNumber())) {
+                new Alert(Alert.AlertType.WARNING, "This item is already in the cart.").show();
+                return;
+            }
+        }
+
+        cartItemList.add(new ItemCartDTO(
+                newItem.getItemId(),
+                newItem.getProductName(),
+                newItem.getSerialNumber(),
+                newItem.getItemPrice(),
+                discount,
+                newItem.getItemPrice() - discount
+        ));
         calculateTotals();
     }
 
@@ -203,6 +314,51 @@ public class SalesController {
         // This is where you OPEN THE POPUP
         System.out.println("Opening Payment Modal...");
         // openPaymentModal(currentTotal);
+    }
+
+    private  void handleCustomerFromFields(CustomerDTO customer){
+        String cusName = txtCusName.getText().trim() == null ? "" : txtCusName.getText().trim();
+        String cusContact = txtCusContact.getText().trim() == null ? "" : txtCusContact.getText().trim();
+        String cusEmail = txtCusEmail.getText().trim() == null ? "" : txtCusEmail.getText().trim();
+        String cusAddress =  txtCusAddress.getText().trim() == null ? "" : txtCusAddress.getText().trim();
+
+        if (!cusName.isEmpty() && !cusContact.isEmpty()) {
+            if (customer == null || !customer.getName().equalsIgnoreCase(cusName)
+                    || !customer.getNumber().equalsIgnoreCase(cusContact)
+                    || (customer.getEmailAddress() == null ? "" : customer.getEmailAddress()).equalsIgnoreCase(cusEmail)
+                    || (customer.getAddress() == null ? "" : customer.getAddress()).equalsIgnoreCase(cusAddress)) {
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are modifying the selected customer details."
+                        + " Do you want to add modified customer?", ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+                if(customer != null && !customer.getName().equalsIgnoreCase(cusName)
+                || !customer.getNumber().equalsIgnoreCase(cusContact)){
+
+                }
+
+                if (alert.getResult() == ButtonType.YES) {
+                    // Add or update customer in database
+                    // If new customer, get generated ID from database
+                    int newCustomerId = customerList.size() + 1; // Dummy ID for demo
+                    CustomerDTO newCustomer = new CustomerDTO(
+                            newCustomerId,
+                            cusName,
+                            cusContact,
+                            cusEmail,
+                            cusAddress
+                    );
+                    customerList.add(newCustomer);
+                    customerMap.put(String.valueOf(newCustomerId), cusName);
+                    comboCustomer.getItems().add(String.valueOf(newCustomerId));
+                    comboCustomer.setValue(String.valueOf(newCustomerId));
+                }
+            }
+
+        }
+
+
+        // Open Customer Details Modal
+        System.out.println("Opening Customer Details Modal...");
     }
 
     private void calculateTotals() {
@@ -266,9 +422,12 @@ public class SalesController {
 
     private void setupListeners() {
         btnRemoveItem.setDisable(true);
-        txtSearchProduct.textProperty().addListener((observable, oldValue, newValue) -> getFilteredProducts(newValue));
+        txtSearchProduct.textProperty().addListener((observable, oldValue, newValue) -> getFilteredProducts(newValue.trim()));
         tblCart.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             btnRemoveItem.setDisable(newValue == null);
+//            if(!tblCart.isFocused()){
+//                tblCart.getSelectionModel().clearSelection();
+//            }
 
         });
 
@@ -324,16 +483,16 @@ public class SalesController {
 
     private void populateCusField(CustomerDTO c) {
         if (c == null) {
-            txtName.setText("");
-            txtContact.setText("");
-            txtEmail.setText("");
-            txtAddress.setText("");
+            txtCusName.setText("");
+            txtCusContact.setText("");
+            txtCusEmail.setText("");
+            txtCusAddress.setText("");
             return;
         }
-        txtName.setText(c.getName());
-        txtContact.setText(c.getNumber());
-        txtEmail.setText(c.getEmailAddress() == null ? "" : c.getEmailAddress());
-        txtAddress.setText(c.getAddress());
+        txtCusName.setText(c.getName());
+        txtCusContact.setText(c.getNumber());
+        txtCusEmail.setText(c.getEmailAddress() == null ? "" : c.getEmailAddress());
+        txtCusAddress.setText(c.getAddress());
     }
 
     private void formatTxtFieldAsNumber(TextField textField, boolean allowDecimal) {
@@ -416,6 +575,7 @@ public class SalesController {
     public void getFilteredProducts(String searchText) {
 
         String finalSearch = (searchText == null) ? "" : searchText.toLowerCase();
+
         List<InventoryItemDTO> filteredList = inventoryItemsList.stream()
                 // 1. Filter by Name
                 .filter(p -> p.getProductName().toLowerCase().contains(finalSearch))

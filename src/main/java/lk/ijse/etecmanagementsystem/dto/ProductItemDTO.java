@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 public class ProductItemDTO {
+    private  int itemId;
+    private int stockId;
+    private int supplierId;
     private String serialNumber;
     private String productName;   // Added for Tab 3/4 context
     private String supplierName;

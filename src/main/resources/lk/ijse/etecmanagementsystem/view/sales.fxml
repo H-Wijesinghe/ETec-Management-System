@@ -211,22 +211,22 @@
                                           <Insets left="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <TextField fx:id="txtName" prefHeight="25.0" prefWidth="348.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                    <TextField fx:id="txtCusName" prefHeight="25.0" prefWidth="348.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets right="2.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <TextField fx:id="txtContact" prefHeight="25.0" prefWidth="355.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
+                                    <TextField fx:id="txtCusContact" prefHeight="25.0" prefWidth="355.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets right="2.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <TextField fx:id="txtEmail" prefHeight="25.0" prefWidth="384.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
+                                    <TextField fx:id="txtCusEmail" prefHeight="25.0" prefWidth="384.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
                                        <GridPane.margin>
                                           <Insets right="2.0" />
                                        </GridPane.margin>
                                     </TextField>
-                                    <TextField fx:id="txtAddress" prefHeight="25.0" prefWidth="386.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4">
+                                    <TextField fx:id="txtCusAddress" prefHeight="25.0" prefWidth="386.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4">
                                        <GridPane.margin>
                                           <Insets right="2.0" />
                                        </GridPane.margin>
