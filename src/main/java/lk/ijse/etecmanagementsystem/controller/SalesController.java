@@ -9,6 +9,7 @@ import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -16,9 +17,7 @@ import javafx.util.StringConverter;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.*;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
-import lk.ijse.etecmanagementsystem.util.ProductCondition;
-import lk.ijse.etecmanagementsystem.util.ProductUtil;
-import lk.ijse.etecmanagementsystem.util.Stock;
+import lk.ijse.etecmanagementsystem.util.*;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class SalesController {
     @FXML
     private TextField txtSearchProduct;
     @FXML
-    private Button btnScan;
+    private ToggleButton tglBtnScan;
     @FXML
     private TableView<InventoryItemDTO> tblProductInventory; // Replace ? with your Product Model
     @FXML
@@ -130,10 +129,19 @@ public class SalesController {
     @FXML
     private TextField txtFinalPrice;
 
+    @FXML
+    private BorderPane rootPane;
+
     public HashMap<String, String> customerMap = new HashMap<>();
     private List<CustomerDTO> customerList = new ArrayList<>();
     private final ObservableList<InventoryItemDTO> inventoryItemsList = FXCollections.observableArrayList();
     private final ObservableList<ItemCartDTO> cartItemList = FXCollections.observableArrayList();
+
+    // Barcode Scanning
+    private final TextField barcodeInput = new TextField();
+    private final BarcodeServer barcodeServer = BarcodeServer.getBarcodeServerInstance(barcodeInput);
+    private final Stage newStage = new Stage();
+
 
     @FXML
     public void initialize() {
@@ -148,7 +156,12 @@ public class SalesController {
         }
 
         // Call the new SAFE method
-        setupSearchWithSuggestions(txtItemName, suggestions);
+        Autocomplete.setupSearchWithSuggestions(txtItemName, suggestions);
+        Autocomplete.setupSearchWithSuggestions(txtCusName,
+                customerList.stream()
+                        .map(CustomerDTO::getName)
+                        .collect(Collectors.toList())
+        );
 
 
 
@@ -161,84 +174,50 @@ public class SalesController {
         formatTxtFieldAsNumber(txtDiscount, true);
         formatTxtFieldAsNumber(txtCusContact, false);
         formatTxtFieldAsNumber(txtWarranty, false);
+        formatTxtFieldAsNumber(txtPrice, true);
 
 
         setupListeners();
 
         setupDiscountFieldListener();
 
+        // Barcode Input Listener
+        barcodeInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.trim().isEmpty()) {
+                txtSerialNumber.setText(newValue.trim());
+                getProductBySerialNumber(newValue.trim());
+                barcodeInput.setText("");
+            }
+        });
+
     }
 
     @FXML
     private void handleScanAction() {
-        TextField barcodeInput = new TextField();
-        BarcodeServer barcodeServer = BarcodeServer.getBarcodeServerInstance(txtSerialNumber);
         barcodeServer.startServer();
-        Stage newStage = new Stage();
 
         try {
-
-
             newStage.setTitle("Barcode Scanner");
             newStage.setScene(new Scene(App.loadFXML("barcode")));
             newStage.setResizable(false);
             newStage.show();
 
-
-
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to start barcode server: " + e.getMessage());
             alert.showAndWait();
         }
-        txtSerialNumber.setText(barcodeInput.getText());
-        newStage.setOnCloseRequest(event -> barcodeServer.stopServer());
 
 
+        newStage.setOnCloseRequest(event -> {
+                    barcodeServer.stopServer();
+                    tglBtnScan.setSelected(false);
 
-
-
-        // Start the server and pass the text field to it
-
+                });
 
         System.out.println("Scan button clicked. Implement barcode scanning logic here.");
     }
 
-    private void setupSearchWithSuggestions(TextField searchField, List<String> entries) {
-        ContextMenu suggestionsPopup = new ContextMenu();
 
-        // Listen for text changes
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) {
-                suggestionsPopup.hide();
-            } else {
-                // Filter the list
-                List<String> filteredList = entries.stream()
-                        .filter(e -> e.toLowerCase().contains(newValue.toLowerCase()))
-                        .collect(Collectors.toList());
-
-                if (!filteredList.isEmpty()) {
-                    suggestionsPopup.getItems().clear();
-                    // Add menu items for each match
-                    for (String match : filteredList) {
-                        MenuItem item = new MenuItem(match);
-                        item.setOnAction(e -> {
-                            searchField.setText(match);
-                            searchField.positionCaret(match.length());
-                            suggestionsPopup.hide();
-                        });
-                        suggestionsPopup.getItems().add(item);
-                    }
-
-                    // Show the popup if not already showing
-                    if (!suggestionsPopup.isShowing()) {
-                        suggestionsPopup.show(searchField, Side.BOTTOM, 0, 0);
-                    }
-                } else {
-                    suggestionsPopup.hide();
-                }
-            }
-        });
-    }
 
     @FXML
     private void handleProductTableClick() {
@@ -586,14 +565,18 @@ public class SalesController {
     }
 
     private void setupListeners() {
+        // Initial Button States
         btnRemoveItem.setDisable(true);
+
+        // Search Field Listener
         txtSearchProduct.textProperty().addListener((observable, oldValue, newValue) -> getFilteredProducts(newValue.trim()));
+
+        // Cart Table Selection Listener
         tblCart.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             btnRemoveItem.setDisable(newValue == null);
-
-
         });
 
+        // Discount Percentage Field Formatter
         txtDisPercentage.setTextFormatter(new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
             String regex = "^([0-9]{0,2}(\\.)?(\\d?)?)?$";
@@ -604,10 +587,12 @@ public class SalesController {
             }
         }));
 
+        // Customer Details Toggle Button Initial State
         tglBtnCusAdd.setText("DETAILS ▼");
         vboxCustomerDetails.setVisible(false);
         vboxCustomerDetails.setManaged(false);
 
+        // Customer Details Toggle Button Listener
         tglBtnCusAdd.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 tglBtnCusAdd.setText("DETAILS ▲");
@@ -620,6 +605,68 @@ public class SalesController {
                 vboxCustomerDetails.setManaged(false);
             }
         });
+
+        // Item Name and Serial Number Enter Key Listeners
+        txtItemName.setOnKeyPressed(event -> {
+            if(event.getCode().toString().equals("ENTER")) {
+                getProductByName(txtItemName.getText().trim());
+            }
+        });
+        txtSerialNumber.setOnKeyPressed(event -> {
+            if(event.getCode().toString().equals("ENTER")) {
+                getProductBySerialNumber(txtSerialNumber.getText().trim());
+            }
+        });
+
+        // Barcode Scan Toggle Button Listener
+        tglBtnScan.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                // Button is ON (Selected)
+
+                tglBtnScan.setText("SCANNING ACTIVE...");
+                handleScanAction();
+            } else {
+                // Button is OFF (Unselected)
+                tglBtnScan.setText("START SCAN");
+                barcodeServer.stopServer();
+                newStage.close();
+
+            }
+        });
+
+        // Listener to stop barcode server when view is removed
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            // If newScene is null, it means this view was removed/swapped out
+            if (newScene == null) {
+                barcodeServer.stopServer();
+                newStage.close();
+            }
+        });
+
+    }
+
+    private void getProductBySerialNumber(String serialNumber) {
+        InventoryItemDTO item = inventoryItemsList.stream()
+                .filter(i -> i.getSerialNumber().equalsIgnoreCase(serialNumber))
+                .findFirst()
+                .orElse(null);
+        if (item != null) {
+            populateItemFields(item);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "No product found with the given serial number.").show();
+        }
+    }
+
+    private void getProductByName(String productName) {
+        InventoryItemDTO item = inventoryItemsList.stream()
+                .filter(i -> i.getProductName().equalsIgnoreCase(productName))
+                .findFirst()
+                .orElse(null);
+        if (item != null) {
+            populateItemFields(item);
+        } else {
+            new Alert(Alert.AlertType.WARNING, "No product found with the given name.").show();
+        }
     }
 
     private void populateItemFields(InventoryItemDTO item) {
