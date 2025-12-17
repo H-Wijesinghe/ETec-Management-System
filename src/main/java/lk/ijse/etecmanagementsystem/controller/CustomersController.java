@@ -8,14 +8,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
-import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 import lk.ijse.etecmanagementsystem.model.CustomersModel;
-import lk.ijse.etecmanagementsystem.model.SuppliersModel;
-import lk.ijse.etecmanagementsystem.service.MenuBar;
-import lk.ijse.etecmanagementsystem.util.Login;
+import lk.ijse.etecmanagementsystem.util.FieldsValidation;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -89,7 +85,7 @@ public class CustomersController {
 
     @FXML
     private void handleSave() {
-        if (!validateFields()) return;
+        if (FieldsValidation.validateCustomerFields(txtName, txtContact, txtEmail, txtAddress, new TextField())) return;
 
         try {
 
@@ -119,7 +115,7 @@ public class CustomersController {
             new Alert(Alert.AlertType.ERROR, "Please select a customer to update.").show();
             return;
         }
-        if (!validateFields()) return;
+        if (FieldsValidation.validateCustomerFields(txtName, txtContact, txtEmail, txtAddress, txtId)) return;
 
         try {
             int id = Integer.parseInt(txtId.getText().trim());
@@ -290,7 +286,7 @@ public class CustomersController {
         }
 
         return true;
-    }
+    } // not used....................
 
     private void reloadTable() {
         loadProducts();

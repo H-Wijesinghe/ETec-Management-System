@@ -5,9 +5,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.util.Login;
 import lk.ijse.etecmanagementsystem.service.ButtonStyle;
+
+import java.net.URL;
 
 
 public class LoginController {
@@ -18,13 +23,58 @@ public class LoginController {
     private PasswordField passwordField;
     @FXML
     private Button loginBtn;
+    @FXML
+    private ImageView backgroundImage;
+
+    @FXML
+    private AnchorPane rootNode;
 
     ButtonStyle buttonStyle = new ButtonStyle();
 
 
     @FXML
     private void initialize() {
+
+        backgroundImage.setVisible(false);
+
+
+
+        setBackground((rootNode));
+
+
+
         loginButtonStyle();
+    }
+
+    public void setBackground(Region rootPane) {
+        // 1. Load the image from resources (Portable path)
+        // This looks inside 'src/main/resources' for the path
+        String imagePath = "/lk/ijse/etecmanagementsystem/images/Background03.png";
+        URL imageUrl = getClass().getResource(imagePath);
+
+        // Safety check to prevent crashing if path is wrong
+        if (imageUrl == null) {
+            System.out.println("Error: Image not found at " + imagePath);
+            return;
+        }
+
+        Image image = new Image(imageUrl.toExternalForm());
+
+        // 2. Define the "Cover" behavior
+        // Width=1.0, Height=1.0, AsPercentage=true, Contain=false, Cover=true
+        BackgroundSize backgroundSize = new BackgroundSize(1.0, 1.0, true, true, false, true);
+
+        // 3. Create the BackgroundImage
+        BackgroundImage bgImage = new BackgroundImage(
+                image,
+                BackgroundRepeat.NO_REPEAT,  // Don't repeat horizontally
+                BackgroundRepeat.NO_REPEAT,  // Don't repeat vertically
+                BackgroundPosition.CENTER,   // Center the image
+                backgroundSize
+        );
+
+        // 4. Apply it to your pane (e.g., anchorPane, stackPane)
+        rootPane.setBackground(new Background(bgImage));
     }
 
 

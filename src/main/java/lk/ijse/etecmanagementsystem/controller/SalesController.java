@@ -1,34 +1,32 @@
 package lk.ijse.etecmanagementsystem.controller;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
 
-import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.*;
 import lk.ijse.etecmanagementsystem.model.CustomersModel;
+import lk.ijse.etecmanagementsystem.model.ProductModel;
 import lk.ijse.etecmanagementsystem.model.SalesModel;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
 import lk.ijse.etecmanagementsystem.util.*;
-import org.controlsfx.control.textfield.TextFields;
 
-import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -140,14 +138,16 @@ public class SalesController {
     private List<CustomerDTO> customerList = new ArrayList<>();
     private final ObservableList<InventoryItemDTO> inventoryItemsList = FXCollections.observableArrayList();
     private final ObservableList<ItemCartDTO> cartItemList = FXCollections.observableArrayList();
+    private final ObservableList<ProductDTO> productsList = FXCollections.observableArrayList();
 
     // Barcode Scanning
     private final TextField barcodeInput = new TextField();
     private final BarcodeServer barcodeServer = BarcodeServer.getBarcodeServerInstance(barcodeInput);
     private final Stage newStage = new Stage();
 
-    private SalesModel salesModel = new SalesModel();
+    private final SalesModel salesModel = new SalesModel();
     CustomersModel customersModel = new CustomersModel();
+    ProductModel productModel = new ProductModel();
 
 
     @FXML
@@ -159,20 +159,6 @@ public class SalesController {
 
         loadCustomers();// Load Customers from DB
         loadProductItems(); // Load Products from DB
-
-        List<String> suggestions = new ArrayList<>();
-
-        for (InventoryItemDTO item : inventoryItemsList) {
-            suggestions.add(item.getProductName());
-        }
-
-        // Call the new SAFE method
-        Autocomplete.setupSearchWithSuggestions(txtItemName, suggestions);
-        Autocomplete.setupSearchWithSuggestions(txtCusName,
-                customerList.stream()
-                        .map(CustomerDTO::getName)
-                        .collect(Collectors.toList())
-        );
 
 
         tblProductInventory.setItems(inventoryItemsList);
@@ -290,7 +276,13 @@ public class SalesController {
 
     @FXML
     private void handleCheckoutAction() {
-        handleCustomerAction();
+        if (!handleCustomerAction()) {
+            return;
+        }
+        if (cartItemList.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "The cart is empty. Please add items before checkout.").show();
+            return;
+        }
         // This is where you OPEN THE POPUP
         System.out.println("Opening Payment Modal...");
 
@@ -401,7 +393,7 @@ public class SalesController {
         calculateTotals();
     }
 
-    private void handleCustomerAction() {
+    private boolean handleCustomerAction() {
 
         CustomerDTO selectedCustomer = null;
         if (comboCustomer.getValue() != null) {
@@ -412,15 +404,25 @@ public class SalesController {
                     .findFirst()
                     .orElse(null);
         }
-        int customerId = handleCustomerFromFields(selectedCustomer);
+        int customerId = 0;
+        customerId = handleCustomerFromFields(selectedCustomer);
 
         if (customerId == -1) {
-            System.out.println("Walk-in Customer or Error in Customer Details.");
+            System.out.println("Walk-in Customer for Transaction.");
+            clearCustomerFields();
+            return true;
+
         } else if (customerId == -2) {
-            // Error in customer details
-            return;
+            System.out.println("Customer handling cancelled. Transaction cannot proceed.");
+            return false;
+
+        } else if (customerId <= 0) {
+            new Alert(Alert.AlertType.ERROR, "An unexpected error occurred while handling customer details.").showAndWait();
+            return false;
+
         } else {
             System.out.println("Customer ID for Transaction: " + customerId);
+            return true;
         }
     }
 
@@ -451,9 +453,12 @@ public class SalesController {
             // get new customer id from db and return it ***********************************************
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are adding a new customer. Do you want to proceed?", ButtonType.YES, ButtonType.NO);
             alert.showAndWait();
+
             if (alert.getResult() == ButtonType.YES) {
-                return saveNewCustomer(inputName, inputContact, inputEmail, inputAddress);
-            } else {
+
+                saveNewCustomer();
+
+                // After saving, retrieve the newly added customer ID
                 return selectedCustomer == null ? -1 : selectedCustomer.getId();
             }
 
@@ -473,22 +478,36 @@ public class SalesController {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You are modifying the selected customer's details."
                         + " Do you want to update the customer?", ButtonType.YES, ButtonType.NO);
                 alert.showAndWait();
+
                 if (alert.getResult() == ButtonType.YES) {
-                    updateExistingCustomer(selectedCustomer, inputEmail, inputAddress);
-                    return selectedCustomer.getId();
-                } else {
-                    return selectedCustomer.getId();
+                    updateExistingCustomer(selectedCustomer, inputEmail, inputAddress, inputContact);
                 }
 
             } else {
-                // Optional: Logic for when nothing changed at all
                 System.out.println("No changes detected.");
-                return selectedCustomer.getId();
             }
+
+            return selectedCustomer.getId();
+
         }
+
+        // If user chose not to add/update customer
+        // walk-in customer
+        return -1;
+
     }
 
-    private int saveNewCustomer(String name, String contact, String email, String address) {
+
+    @FXML
+    private void saveNewCustomer() {
+
+        if (FieldsValidation.validateCustomerFields(txtCusName, txtCusContact, txtCusEmail, txtCusAddress, new TextField())) {
+            return;
+        }
+        String name = txtCusName.getText().trim();
+        String contact = txtCusContact.getText().trim();
+        String email = txtCusEmail.getText().trim();
+        String address = txtCusAddress.getText().trim();
 
         CustomerDTO newCustomer = new CustomerDTO(0, name, contact, email, address);
         try {
@@ -498,29 +517,33 @@ public class SalesController {
             comboCustomer.setValue(String.valueOf(newCustomerId)); // Select the newly added customer
 
 
-            System.out.println("New Customer Added: " + name);
-            return newCustomerId;
+            new Alert(Alert.AlertType.INFORMATION, "New customer added successfully!").showAndWait();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -2; // Indicate failure
     }
 
-    private void updateExistingCustomer(CustomerDTO customer, String newEmail, String newAddress) {
+    private void updateExistingCustomer(CustomerDTO customer, String newEmail, String newAddress, String newContact) {
         // 1. Update the object
         customer.setEmailAddress(newEmail);
         customer.setAddress(newAddress);
+        customer.setNumber(newContact);
 
-        // 2. Database Update Logic Here
+        if (FieldsValidation.validateCustomerFields(txtCusName, txtCusContact, txtCusEmail, txtCusAddress, new TextField())) {
+            return;
+        }
 
+        // 2. Update in DB
         try {
             customersModel.updateCustomer(customer);
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "Failed to update customer: " + e.getMessage()).show();
+            new Alert(Alert.AlertType.ERROR, "Failed to update customer: " + e.getMessage()).showAndWait();
             return;
         } finally {
             loadCustomers();// Reload Customers from DB
+            setupCusCmbBox(); // Refresh ComboBox
+            comboCustomer.setValue(String.valueOf(customer.getId())); // Reselect the updated customer
         }
 
         System.out.println("Customer Updated: " + customer.getName() + " (ID: " + customer.getId() + ")");
@@ -559,7 +582,13 @@ public class SalesController {
     }
 
     private void loadProducts() {
-        // Load data from Database
+        try {
+            productsList.clear();
+            productsList.addAll(productModel.findAll());
+
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed to load products: " + e.getMessage()).showAndWait();
+        }
     }
 
     private void loadCustomers() {
@@ -568,7 +597,7 @@ public class SalesController {
         try {
             customerList = customersModel.getAllCustomers();
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "Failed to load customers: " + e.getMessage()).show();
+            new Alert(Alert.AlertType.ERROR, "Failed to load customers: " + e.getMessage()).showAndWait();
             return;
         }
 
@@ -722,25 +751,77 @@ public class SalesController {
     }
 
     private void setupCusCmbBox() {
+        setupSearchableCustomerCombo();
 
+        // 4. Action Event
+        comboCustomer.setOnAction(event -> {
+            String selectedKey = comboCustomer.getValue();
+            if (selectedKey != null && customerMap.containsKey(selectedKey)) {
+                filterCustomers(selectedKey);
+                System.out.println("Selected Customer: " + selectedKey);
+            }
+        });
+    }
+
+
+
+    private void setupSearchableCustomerCombo() {
+        // 1. Initial Setup
         comboCustomer.getItems().setAll(customerMap.keySet());
+        comboCustomer.setEditable(true);
 
+        // 2. Setup Converter (Fixes the "Selection Clears" bug)
         comboCustomer.setConverter(new StringConverter<String>() {
             @Override
             public String toString(String key) {
-                return customerMap.get(key);
+                return customerMap.get(key); // Show Name
             }
 
             @Override
-            public String fromString(String string) {
+            public String fromString(String typedName) {
+                // FIX: Allow the ComboBox to "remember" what was selected when focus is lost
+                if (typedName == null || typedName.isEmpty()) {
+                    return null;
+                }
+                for (Map.Entry<String, String> entry : customerMap.entrySet()) {
+                    if (entry.getValue().equalsIgnoreCase(typedName)) {
+                        return entry.getKey();
+                    }
+                }
                 return null;
             }
         });
-        comboCustomer.setOnAction(event -> {
-            String selectedKey = comboCustomer.getValue();
 
-            filterCustomers(selectedKey);
-            System.out.println("Selected Customer: " + selectedKey);
+        // 3. Search Listener
+        comboCustomer.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+
+            // Guard Clause: Stop if the user just selected an item
+            if (comboCustomer.getSelectionModel().getSelectedItem() != null) {
+                return;
+            }
+
+            Platform.runLater(() -> {
+                // Logic: Filter AND Sort the results (Fixes "Random Order")
+                List<String> sortedKeys = customerMap.entrySet().stream()
+                        .filter(entry -> {
+                            String name = entry.getValue();
+                            return name != null && name.toLowerCase().contains(newText == null ? "" : newText.toLowerCase());
+                        })
+                        .sorted(Map.Entry.comparingByValue()) // Sort alphabetically by Name
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+
+                // Update items (Fixes "StackOverflow" crash)
+                comboCustomer.getItems().setAll(sortedKeys);
+
+                // Show dropdown if we have matches and the box is focused
+                if (!sortedKeys.isEmpty() && comboCustomer.isFocused()) {
+                    comboCustomer.show();
+                } else {
+                    // Only hide if the list is empty, otherwise let standard behavior handle it
+                    if (sortedKeys.isEmpty()) comboCustomer.hide();
+                }
+            });
         });
     }
 
@@ -874,7 +955,8 @@ public class SalesController {
 
     @FXML
     private void clearCustomerFields() {
-        setupCusCmbBox();
+        comboCustomer.getSelectionModel().clearSelection();
+        comboCustomer.getEditor().setText("");
         txtCusName.setText("");
         txtCusContact.setText("");
         txtCusEmail.setText("");
