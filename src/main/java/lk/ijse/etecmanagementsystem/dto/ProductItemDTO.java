@@ -19,6 +19,15 @@ public class ProductItemDTO {
     private Date addedDate;
     private Date soldDate;
 
+    public ProductItemDTO() {
+    }
+
+    public ProductItemDTO(int stockId, String serialNumber, int customerWarranty) {
+        this.stockId = stockId;
+        this.serialNumber = serialNumber;
+        this.customerWarranty = customerWarranty;
+    }
+
     // Full Constructor
     public ProductItemDTO(String serialNumber, String productName, String supplierName,
                           int supplierWarranty, int customerWarranty, String status,
@@ -40,27 +49,110 @@ public class ProductItemDTO {
         this.status = status;
     }
 
-    // Getters & Setters
-    public String getSerialNumber() { return serialNumber; }
-    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+    public int getItemId() {
+        return itemId;
+    }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
+    }
 
-    public String getSupplierName() { return supplierName; }
-    public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
+    public int getStockId() {
+        return stockId;
+    }
 
-    public int getSupplierWarranty() { return supplierWarranty; }
-    public void setSupplierWarranty(int supplierWarranty) { this.supplierWarranty = supplierWarranty; }
+    public void setStockId(int stockId) {
+        this.stockId = stockId;
+    }
 
-    public int getCustomerWarranty() { return customerWarranty; }
-    public void setCustomerWarranty(int customerWarranty) { this.customerWarranty = customerWarranty; }
+    public int getSupplierId() {
+        return supplierId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setSupplierId(int supplierId) {
+        this.supplierId = supplierId;
+    }
 
-    public Date getAddedDate() { return addedDate; }
-    public Date getSoldDate() { return soldDate; }
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
+    public int getSupplierWarranty() {
+        return supplierWarranty;
+    }
+
+    public void setSupplierWarranty(int supplierWarranty) {
+        this.supplierWarranty = supplierWarranty;
+    }
+
+    public int getCustomerWarranty() {
+        return customerWarranty;
+    }
+
+    public void setCustomerWarranty(int customerWarranty) {
+        this.customerWarranty = customerWarranty;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getAddedDate() {
+        return addedDate;
+    }
+
+    public void setAddedDate(Date addedDate) {
+        this.addedDate = addedDate;
+    }
+
+    public Date getSoldDate() {
+        return soldDate;
+    }
+
+    public void setSoldDate(Date soldDate) {
+        this.soldDate = soldDate;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductItemDTO{" +
+                "itemId=" + itemId +
+                ", stockId=" + stockId +
+                ", supplierId=" + supplierId +
+                ", serialNumber='" + serialNumber + '\'' +
+                ", productName='" + productName + '\'' +
+                ", supplierName='" + supplierName + '\'' +
+                ", supplierWarranty=" + supplierWarranty +
+                ", customerWarranty=" + customerWarranty +
+                ", status='" + status + '\'' +
+                ", addedDate=" + addedDate +
+                ", soldDate=" + soldDate +
+                '}';
+    }
 
     // Logic: Calculate Remaining Life
     public String getRemainingLife() {

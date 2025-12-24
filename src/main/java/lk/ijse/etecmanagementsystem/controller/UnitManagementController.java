@@ -226,35 +226,88 @@ public class UnitManagementController {
         }
     }
 
-    @FXML void handleSaveAll(ActionEvent e) {
+    @FXML
+    void handleSaveAll(ActionEvent e) {
         if (selectedStockId == -1) return;
+
+        // Get Common Data
+        Integer supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : 0;
+        int supWar = txtSupplierWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtSupplierWarranty.getText());
+        int custWar = Integer.parseInt(txtCustomerWarranty.getText());
+
         try {
-            // Get ID from Map
-            Integer supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : null;
+            int successCount = 0;
 
-            int supWar = txtSupplierWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtSupplierWarranty.getText());
-            int custWar = Integer.parseInt(txtCustomerWarranty.getText());
-            List<String> list = new ArrayList<>(stagingList);
+            // Loop through every serial in your Staging Table
+            for (String serial : stagingList) {
 
-            if (model.saveBatch(selectedStockId, supId, supWar, custWar, list)) {
-                showAlert(Alert.AlertType.INFORMATION, "Success");
-                stagingList.clear();
-                lblStagingCount.setText("0 Items");
-                btnSaveAll.setDisable(true);
+                ProductItemDTO itemDTO = new ProductItemDTO();
+                itemDTO.setStockId(selectedStockId);
+                itemDTO.setSupplierId(supId);
+                itemDTO.setSerialNumber(serial);
+                itemDTO.setSupplierWarranty(supWar);
+                itemDTO.setCustomerWarranty(custWar);
 
-                // Refresh History
-                String currentComboVal = cmbProduct.getValue();
-                if(currentComboVal != null) {
-                    historyList.clear();
-                    String cleanName = currentComboVal.substring(0, currentComboVal.lastIndexOf(" (ID:"));
-                    historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
+                // Call the SMART method
+                // This will auto-detect if it needs to fill a slot or add a new one
+                if (model.registerRealItem(itemDTO)) {
+                    successCount++;
                 }
-
-                // Refresh View if match
-                if (cmbViewProduct.getValue() != null && cmbViewProduct.getValue().equals(currentComboVal)) handleViewFilter(null);
             }
-        } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
+
+            showAlert(Alert.AlertType.INFORMATION, "Successfully registered " + successCount + " items.");
+
+            // Cleanup UI
+            stagingList.clear();
+            lblStagingCount.setText("0 Items");
+            btnSaveAll.setDisable(true);
+
+            // Refresh History Table
+            String currentComboVal = cmbProduct.getValue();
+            if(currentComboVal != null) {
+                historyList.clear();
+                String cleanName = currentComboVal.substring(0, currentComboVal.lastIndexOf(" (ID:"));
+                historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
+            }
+
+        } catch (SQLException ex) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                showAlert(Alert.AlertType.ERROR, "One of these Serial Numbers already exists!");
+            } else {
+                showAlert(Alert.AlertType.ERROR, ex.getMessage());
+            }
+        }
     }
+
+//    @FXML void handleSaveAll(ActionEvent e) {
+//        if (selectedStockId == -1) return;
+//        try {
+//            // Get ID from Map
+//            Integer supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : null;
+//
+//            int supWar = txtSupplierWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtSupplierWarranty.getText());
+//            int custWar = Integer.parseInt(txtCustomerWarranty.getText());
+//            List<String> list = new ArrayList<>(stagingList);
+//
+//            if (model.saveBatch(selectedStockId, supId, supWar, custWar, list)) {
+//                showAlert(Alert.AlertType.INFORMATION, "Success");
+//                stagingList.clear();
+//                lblStagingCount.setText("0 Items");
+//                btnSaveAll.setDisable(true);
+//
+//                // Refresh History
+//                String currentComboVal = cmbProduct.getValue();
+//                if(currentComboVal != null) {
+//                    historyList.clear();
+//                    String cleanName = currentComboVal.substring(0, currentComboVal.lastIndexOf(" (ID:"));
+//                    historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
+//                }
+//
+//                // Refresh View if match
+//                if (cmbViewProduct.getValue() != null && cmbViewProduct.getValue().equals(currentComboVal)) handleViewFilter(null);
+//            }
+//        } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
+//    }
 
     // --- TAB 3: CORRECTION ---
     @FXML void handleFixSearch(ActionEvent e) {
@@ -303,7 +356,12 @@ public class UnitManagementController {
                 txtFixSearch.clear();
                 handleViewFilter(null);
             }
-        } catch (Exception ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
+        } catch (Exception ex) {
+            if(ex.getMessage().contains("Duplicate entry")) {
+                new Alert(Alert.AlertType.WARNING, "The new serial number already exists. Please use a different serial number.").showAndWait();
+                return;
+            }
+            showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
     }
 
     // --- TAB 4: STATUS ---

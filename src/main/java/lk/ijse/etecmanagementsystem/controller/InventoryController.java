@@ -66,6 +66,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService = new InventoryService();
 
+    private final ObservableList<ProductDTO> productDataList = FXCollections.observableArrayList();
     private List<ProductDTO> allFetchedData = new ArrayList<>(); // Stores ALL results from DB
     private ObservableList<ProductDTO> tableDataList = FXCollections.observableArrayList();
 
@@ -103,9 +104,11 @@ public class InventoryController {
 
             List<ProductDTO> rawData = inventoryModel.findAll();
             if (rawData != null) {
-                ProductUtil.productCache.setAll(rawData);
+//                ProductUtil.productCache.setAll(rawData);
+                productDataList.clear();
+                productDataList.setAll(rawData);
             } else {
-                ProductUtil.productCache.clear();
+                productDataList.clear();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "No products found in the database.");
                 alert.show();
             }
@@ -230,7 +233,8 @@ public class InventoryController {
                 Thread.sleep(100);
 
                 // Fetch ALL matching data from Service
-                return inventoryService.getFilteredProducts(txtSearch.getText(), cmbCategory.getValue(), cmbCondition.getValue(), cmbStock.getValue());
+                return inventoryService.getFilteredProducts(productDataList, txtSearch.getText(),
+                        cmbCategory.getValue(), cmbCondition.getValue(), cmbStock.getValue());
             }
         };
 
@@ -423,6 +427,8 @@ public class InventoryController {
         setupCategoryComboBox();
         cmbCondition.getSelectionModel().select(ProductCondition.BOTH);
         cmbStock.getSelectionModel().select(Stock.ALL);
+        loadProducts();
+        loadCategories();
         refreshData();
     }
 

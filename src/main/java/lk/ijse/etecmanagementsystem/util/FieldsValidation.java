@@ -2,6 +2,7 @@ package lk.ijse.etecmanagementsystem.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 
 public class FieldsValidation {
 
@@ -60,6 +61,12 @@ public class FieldsValidation {
         }
 
         return false;
+    }
+
+    public static void formatTxtFieldAsNumber(TextField textField, boolean allowDecimal) {
+        String regex = allowDecimal ? "\\d*(\\.\\d{0,2})?" : "\\d*";
+        textField.setTextFormatter(new TextFormatter<>(change ->
+                change.getControlNewText().matches(regex) ? change : null));
     }
 
 }

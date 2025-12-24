@@ -19,11 +19,17 @@ import lk.ijse.etecmanagementsystem.model.CustomersModel;
 import lk.ijse.etecmanagementsystem.model.ProductModel;
 import lk.ijse.etecmanagementsystem.model.SalesModel;
 import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
+import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
 import lk.ijse.etecmanagementsystem.util.*;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,9 +154,11 @@ public class SalesController {
     private final SalesModel salesModel = new SalesModel();
     private final CustomersModel customersModel = new CustomersModel();
     private final ProductModel productModel = new ProductModel();
+    private final UnitManagementModel unitManagementModel = new UnitManagementModel();
 
     @FXML
     public void initialize() {
+
         if (LoginUtil.getUserName() != null) {
             lblCashierName.setText("Cashier: " + LoginUtil.getUserName());
         }
@@ -291,44 +299,56 @@ public class SalesController {
                 alert.showAndWait();
 
                 if (alert.getResult() == ButtonType.YES) {
-                    addCartItemToTable(newCartItem);
-                } else {
-                    // Revert to strict table data
-                    addInventoryItemToCart(selectedInventoryItem, qty, discount);
+
+
+                    if(!serialNumber.isEmpty() && !selectedInventoryItem.getSerialNumber().equalsIgnoreCase(serialNumber)) {
+
+                        // Serial number mismatch alert
+                        Alert serialAlert = getSerialAlert();
+
+                        if (serialAlert.getResult().getText().equals("MODIFY")) {
+                            System.out.println("User chose to MODIFY the serial number.");
+
+                            // Modify existing item in inventory and add to cart
+                            modifyAndAddItemToCart(newCartItem);
+
+                        }else if (serialAlert.getResult().getText().equals("ADD AS NEW")) {
+                            // Add as new item
+                            addNewItemToInventory(newCartItem);
+                        }
+                    }else if(serialNumber.isEmpty()) {
+                        // No serial number provided, add as new item
+                        addNewItemToInventory(newCartItem);
+                    }else {
+                        // Serial number matches, add directly
+                        addFieldItemToCart(newCartItem);
+                    }
                 }
-            } else {
-                // Not modified, add strictly from table
-                addInventoryItemToCart(selectedInventoryItem, qty, discount);
+            }else {
+                // Exact match, add directly from table
+                addFieldItemToCart(newCartItem);
             }
         } else {
             // No table selection, pure manual entry
-            addCartItemToTable(newCartItem);
+            addFieldItemToCart(newCartItem);
         }
     }
 
-    private void addInventoryItemToCart(InventoryItemDTO item, int qty, double discount) {
-        // Duplicate Check
-        if (isItemAlreadyInCart(item.getSerialNumber())) {
-            showAlert(Alert.AlertType.WARNING, "This serial number is already in the cart.");
-            return;
-        }
 
-        ItemCartTM cartItem = new ItemCartTM(
-                item.getItemId(),
-                item.getProductName(),
-                item.getSerialNumber(),
-                item.getCustomerWarranty(),
-                qty,
-                item.getProductCondition().toString(),
-                item.getItemPrice(),
-                discount,
-                (item.getItemPrice() * qty) - discount
-        );
-        cartItemList.add(cartItem);
-        calculateTotals();
+    // Alert for Serial Number Mismatch
+    private Alert getSerialAlert() {
+        Alert serialAlert = new Alert(Alert.AlertType.CONFIRMATION,
+                "The serial number you entered does not match the selected inventory item's serial number. Do you want modify it or Add Serial_No as New item?",
+                new ButtonType("MODIFY"),
+                new ButtonType("ADD AS NEW"),
+                ButtonType.CANCEL);
+
+        serialAlert.setHeaderText(null);
+        serialAlert.showAndWait();
+        return serialAlert;
     }
 
-    private void addCartItemToTable(ItemCartTM item) {
+    private void addFieldItemToCart(ItemCartTM item) {
         // Validation for manual entry
         if (item.getUnitPrice() <= 0) {
             showAlert(Alert.AlertType.WARNING, "Price must be greater than 0.");
@@ -343,6 +363,77 @@ public class SalesController {
         cartItemList.add(item);
         calculateTotals();
     }
+
+    private void addNewItemToInventory(ItemCartTM cartItem){
+
+        int ProductId = 0;
+        try{
+            ProductId = productModel.getIdByName(cartItem.getItemName());
+
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Failed to retrieve product ID: ");
+            System.out.println(e.getMessage());
+            return ;
+        }
+        if(ProductId <= 0){
+            showAlert(Alert.AlertType.ERROR, "Product not found in database. Please add the product first.");
+            return ;
+        }
+        //int stockId, String serialNumber, int customerWarranty, String status, Date addedDate
+        ProductItemDTO productItemDTO = new ProductItemDTO(
+                ProductId,
+                cartItem.getSerialNo(),
+                cartItem.getWarrantyMonths()
+        );
+        int newStockId = 0;
+        try{
+            newStockId = unitManagementModel.addItemAndGetGeneratedId(productItemDTO);
+            if(newStockId > 0){
+                cartItem.setItemId(newStockId);
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Failed to add new item to inventory.");
+                return ;
+            }
+        } catch (Exception e) {
+            if(e.getMessage().contains("Duplicate entry")) {
+                new Alert(Alert.AlertType.WARNING, "The new serial number already exists. Please use a different serial number.").showAndWait();
+                return ;
+            }
+            new Alert(Alert.AlertType.ERROR, "Failed to add new inventory item: ").show();
+            System.out.println(e.getMessage());
+            return;
+        }
+        System.out.println(productItemDTO.toString());
+        cartItemList.add(cartItem);
+        calculateTotals();
+        loadProductItems();
+    }
+
+    private void modifyAndAddItemToCart(ItemCartTM cartItem){
+
+
+        try{
+            int isUpdated = unitManagementModel.updateSerialNumber(cartItem.getItemId(), cartItem.getSerialNo());
+            if(isUpdated <= 0){
+                new Alert(Alert.AlertType.ERROR, "Failed to update inventory item serial number.").show();
+                return ;
+            }
+
+            cartItemList.add(cartItem);
+            calculateTotals();
+            loadProductItems();
+
+        } catch (Exception e) {
+            if(e.getMessage().contains("Duplicate entry")) {
+                new Alert(Alert.AlertType.WARNING, "The new serial number already exists. Please use a different serial number.").showAndWait();
+                return ;
+            }
+            new Alert(Alert.AlertType.ERROR, "Failed to modify inventory item: ").show();
+            System.out.println(e.getMessage());
+        }
+    }
+
+
 
     private boolean isItemAlreadyInCart(String serial) {
         if (serial == null || serial.isEmpty()) return false;
@@ -414,13 +505,49 @@ public class SalesController {
             stage.setScene(new Scene(root));
             stage.setTitle("Checkout");
             stage.centerOnScreen();
-            stage.show(); // Use show() or showAndWait()
+            stage.showAndWait(); // Use show() or showAndWait()
+            generateReport();
+
+
 
 
         } catch (IOException e) {
             System.out.println("Error loading checkout form: " + e.getMessage());
         }
 
+    }
+
+    public void generateReport() {
+        try {
+            // 1. Load the report template from your resources
+            // Note: The path must start with a slash /
+            InputStream reportStream = App.class.getResourceAsStream("reports/hello_etec.jrxml");
+
+            if (reportStream == null) {
+                System.out.println("File not found! Check the path.");
+                return;
+            }
+
+            // 2. Compile the report (from .jrxml to .jasper)
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+
+            // 3. Create parameters (Empty for now, we will use this later for titles/dates)
+            Map<String, Object> parameters = new HashMap<>();
+
+            // 4. Create an empty data source (Just to test the layout)
+            // JREmptyDataSource(1) means "fake 1 row of data so the report prints once"
+            JREmptyDataSource dataSource = new JREmptyDataSource(1);
+
+            // 5. Fill the report (Combine Template + Data)
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+            // 6. View the report (Opens a separate window with the PDF preview)
+            // 'false' means: Close the report window ONLY, not the whole app, when you click X
+            JasperViewer.viewReport(jasperPrint, false);
+
+        } catch (JRException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean handleCustomerAction() {
@@ -635,6 +762,11 @@ public class SalesController {
                     calculateFinalPrice();
                     return;
 
+                }else {
+                    Platform.runLater(() -> txtSerialNumber.setText(""));
+                    txtWarranty.setText("0");
+                    calculateFinalPrice();
+                    return;
                 }
 
             }
@@ -651,6 +783,10 @@ public class SalesController {
 
                     Platform.runLater(() -> txtSerialNumber.setText(""));
                     txtWarranty.setText("0");
+                    calculateFinalPrice();
+                    return;
+                }else {
+                    Platform.runLater(() -> txtItemQty.setText("1"));
                     calculateFinalPrice();
                     return;
                 }
@@ -916,5 +1052,6 @@ public class SalesController {
         clearCart();
         tblProductInventory.getSelectionModel().clearSelection();
         tblCart.getSelectionModel().clearSelection();
+        loadProductItems();
     }
 }

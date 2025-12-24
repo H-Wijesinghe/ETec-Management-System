@@ -13,9 +13,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.ProductModel;
+import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
+import lk.ijse.etecmanagementsystem.util.FieldsValidation;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
 
@@ -24,6 +26,7 @@ import javafx.scene.input.KeyEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -100,12 +103,24 @@ public class ProductController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // 1. Load Products from Database
+        loadProducts();
 
-        tableProducts.setItems(ProductUtil.productCache);
+        tableProducts.setItems(productList);
 
         setCellValueFactories();
 
         initComboBoxes();
+
+        FieldsValidation.formatTxtFieldAsNumber(txtId, false);
+        FieldsValidation.formatTxtFieldAsNumber(txtSellPrice, true);
+        FieldsValidation.formatTxtFieldAsNumber(txtBuyPrice, true);
+        FieldsValidation.formatTxtFieldAsNumber(txtWarranty, false);
+        FieldsValidation.formatTxtFieldAsNumber(txtQty, false);
+
+
+
+
 
         // 4. Add Listener for Table Selection
         tableProducts.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -173,16 +188,12 @@ public class ProductController implements Initializable {
         }
 
     }
-
-    // --- CRUD Operations ---
-
     private void saveProduct() {
-        txtId.setText("auto generate!");
+        txtId.setText("");
         if (validateFields()) return;
 
-
+        // Create the DTO
         ProductDTO newProduct = new ProductDTO(
-
                 txtName.getText().trim(),
                 txtDescription.getText().trim(),
                 Double.parseDouble(txtSellPrice.getText().trim()),
@@ -190,111 +201,311 @@ public class ProductController implements Initializable {
                 cmbCondition.getValue(),
                 Double.parseDouble(txtBuyPrice.getText().trim()),
                 Integer.parseInt(txtWarranty.getText()),
-                Integer.parseInt(txtQty.getText()),
+                Integer.parseInt(txtQty.getText()), // e.g., 10
                 selectedImagePath
         );
-        try {
-            boolean result = productModel.save(newProduct);
 
-            if (result) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
+        try {
+            // 1. Save Product and get the new ID (e.g., ID = 50)
+            int newStockId = productModel.saveProductAndGetId(newProduct);
+
+            if (newStockId > 0) {
+                // 2. Create the empty slots (e.g., 10 "PENDING" items)
+                UnitManagementModel unitModel = new UnitManagementModel();
+                unitModel.createPlaceholderItems(newStockId, newProduct.getQty());
+
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved with " + newProduct.getQty() + " empty slots created!");
                 reFresh();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
             }
         } catch (Exception e) {
+            if(e.getMessage().contains("UNIQUE constraint failed: Product.name")){
+                showAlert(Alert.AlertType.ERROR, "Validation Error", "Product with the same name already exists.");
+                return;
+            }
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
         }
     }
+    // --- CRUD Operations ---
+
+//    private void saveProduct() {
+//        txtId.setText("auto generate!");
+//        if (validateFields()) return;
+//
+//
+//        ProductDTO newProduct = new ProductDTO(
+//
+//                txtName.getText().trim(),
+//                txtDescription.getText().trim(),
+//                Double.parseDouble(txtSellPrice.getText().trim()),
+//                cmbCategory.getValue(),
+//                cmbCondition.getValue(),
+//                Double.parseDouble(txtBuyPrice.getText().trim()),
+//                Integer.parseInt(txtWarranty.getText()),
+//                Integer.parseInt(txtQty.getText()),
+//                selectedImagePath
+//        );
+//        try {
+//            boolean result = productModel.save(newProduct);
+//
+//            if (result) {
+//                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
+//                reFresh();
+//            } else {
+//                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
+//            }
+//        } catch (Exception e) {
+//            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
+//        }
+//    }
+
 
     private void updateProduct() {
-        ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-        if(selected == null){
-            selected = new ProductDTO();
-        }
+        // 1. Validation checks (ID existence, regex fields)
         if (txtId.getText() == null || txtId.getText().isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
             return;
         }
-        String id = txtId.getText();
-        try {
-            ResultSet product = productModel.findById(id);
-            if(!product.next()){
-                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " not found for update.");
-                return;
-            }
+        if (!isProductIdExist()) return;
 
-        }catch (Exception e){
-            showAlert(Alert.AlertType.ERROR, "Error", "Error retrieving product for update: " + e.getMessage());
-            return;
-        }
+        tableProducts.getSelectionModel().clearSelection();
 
         if (validateFields()) return;
 
-        // Update the object
-        selected.setId(txtId.getText().trim());
-        selected.setName(txtName.getText().trim());
-        selected.setCategory(cmbCategory.getValue());
-        selected.setCondition(cmbCondition.getValue());
-        selected.setSellPrice(Double.parseDouble(txtSellPrice.getText()));
-        selected.setBuyPrice(Double.parseDouble(txtBuyPrice.getText()));
-        selected.setWarrantyMonth(Integer.parseInt(txtWarranty.getText()));
-        selected.setQty(Integer.parseInt(txtQty.getText()));
-        selected.setDescription(txtDescription.getText().trim());
-        selected.setImagePath(selectedImagePath);
+        // 2. Prepare Data
+        int stockId = Integer.parseInt(txtId.getText().trim());
+        int newQty = Integer.parseInt(txtQty.getText().trim());
+
+
 
         try {
-            boolean result = productModel.update(selected);
+            // --- STEP 1: SAFETY CHECK ---
+            // Get the number of "Real" (non-placeholder) items currently in DB
+            int realItemCount = productModel.getRealItemCount(stockId);
+
+            // If user tries to set Qty lower than the number of actual items, STOP THEM.
+            if (newQty < realItemCount) {
+                showAlert(Alert.AlertType.ERROR, "Quantity Error",
+                        "Cannot reduce Quantity to " + newQty + ".\n" +
+                                "You have " + realItemCount + " physical items registered.\n" +
+                                "You must manually delete specific items first.");
+                // Reset the Qty field to the safe minimum
+                txtQty.setText(String.valueOf(realItemCount));
+                return;
+            }
+
+            Alert alert =new Alert(Alert.AlertType.CONFIRMATION,"You are updating the product details and quantity to " + newQty + ".\n" +
+                    "Click OK to proceed.", ButtonType.OK, ButtonType.CANCEL);
+            alert.setTitle("Confirm Update");
+            alert.showAndWait();
+            if(alert.getResult() != ButtonType.OK){
+                return;
+            }
+
+            // --- STEP 2: PROCEED WITH UPDATE ---
+            ProductDTO selected = new ProductDTO(
+                    txtId.getText().trim(),
+                    txtName.getText().trim(),
+                    txtDescription.getText().trim(),
+                    Double.parseDouble(txtSellPrice.getText()),
+                    cmbCategory.getValue(),
+                    cmbCondition.getValue(),
+                    Double.parseDouble(txtBuyPrice.getText()),
+                    Integer.parseInt(txtWarranty.getText()),
+                    newQty,
+                    selectedImagePath
+            );
+
+
+
+            // Call the new Sync method
+            boolean result = productModel.updateProductWithQtySync(selected);
 
             if (result) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Product and Quantity Updated Successfully!");
                 reFresh();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
             }
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to update product: " + e.getMessage());
-        }
 
+        } catch (SQLException e) {
+            // This catches the specific error thrown from the Model if the DELETE LIMIT fails
+            showAlert(Alert.AlertType.ERROR, "Update Failed", e.getMessage());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "An unexpected error occurred: " + e.getMessage());
+        }
     }
+
+//    private void updateProduct() {
+//        ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
+//        if(selected == null){
+//            selected = new ProductDTO();
+//        }
+//        if (txtId.getText() == null || txtId.getText().isEmpty()) {
+//            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
+//            return;
+//        }
+//        String id = txtId.getText();
+//        try {
+//            ResultSet product = productModel.findById(id);
+//            if(!product.next()){
+//                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " not found for update.");
+//                return;
+//            }
+//
+//        }catch (Exception e){
+//            showAlert(Alert.AlertType.ERROR, "Error", "Error retrieving product for update: " + e.getMessage());
+//            return;
+//        }
+//
+//        if (validateFields()) return;
+//
+//        // Update the object
+//        selected.setId(txtId.getText().trim());
+//        selected.setName(txtName.getText().trim());
+//        selected.setCategory(cmbCategory.getValue());
+//        selected.setCondition(cmbCondition.getValue());
+//        selected.setSellPrice(Double.parseDouble(txtSellPrice.getText()));
+//        selected.setBuyPrice(Double.parseDouble(txtBuyPrice.getText()));
+//        selected.setWarrantyMonth(Integer.parseInt(txtWarranty.getText()));
+//        selected.setQty(Integer.parseInt(txtQty.getText()));
+//        selected.setDescription(txtDescription.getText().trim());
+//        selected.setImagePath(selectedImagePath);
+//
+//        try {
+//            boolean result = productModel.update(selected);
+//
+//            if (result) {
+//                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
+//                reFresh();
+//            } else {
+//                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
+//            }
+//        } catch (Exception e) {
+//            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to update product: " + e.getMessage());
+//        }
+//
+//    }
+
+    // In ProductController.java
 
     private void deleteProduct() {
+        // 1. Get Selection
         ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-        if(selected == null){
-            selected = new ProductDTO();
-        }
-        if (txtId.getText() == null || txtId.getText().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
-            return;
-        }
-        selected.setId(txtId.getText().trim());
+        if (selected == null) {
+            // Fallback if they typed ID but didn't select from table
+            if (txtId.getText() == null || txtId.getText().isEmpty()) {
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
-        alert.showAndWait();
+                showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
+                return;
 
-        if (alert.getResult() == ButtonType.YES) {
-            try {
-                boolean result = productModel.deleteById(selected.getId());
-                if (result) {
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "Product Deleted Successfully!");
-                    reFresh();
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete product.");
-                }
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to delete product: " + e.getMessage());
+            } else {
+
+                if(!isProductIdExist()) return;
+
+                selected = new ProductDTO();
+                selected.setId(txtId.getText().trim());
+                selected.setName("Product ID: " + txtId.getText()); // Placeholder name
             }
+        } else {
+
+            populateFields(selected);
+
+        }
+
+        try {
+            // 2. INSPECT THE ITEMS (The new safety check)
+            ProductModel.ItemDeleteStatus status = productModel.checkItemStatusForDelete(selected.getId());
+
+            // --- SCENARIO A: BLOCK DELETE (Has History) ---
+            if (status.restrictedCount > 0) {
+                showAlert(Alert.AlertType.ERROR, "Deletion Blocked",
+                        "Cannot delete this product.\n\n" +
+                                "Reason: It has " + status.restrictedCount + " items with history (SOLD, RMA, or DAMAGED).\n" +
+                                "You cannot delete records that are part of business history.");
+                return;
+            }
+
+            // --- SCENARIO B: WARNING (Has Real Stock) ---
+            if (status.realAvailableCount > 0) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirm Deletion of Physical Stock");
+                alert.setHeaderText("Warning: Physical Items Found");
+                alert.setContentText(
+                        "This product has " + status.realAvailableCount + " REAL items currently in stock.\n\n" +
+                                "Deleting this product will remove these items from the database permanently.\n" +
+                                "Are you sure you want to proceed?");
+
+                // Wait for user response
+                if (alert.showAndWait().get() != ButtonType.OK) {
+                    return; // User cancelled
+                }
+            } else {
+                // --- SCENARIO C: STANDARD DELETE (Only Placeholders or Empty) ---
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Are you sure you want to delete " + selected.getName() + "?\n(Only empty slots will be removed)",
+                        ButtonType.YES, ButtonType.NO);
+                if (alert.showAndWait().get() != ButtonType.YES) {
+                    return;
+                }
+            }
+
+            // 3. EXECUTE DELETE
+            // This calls the robust deleteById method we wrote previously
+            // (which wipes the items first, then the product)
+            boolean result = productModel.deleteById(selected.getId());
+
+            if (result) {
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Deleted Successfully!");
+                reFresh();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete product.");
+            }
+
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to delete product: " + e.getMessage());
         }
     }
+
+//    private void deleteProduct() {
+//        ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
+//        if(selected == null){
+//            selected = new ProductDTO();
+//        }
+//        if (txtId.getText() == null || txtId.getText().isEmpty()) {
+//            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
+//            return;
+//        }
+//        selected.setId(txtId.getText().trim());
+//
+//        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
+//        alert.showAndWait();
+//
+//        if (alert.getResult() == ButtonType.YES) {
+//            try {
+//                boolean result = productModel.deleteById(selected.getId());
+//                if (result) {
+//                    showAlert(Alert.AlertType.INFORMATION, "Success", "Product Deleted Successfully!");
+//                    reFresh();
+//                } else {
+//                    showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete product.");
+//                }
+//            } catch (Exception e) {
+//                showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to delete product: " + e.getMessage());
+//            }
+//        }
+//    }
 
     @FXML
     private void getEnterKeyNav(KeyEvent Event) {
         if (Event.getCode() == KeyCode.ENTER) {
             String id = txtId.getText();
+            tableProducts.getSelectionModel().clearSelection();
 
             try {
                 if (id == null || id.isEmpty()) {
-                    new Alert(Alert.AlertType.WARNING, "Please enter a Product ID to search.").show();
+//                    new Alert(Alert.AlertType.WARNING, "Please enter a Product ID to search.").show();
                     return;
                 }
 
@@ -316,7 +527,8 @@ public class ProductController implements Initializable {
                     );
                     populateFields(p);
                 } else {
-                    new Alert(Alert.AlertType.INFORMATION, "No product found with ID: " + id).show();
+                    new Alert(Alert.AlertType.INFORMATION, "No product found with ID: " + id).showAndWait();
+                    clearForm();
                 }
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, "Error retrieving product: " + e.getMessage()).show();
@@ -329,9 +541,10 @@ public class ProductController implements Initializable {
 
             List<ProductDTO> rawData = productModel.findAll();
             if (rawData != null) {
-                ProductUtil.productCache.setAll(rawData);
+//                ProductUtil.productCache.setAll(rawData);
+                productList.setAll(rawData);
             } else {
-                ProductUtil.productCache.clear();
+                productList.clear();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "No products found in the database.");
                 alert.show();
             }
@@ -350,8 +563,8 @@ public class ProductController implements Initializable {
     private void clearForm() {
         txtId.setText("");
         txtName.setText("");
-        cmbCategory.getSelectionModel().clearSelection();
-        cmbCondition.getSelectionModel().clearSelection();
+        cmbCategory.getSelectionModel().select(null);
+        cmbCondition.getSelectionModel().select(null);
         txtSellPrice.setText("");
         txtBuyPrice.setText("");
         txtWarranty.setText("");
@@ -399,7 +612,30 @@ public class ProductController implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Validation Error", "Qty must be 1-5 digit number.");
             return true;
         }
+        if( cmbCategory.getValue() == null){
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select a Category.");
+            return true;
+        }
+        if( cmbCondition.getValue() == null){
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select a Condition.");
+            return true;
+        }
         return false;
+    }
+
+    private boolean isProductIdExist() {
+        String id = txtId.getText();
+        try {
+            ResultSet product = productModel.findById(id);
+            if(!product.next()){
+                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " does not exist.");
+                return false;
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Error checking product ID: " + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

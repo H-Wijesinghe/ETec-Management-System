@@ -126,7 +126,7 @@ public class SalesModel {
                 pstmSalesItem.addBatch();
 
                 // B. Update ProductItem Table (Mark as SOLD)
-                pstmUpdateItem.setTimestamp(1, new Timestamp(new java.util.Date().getTime()));
+                pstmUpdateItem.setTimestamp(1, new Timestamp(new java.util.Date().getTime())); // sold_date = now
                 // Use warranty from SaleDTO or specific item logic? using SalesDTO logic for now as per schema implies flexibility
                 pstmUpdateItem.setInt(2, salesDTO.getCustomerWarrantyMonths());
                 pstmUpdateItem.setInt(3, item.getItemId());

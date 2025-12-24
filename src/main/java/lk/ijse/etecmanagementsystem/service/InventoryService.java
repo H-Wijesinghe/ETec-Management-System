@@ -77,6 +77,7 @@
 //}
 package lk.ijse.etecmanagementsystem.service;
 
+import javafx.collections.ObservableList;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.ProductUtil;
@@ -87,11 +88,11 @@ import java.util.stream.Collectors;
 
 public class InventoryService {
 
-    public List<ProductDTO> getFilteredProducts(String searchText, String category, ProductCondition conditionFilter, Stock stockFilter) {
+    public List<ProductDTO> getFilteredProducts(ObservableList<ProductDTO> productDataList, String searchText, String category, ProductCondition conditionFilter, Stock stockFilter) {
 
         String finalSearch = (searchText == null) ? "" : searchText.toLowerCase();
 
-        return ProductUtil.productCache.stream()
+        return productDataList.stream()
                 // 1. Filter by Name
                 .filter(p -> p.getName().toLowerCase().contains(finalSearch))
 
@@ -116,11 +117,12 @@ public class InventoryService {
     private boolean isConditionMatch(ProductDTO p, ProductCondition filterValue) {
         if (filterValue == null || filterValue == ProductCondition.BOTH) {
             return true;
+        } else if (filterValue == ProductCondition.BRAND_NEW) {
+            return p.getCondition().equals(ProductCondition.BRAND_NEW);
+        } else if (filterValue == ProductCondition.USED) {
+            return p.getCondition().equals(ProductCondition.USED);
         }
-        if (p.getCondition() == null) {
-            return false;
-        }
-        return p.getCondition() == filterValue;
+        return true;
     }
 
     private boolean isStockMatch(ProductDTO p, Stock stock) {

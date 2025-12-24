@@ -13,7 +13,8 @@ import java.util.List;
 public class InventoryModel {
 
     public List<ProductDTO> findAll() throws Exception {
-        String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
+//        String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
+        String sql = "SELECT * FROM Product";
 
         List<ProductDTO> products = new ArrayList<>();
 
@@ -44,11 +45,11 @@ public class InventoryModel {
 
 
     private ProductCondition fromConditionString(String s) {
-        if (s == null) return null;
+        if (s == null) return ProductCondition.BOTH;
         try {
-            if (s.equals("Used")) {
+            if (s.equals("USED")) {
                 return ProductCondition.USED;
-            } else if (s.equals("Brand New")) {
+            } else if (s.equals("BRAND NEW")) {
                 return ProductCondition.BRAND_NEW;
             }
             return ProductCondition.BOTH;

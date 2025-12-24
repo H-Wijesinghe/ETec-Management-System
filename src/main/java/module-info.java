@@ -10,7 +10,7 @@ module lk.ijse.etecmanagementsystem {
     requires javafx.base;
     requires javafx.graphics;
     requires jdk.httpserver;
-
+    requires net.sf.jasperreports.core;
 
 
     exports lk.ijse.etecmanagementsystem;

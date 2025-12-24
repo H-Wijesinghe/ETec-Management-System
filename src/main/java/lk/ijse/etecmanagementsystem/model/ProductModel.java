@@ -32,6 +32,39 @@ public class ProductModel {
         );
     }
 
+    public int saveProductAndGetId(ProductDTO p) throws SQLException {
+        String sql = "INSERT INTO Product (name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path) " +
+                "VALUES (?,?,?,?,?,?,?,?,?)";
+
+        Connection connection = DBConnection.getInstance().getConnection();
+
+        // We must request RETURN_GENERATED_KEYS to get the new stock_id
+        try (PreparedStatement pstm = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            pstm.setString(1, p.getName());
+            pstm.setString(2, p.getDescription());
+            pstm.setDouble(3, p.getSellPrice());
+            pstm.setString(4, p.getCategory());
+            pstm.setString(5, p.getCondition().getLabel());
+            pstm.setDouble(6, p.getBuyPrice());
+            pstm.setInt(7, p.getWarrantyMonth());
+            pstm.setInt(8, p.getQty());
+            pstm.setString(9, p.getImagePath());
+
+            int affectedRows = pstm.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating product failed, no rows affected.");
+            }
+
+            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Return the new stock_id
+                } else {
+                    throw new SQLException("Creating product failed, no ID obtained.");
+                }
+            }
+        }
+    }
+
     public boolean update(ProductDTO p) throws SQLException {
         Connection connection = null;
 
@@ -86,9 +119,186 @@ public class ProductModel {
         }
     }
 
-    public boolean deleteById(String id) throws Exception {
-        String sql = "DELETE FROM Product WHERE stock_id=?";
-        return CrudUtil.execute(sql, id);
+    // 1. New Helper: Count only "Real" items (ignoring PENDING ones)
+    public int getRealItemCount(int stockId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%'";
+        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // 2. Updated Update Method: Handles Product Details AND Quantity Adjustment
+    public boolean updateProductWithQtySync(ProductDTO p) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = DBConnection.getInstance().getConnection();
+            connection.setAutoCommit(false); // Start Transaction
+
+            // --- A. Update Main Product Details ---
+            String sqlProduct = "UPDATE Product SET name=?, description=?, sell_price=?, category=?, p_condition=?, buy_price=?, warranty_months=?, qty=?, image_path=? WHERE stock_id=?";
+            try (PreparedStatement pstm = connection.prepareStatement(sqlProduct)) {
+                pstm.setString(1, p.getName());
+                pstm.setString(2, p.getDescription());
+                pstm.setDouble(3, p.getSellPrice());
+                pstm.setString(4, p.getCategory());
+                pstm.setString(5, p.getCondition().getLabel());
+                pstm.setDouble(6, p.getBuyPrice());
+                pstm.setInt(7, p.getWarrantyMonth());
+                pstm.setInt(8, p.getQty()); // Set the NEW Total Qty
+                pstm.setString(9, p.getImagePath());
+                pstm.setString(10, p.getId());
+
+                if (pstm.executeUpdate() == 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            // --- B. Sync Warranty on Shelf Items ---
+            String sqlWarranty = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
+            try (PreparedStatement pstmWar = connection.prepareStatement(sqlWarranty)) {
+                pstmWar.setInt(1, p.getWarrantyMonth());
+                pstmWar.setString(2, p.getId());
+                pstmWar.executeUpdate();
+            }
+
+            // --- C. Adjust Placeholders (The Critical Part) ---
+            // 1. Get current total count (Real + Placeholders) BEFORE the update committed effectively?
+            // Actually, we need to compare the NEW Qty with the count of items currently in DB.
+
+            String countSql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ?";
+            int currentTotalItems = 0;
+            try (PreparedStatement psCount = connection.prepareStatement(countSql)) {
+                psCount.setString(1, p.getId());
+                ResultSet rs = psCount.executeQuery();
+                if (rs.next()) currentTotalItems = rs.getInt(1);
+            }
+
+            int targetQty = p.getQty();
+            int difference = targetQty - currentTotalItems;
+
+            if (difference > 0) {
+                // INCREASE QTY: Add 'difference' amount of Placeholders
+                String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, status, added_date) VALUES (?, ?, 'AVAILABLE', NOW())";
+                try (PreparedStatement pstmAdd = connection.prepareStatement(insertSql)) {
+                    for (int i = 0; i < difference; i++) {
+                        pstmAdd.setString(1, p.getId());
+                        String tempSerial = "PENDING-" + p.getId() + "-" + System.nanoTime() + "-" + i;
+                        pstmAdd.setString(2, tempSerial);
+                        pstmAdd.addBatch();
+                    }
+                    pstmAdd.executeBatch();
+                }
+            } else if (difference < 0) {
+                // DECREASE QTY: Delete 'abs(difference)' amount of Placeholders
+                // We strictly delete ONLY items that are PENDING placeholders
+                int removeCount = Math.abs(difference);
+                String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' LIMIT ?";
+
+                try (PreparedStatement pstmDel = connection.prepareStatement(deleteSql)) {
+                    pstmDel.setString(1, p.getId());
+                    pstmDel.setInt(2, removeCount);
+                    int deletedRows = pstmDel.executeUpdate();
+
+                    // CRITICAL CHECK:
+                    // If we tried to delete 5 items, but only deleted 3 placeholders, it means
+                    // the user tried to delete Real Items. We must block this.
+                    if (deletedRows < removeCount) {
+                        throw new SQLException("Cannot reduce Quantity below " + (currentTotalItems - deletedRows) + ". You have real items registered that cannot be auto-deleted.");
+                    }
+                }
+            }
+
+            connection.commit();
+            return true;
+
+        } catch (SQLException e) {
+            if (connection != null) connection.rollback();
+            throw e; // Re-throw to be caught by Controller
+        } finally {
+            if (connection != null) connection.setAutoCommit(true);
+        }
+    }
+
+    public boolean deleteById(String stockId) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = DBConnection.getInstance().getConnection();
+            connection.setAutoCommit(false); // Start Transaction
+
+            // --- STEP 1: Delete all Inventory Items (Children) ---
+            // Note: If any item has been SOLD, this will fail because of the Sales table.
+            // This is GOOD. It prevents you from deleting products that have sales history.
+            String deleteItemsSql = "DELETE FROM ProductItem WHERE stock_id = ?";
+            try (PreparedStatement pstm = connection.prepareStatement(deleteItemsSql)) {
+                pstm.setString(1, stockId);
+                pstm.executeUpdate();
+            }
+
+            // --- STEP 2: Delete the Product (Parent) ---
+            String deleteProductSql = "DELETE FROM Product WHERE stock_id = ?";
+            try (PreparedStatement pstm = connection.prepareStatement(deleteProductSql)) {
+                pstm.setString(1, stockId);
+                int rows = pstm.executeUpdate();
+
+                if (rows > 0) {
+                    connection.commit(); // Success!
+                    return true;
+                } else {
+                    connection.rollback(); // Product didn't exist?
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            if (connection != null) connection.rollback();
+
+            // Check if the error is actually because an item was SOLD (Foreign Key from SalesItem)
+            if (e.getMessage().contains("constraint") || e.getMessage().contains("foreign key")) {
+                throw new SQLException("Cannot delete this Product because some items have already been SOLD. You cannot delete history.");
+            }
+            throw e;
+        } finally {
+            if (connection != null) connection.setAutoCommit(true);
+        }
+    }
+
+    public ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException {
+        String sql = "SELECT serial_number, status FROM ProductItem WHERE stock_id = ?";
+
+        int realAvailableCount = 0;
+        int restrictedCount = 0; // SOLD, RMA, etc.
+
+        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
+            while (rs.next()) {
+                String serial = rs.getString("serial_number");
+                String status = rs.getString("status");
+
+                // Ignore Placeholders completely (they are safe to delete)
+                if (serial.startsWith("PENDING-")) continue;
+
+                if ("AVAILABLE".equals(status)) {
+                    realAvailableCount++;
+                } else {
+                    // If it's SOLD, RMA, RETURNED, DAMAGED -> We CANNOT delete the product
+                    restrictedCount++;
+                }
+            }
+        }
+        return new ItemDeleteStatus(realAvailableCount, restrictedCount);
+    }
+
+    // Simple helper class for the result
+    public static class ItemDeleteStatus {
+        public final int realAvailableCount;
+        public final int restrictedCount;
+
+        public ItemDeleteStatus(int real, int restricted) {
+            this.realAvailableCount = real;
+            this.restrictedCount = restricted;
+        }
     }
 
     public ResultSet findById(String id) throws Exception {
@@ -96,6 +306,18 @@ public class ProductModel {
 
         return CrudUtil.execute(sql, id);
 
+    }
+
+    public int getIdByName(String name) throws SQLException {
+
+        String sql = "SELECT stock_id FROM Product WHERE name=?";
+        try (ResultSet rs = CrudUtil.execute(sql, name)) {
+            if (rs.next()) {
+                return rs.getInt("stock_id");
+            }else {
+                return -1;
+            }
+        }
     }
 
     public List<ProductDTO> findAll() throws Exception {
