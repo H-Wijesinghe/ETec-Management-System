@@ -26,7 +26,7 @@ public class SalesModel {
                 "p.warranty_months, p.sell_price, p.p_condition " +
                 "FROM ProductItem pi " +
                 "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "WHERE pi.status = 'AVAILABLE'";
+                "WHERE pi.status = 'AVAILABLE' AND pi.serial_number NOT LIKE 'PENDING-%' ";
 
         ResultSet rs = CrudUtil.execute(sql);
 

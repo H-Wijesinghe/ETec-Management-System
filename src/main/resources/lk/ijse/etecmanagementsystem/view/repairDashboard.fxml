@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.RepairDashboardController">
+
+    <!-- TOP MENU -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="top-bar" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+            </padding>
+            <children>
+                <Label text="Repair Management" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnAddTicket" mnemonicParsing="false" onAction="#handleNewTicket" styleClass="btn-primary" text="+ New Repair Ticket" />
+            </children>
+        </HBox>
+    </top>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <SplitPane dividerPositions="0.3" BorderPane.alignment="CENTER">
+
+            <!-- LEFT SIDE: LIST -->
+            <items>
+                <VBox spacing="5.0">
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </padding>
+                    <children>
+                        <TextField fx:id="txtSearch" promptText="Filter by Name, Device or ID..." />
+                        <HBox spacing="5.0">
+                            <ComboBox fx:id="comboStatusFilter" prefWidth="150.0" promptText="All Status" />
+                        </HBox>
+                        <ListView fx:id="listRepairJobs" VBox.vgrow="ALWAYS" />
+                    </children>
+                </VBox>
+
+                <!-- RIGHT SIDE: DETAILS -->
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+                    <content>
+                        <VBox fx:id="detailsPane" spacing="15.0" visible="false">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+
+                                <!-- Header -->
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <children>
+                                        <Label fx:id="lblJobId" text="Job #1024" textFill="#2c3e50">
+                                            <font>
+                                                <Font name="System Bold" size="24.0" />
+                                            </font>
+                                        </Label>
+                                        <Label fx:id="lblStatusBadge" styleClass="status-badge" text="PENDING" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label fx:id="lblDate" text="2025-12-25" textFill="#7f8c8d" />
+                                    </children>
+                                </HBox>
+
+                                <Separator />
+
+                                <!-- Customer & Device Info (Grid) -->
+                                <GridPane hgap="20.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" />
+                                    </columnConstraints>
+                                    <children>
+                                        <VBox fx:id="cardCustomer" onMouseClicked="#handleCardClick" styleClass="card-clickable">
+                                            <children>
+                                                <Label styleClass="section-header" text="Customer Details" />
+                                                <Label fx:id="lblCustomerName" style="-fx-font-weight: bold;" text="John Doe" />
+                                                <Label fx:id="lblContact" text="077-1234567" />
+                                            </children>
+                                        </VBox>
+                                        <VBox fx:id="cardDevice" onMouseClicked="#handleCardClick" styleClass="card-clickable" GridPane.columnIndex="1">
+                                            <children>
+                                                <Label styleClass="section-header" text="Device Details" />
+                                                <Label fx:id="lblDeviceName" style="-fx-font-weight: bold;" text="Dell Inspiron 15" />
+                                                <Label fx:id="lblSerial" text="SN: XYZ-9999" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                           <rowConstraints>
+                              <RowConstraints />
+                           </rowConstraints>
+                                </GridPane>
+
+                                <!-- Workflow Actions -->
+                                <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="action-bar">
+                                    <children>
+                                        <Button onAction="#handlePrevStatus" styleClass="btn-secondary" text="&lt; Revert" />
+                                        <ProgressBar fx:id="progressWorkflow" prefWidth="200.0" progress="0.0" />
+                                        <Button onAction="#handleNextStatus" styleClass="btn-success" text="Next Stage &gt;" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button onAction="#handleUnclaimed" styleClass="btn-danger" text="Mark Unclaimed" />
+                                    </children>
+                                </HBox>
+
+                                <!-- 3 Stages Descriptions -->
+                                <TabPane tabClosingPolicy="UNAVAILABLE">
+                                    <tabs>
+                                        <Tab text="1. Intake Issue">
+                                            <content>
+                                                <TextArea fx:id="txtIntake" prefHeight="100.0" promptText="Customer complaint..." wrapText="true" />
+                                            </content>
+                                        </Tab>
+                                        <Tab text="2. Diagnosis">
+                                            <content>
+                                                <TextArea fx:id="txtDiagnosis" prefHeight="100.0" promptText="Technician findings..." wrapText="true" />
+                                            </content>
+                                        </Tab>
+                                        <Tab text="3. Repair Results">
+                                            <content>
+                                                <TextArea fx:id="txtResolution" prefHeight="100.0" promptText="Work done details..." wrapText="true" />
+                                            </content>
+                                        </Tab>
+                                    </tabs>
+                                </TabPane>
+
+                                <!-- Used Items / Parts -->
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label styleClass="section-header" text="Parts Used" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#handleAddPart" text="+ Add Part" />
+                                            </children>
+                                        </HBox>
+                                        <TableView fx:id="tblParts" prefHeight="150.0">
+                                            <columns>
+                                                <TableColumn fx:id="colPartName" prefWidth="200.0" text="Item Name" />
+                                                <TableColumn fx:id="colPartPrice" prefWidth="100.0" text="Price" />
+                                                <TableColumn fx:id="colPartQty" prefWidth="75.0" text="Qty" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+
+                                <!-- Footer Actions -->
+                                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnUpdateJob" onAction="#handleUpdateJob" styleClass="btn-secondary" text="Update / Delete Details" />
+                                        <Button styleClass="btn-primary" text="Save Changes" />
+                                        <Button styleClass="btn-success" text="Checkout &amp; Invoice" />
+                                    </children>
+                                </HBox>
+
+
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </items>
+        </SplitPane>
+    </center>
+   <stylesheets>
+      <URL value="@../css/RepairStyle.css" />
+   </stylesheets>
+</BorderPane>

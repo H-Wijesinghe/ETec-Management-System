@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="550.0" stylesheets="@../css/RepairStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.AddRepairTicketController">
+    <children>
+        <VBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+                    <children>
+                        <Label text="Create New Repair Ticket" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                    </padding>
+                </HBox>
+
+                <VBox spacing="15.0">
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                    </padding>
+                    <children>
+
+                        <!-- Section 1: Customer Selection -->
+                        <Label styleClass="section-header" text="1. SELECT CUSTOMER" />
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <!-- Editable ComboBox for Search -->
+                                <ComboBox fx:id="cmbCustomer" editable="true" onAction="#handleCustomerSelection" prefHeight="30.0" prefWidth="350.0" promptText="Type Name or Contact to Search..." HBox.hgrow="ALWAYS" />
+
+                                <!-- Add New Customer Button -->
+                                <Button mnemonicParsing="false" onAction="#handleAddNewCustomer" prefHeight="30.0" styleClass="btn-success" text="+ New Customer" />
+                            </children>
+                        </HBox>
+
+                        <!-- Customer Preview (Gray Box) -->
+                        <VBox style="-fx-background-color: #ecf0f1; -fx-padding: 10; -fx-background-radius: 5;">
+                            <children>
+                                <!-- Row 1: Name, Contact, ID -->
+                                <HBox spacing="15.0">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Customer Name" textFill="#7f8c8d">
+                                                    <font><Font size="10.0" /></font>
+                                                </Label>
+                                                <Label fx:id="lblCusName" text="-" textFill="#2c3e50">
+                                                    <font><Font name="System Bold" size="14.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Contact" textFill="#7f8c8d">
+                                                    <font><Font size="10.0" /></font>
+                                                </Label>
+                                                <Label fx:id="lblCusContact" text="-" textFill="#2c3e50">
+                                                    <font><Font name="System Bold" size="14.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                        <VBox prefHeight="35.0" prefWidth="37.0">
+                                            <children>
+                                                <Label text="ID" textFill="#7f8c8d">
+                                                    <font><Font size="10.0" /></font>
+                                                </Label>
+                                                <Label fx:id="lblCusId" text="-" textFill="#2c3e50">
+                                                    <font><Font name="System Bold" size="14.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <!-- Row 2: Email & Address (Added This) -->
+                                <HBox spacing="15.0">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Email" textFill="#7f8c8d">
+                                                    <font><Font size="10.0" /></font>
+                                                </Label>
+                                                <Label fx:id="lblCusEmail" text="-" textFill="#2c3e50">
+                                                    <font><Font name="System Bold" size="12.0" /></font>
+                                                </Label>
+                                            </children>
+                                        </VBox>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Address" textFill="#7f8c8d">
+                                                    <font><Font size="10.0" /></font>
+                                                </Label>
+                                                <Label fx:id="lblCusAddress" text="-" textFill="#2c3e50" wrapText="true" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="8.0" />
+                                    </VBox.margin>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <Separator />
+
+                        <!-- Section 2: Device Information -->
+                        <Label styleClass="section-header" text="2. DEVICE INFORMATION" />
+                        <HBox spacing="10.0">
+                            <children>
+                                <TextField fx:id="txtDeviceName" promptText="Device Model (e.g. Dell Inspiron)" HBox.hgrow="ALWAYS" />
+                                <TextField fx:id="txtSerial" promptText="Serial Number" HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+
+                        <Label text="Problem Description:" textFill="#7f8c8d">
+                            <font>
+                                <Font size="12.0" />
+                            </font>
+                        </Label>
+                        <TextArea fx:id="txtProblem" prefHeight="100.0" promptText="Describe the issue..." wrapText="true" />
+
+                        <Separator />
+
+                        <!-- Footer Buttons -->
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                            <children>
+                                <Button cancelButton="true" mnemonicParsing="false" onAction="#handleCancel" styleClass="btn-secondary" text="Cancel" />
+                                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSaveTicket" styleClass="btn-primary" text="Create Ticket" />
+                            </children>
+                            <padding>
+                                <Insets top="10.0" />
+                            </padding>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

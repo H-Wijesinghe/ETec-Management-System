@@ -1,0 +1,85 @@
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* Top Bar */
+.top-bar {
+    -fx-background-color: #2c3e50;
+}
+
+/* List View */
+.list-view .list-cell {
+    -fx-padding: 10px;
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 0 0 1 0;
+}
+.list-view .list-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+/* Detail Cards */
+.card {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+.section-header {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
+
+/* Status Badges */
+.status-badge {
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+.status-pending { -fx-background-color: #3498db; }
+.status-warn { -fx-background-color: #f39c12; }
+.status-done { -fx-background-color: #27ae60; }
+.status-danger { -fx-background-color: #c0392b; }
+
+/* Buttons */
+.button {
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+}
+.btn-primary {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+.btn-success {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+}
+.btn-secondary {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+}
+.btn-danger {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Add this to your style.css */
+.card-clickable {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+    -fx-cursor: hand; /* Changes cursor to hand */
+    -fx-transition: -fx-background-color 0.2s;
+}
+
+.card-clickable:hover {
+    -fx-background-color: #dce4e6; /* Slightly darker on hover */
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.4), 8, 0, 0, 0); /* Blue glow */
+}
