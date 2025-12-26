@@ -4,10 +4,24 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.model.RepairJobModel;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JasperViewer;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RepairCheckoutController {
 
@@ -19,6 +33,14 @@ public class RepairCheckoutController {
     @FXML private Label lblGrandTotal;
     @FXML private Label lblBalance;
 
+    @FXML
+    private Label lblDiscount;
+
+    @FXML
+    private TextField txtDiscount;
+    @FXML
+    private Label lblSubTotal;
+
     @FXML private ComboBox<String> cmbPaymentMethod;
     @FXML private TextField txtAmountPaid;
 
@@ -27,7 +49,9 @@ public class RepairCheckoutController {
     private RepairDashboardController mainController;
     private final RepairJobModel repairModel = new RepairJobModel();
 
+    private double subTotal = 0.0;
     private double grandTotal = 0.0;
+    private double discount = 0.0;
 
     @FXML
     public void initialize() {
@@ -37,6 +61,29 @@ public class RepairCheckoutController {
 
         // Add Listener to calculate Balance/Due in real-time
         txtAmountPaid.textProperty().addListener((obs, oldVal, newVal) -> calculateBalance());
+
+        txtDiscount.textProperty().addListener((obs, oldVal, newVal) -> {
+            try {
+                if(newVal != null && newVal.isEmpty()){
+                    return;
+                }
+                double discount = Double.parseDouble(newVal);
+                if (discount < 0 || discount > subTotal) {
+                    throw new NumberFormatException();
+                } else {
+                    lblDiscount.setText(String.format("%.2f", discount));
+                    double grandTotal = subTotal - discount;
+                    lblGrandTotal.setText(String.format("%.2f", grandTotal));
+                    this.grandTotal = grandTotal;
+                    txtAmountPaid.setText(String.format("%.2f", grandTotal));
+                    this.discount = discount;
+                }
+            } catch (NumberFormatException e) {
+                txtDiscount.setText(oldVal);
+            }
+        });
+
+        txtAmountPaid.requestFocus();
     }
 
     // --- RECEIVE DATA FROM DASHBOARD ---
@@ -48,15 +95,16 @@ public class RepairCheckoutController {
         lblJobId.setText("#" + job.getRepairId());
         lblCustomer.setText(job.getCustomerName());
 
-        // Display Financials
-        // NOTE: Ensure your TM/DTO has these values updated!
+
         double labor = job.getOriginalDto().getLaborCost();
         double parts = job.getOriginalDto().getPartsCost();
-        this.grandTotal = job.getOriginalDto().getTotalAmount();
+        this.subTotal = job.getOriginalDto().getTotalAmount();
 
         lblPartsTotal.setText(String.format("%.2f", parts));
         lblLaborTotal.setText(String.format("%.2f", labor));
-        lblGrandTotal.setText(String.format("%.2f", grandTotal));
+        lblSubTotal.setText(String.format("%.2f", subTotal));
+        lblGrandTotal.setText(String.format("%.2f", subTotal));
+        this.grandTotal = subTotal;
 
         // Default: Assume they pay full amount
         txtAmountPaid.setText(String.valueOf(grandTotal));
@@ -93,7 +141,12 @@ public class RepairCheckoutController {
     private void handleConfirm() {
         try {
             double paid = Double.parseDouble(txtAmountPaid.getText());
+
             if (paid < 0) throw new NumberFormatException();
+            if(paid > grandTotal){
+                new Alert(Alert.AlertType.ERROR, "Paid amount cannot exceed the grand total.").showAndWait();
+                return;
+            }
 
             String method = cmbPaymentMethod.getValue();
             int userId = 1; // Replace with LoginUtil.getUserId();
@@ -105,12 +158,14 @@ public class RepairCheckoutController {
                     cusId,
                     userId,
                     grandTotal,
+                    discount,
                     paid,
                     method
             );
 
             if (success) {
-                new Alert(Alert.AlertType.INFORMATION, "Job Delivered Successfully!").show();
+                new Alert(Alert.AlertType.INFORMATION, "Job Delivered Successfully!").showAndWait();
+                generateInvoice(jobTM.getRepairId(), paid);
                 mainController.refreshList(); // Reload Dashboard
                 closeWindow();
             }
@@ -120,6 +175,37 @@ public class RepairCheckoutController {
         } catch (SQLException e) {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Database Error: " + e.getMessage()).show();
+        }
+    }
+
+    public void generateInvoice(int saleId, double amountPaid) {
+        try {
+
+            String path = "reports/salesInvoice.jasper";
+
+            InputStream reportStream = App.class.getResourceAsStream(path);
+
+            if (reportStream == null) {
+                System.err.println("Error: Could not find salesReceipt.jasper at " + path);
+                return;
+            }
+
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(reportStream);
+
+            Map<String, Object> parameters = new HashMap<>();
+
+            parameters.put("saleId", saleId);
+
+            parameters.put("amountPaid", BigDecimal.valueOf(amountPaid));
+
+            Connection connection = DBConnection.getInstance().getConnection();
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
+
+            JasperViewer.viewReport(jasperPrint, false); // false = Don't close app on exit
+
+        } catch (JRException | java.sql.SQLException e) {
+            e.printStackTrace();
         }
     }
 

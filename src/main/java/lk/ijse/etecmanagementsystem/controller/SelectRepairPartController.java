@@ -4,11 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
 import lk.ijse.etecmanagementsystem.model.RepairPartsModel; // Import Model
+
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -67,6 +74,28 @@ public class SelectRepairPartController {
         } catch (SQLException e) {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Failed to load stock: " + e.getMessage()).show();
+        }
+    }
+
+    @FXML
+    private void handleAddNewItem() {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("view/unitManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Product Unit Management");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            // Refresh stock list after adding new item
+            loadAvailableStock();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Could not open Product Unit Management").show();
+
         }
     }
 

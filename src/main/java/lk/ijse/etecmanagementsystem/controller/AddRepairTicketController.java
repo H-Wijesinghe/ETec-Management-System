@@ -10,13 +10,23 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.model.CustomersModel; // NEW IMPORT
 import lk.ijse.etecmanagementsystem.model.RepairJobModel; // NEW IMPORT
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -189,15 +199,50 @@ public class AddRepairTicketController {
             boolean isSaved = repairJobModel.saveRepairJob(newJob);
 
             if (isSaved) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Ticket Created Successfully!");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Ticket saved successfully with ID: " + newJob.getRepairId());
+                alert.setTitle("Success");
+                alert.setHeaderText("Repair Ticket Saved");
+                alert.showAndWait();
                 if(mainController != null) mainController.refreshList();
                 closeWindow();
+
+                generateIntakeReceipt(newJob.getRepairId());
+
             } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Ticket could not be saved.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", e.getMessage());
+        }
+    }
+
+    public void generateIntakeReceipt(int repairId) {
+        try {
+
+            String path = "reports/repairTicket.jasper";
+
+            InputStream reportStream = App.class.getResourceAsStream(path);
+
+            if (reportStream == null) {
+                System.err.println("Error: Could not find repairTicket.jasper at " + path);
+                return;
+            }
+
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(reportStream);
+
+            Map<String, Object> parameters = new HashMap<>();
+
+            parameters.put("repairId", repairId);
+
+            Connection connection = DBConnection.getInstance().getConnection();
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
+
+            JasperViewer.viewReport(jasperPrint, false); // false = Don't close app on exit
+
+        } catch (JRException | java.sql.SQLException e) {
+            e.printStackTrace();
         }
     }
 

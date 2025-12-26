@@ -19,11 +19,13 @@ public class RepairJobDTO {
     private double laborCost;
     private double partsCost;
     private double totalAmount;   // Changed to match DB column (DB: total_amount)
+    private double paidAmount; // Changed to match DB column (DB: paid_amount)
+    private double discount;
     private PaymentStatus paymentStatus;
 
     public RepairJobDTO() {}
 
-    public RepairJobDTO(int repairId, int cusId, int userId, String deviceName, String deviceSn, String problemDesc,String diagnosisDesc,String repairResults, RepairStatus status, Date dateIn, Date dateOut, double laborCost, double partsCost, double totalAmount, PaymentStatus paymentStatus) {
+    public RepairJobDTO(int repairId, int cusId, int userId, String deviceName, String deviceSn, String problemDesc,String diagnosisDesc,String repairResults, RepairStatus status, Date dateIn, Date dateOut, double laborCost, double partsCost, double totalAmount, double discount, double paidAmount, PaymentStatus paymentStatus) {
         this.repairId = repairId;
         this.cusId = cusId;
         this.userId = userId;
@@ -38,6 +40,7 @@ public class RepairJobDTO {
         this.laborCost = laborCost;
         this.partsCost = partsCost;
         this.totalAmount = totalAmount;
+        this.paidAmount = paidAmount;
         this.paymentStatus = paymentStatus;
     }
 
@@ -78,8 +81,14 @@ public class RepairJobDTO {
     public double getTotalAmount() { return totalAmount; }
     public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
 
+    public  double getDiscount() { return discount; }
+    public void setDiscount(double discount) { this.discount = discount; }
+
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public double getPaidAmount() { return paidAmount; }
+    public void setPaidAmount(double paidAmount) { this.paidAmount = paidAmount;}
 
     public String getDiagnosisDesc() { return diagnosisDesc; }
     public void setDiagnosisDesc(String diagnosisDesc) { this.diagnosisDesc = diagnosisDesc; }

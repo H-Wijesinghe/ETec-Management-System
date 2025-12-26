@@ -97,7 +97,7 @@ public class RepairDashboardController {
 
         // 3. Load Data from DB
         loadDataFromDB();
-        listRepairJobs.refresh();
+
 
 
         // 4. Setup Filtering
@@ -140,7 +140,10 @@ public class RepairDashboardController {
             stage.setTitle("Repair Checkout");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL); // Blocks main window
+            stage.setResizable(false);
             stage.showAndWait();
+
+            resetSelectedJob();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -164,6 +167,8 @@ public class RepairDashboardController {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
+
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,6 +249,7 @@ public class RepairDashboardController {
                 currentSelection.getOriginalDto().setLaborCost(laborCost); // <--- Update Memory
                 currentSelection.getOriginalDto().setPartsCost(partsCost);
                 currentSelection.getOriginalDto().setTotalAmount(totalAmount);
+                txtTotalCost.setText(Double.toString(totalAmount));
 
                 // Clear Return Queue (DB has processed them)
                 partsToReturnList.clear();
@@ -259,6 +265,7 @@ public class RepairDashboardController {
                 }
 
 
+resetSelectedJob();
 
             } else {
                 showAlert(Alert.AlertType.ERROR, "Save Failed", "Database update failed.");
@@ -279,6 +286,7 @@ public class RepairDashboardController {
             List<RepairJobTM> dbList = repairModel.getAllRepairJobs();
             masterData.clear();
             masterData.addAll(dbList);
+            listRepairJobs.refresh();
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to load repair jobs: " + e.getMessage());
@@ -287,7 +295,6 @@ public class RepairDashboardController {
 
     public void refreshList() {
         loadDataFromDB();
-        listRepairJobs.refresh();
 
         // Clear selection details if needed
         detailsPane.setVisible(false);
@@ -521,7 +528,7 @@ public class RepairDashboardController {
             stage.showAndWait();
 
             // Refresh list in case data changed
-            loadDataFromDB();
+            resetSelectedJob();
 
             if(currentSelection != null) showDetails(currentSelection);
 
@@ -545,7 +552,7 @@ public class RepairDashboardController {
             stage.showAndWait();
 
             // Refresh list after adding new ticket
-            loadDataFromDB();
+            resetSelectedJob();
 
 
         } catch (IOException e) {
@@ -662,5 +669,20 @@ public class RepairDashboardController {
         // Clear all fields and reset state
         listRepairJobs.getSelectionModel().clearSelection();
         usedPartsList.clear();
+    }
+
+    private void resetSelectedJob(){
+        RepairJobTM selectedJob = listRepairJobs.getSelectionModel().getSelectedItem();
+        if (selectedJob != null) {
+            loadDataFromDB();
+            listRepairJobs.getSelectionModel().clearSelection();
+
+            listRepairJobs.getSelectionModel().select(
+                    masterData.stream()
+                            .filter(job -> job.getRepairId() == selectedJob.getRepairId())
+                            .findFirst()
+                            .orElse(null)
+            );
+        }
     }
 }

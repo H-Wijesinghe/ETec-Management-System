@@ -1,0 +1,110 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="RepairTicket" language="java" pageWidth="420" pageHeight="595" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="16353344-7890-4a12-8877-654321abcdef">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MYSQL"/>
+	<parameter name="repairId" class="java.lang.Integer"/>
+	<query language="SQL"><![CDATA[SELECT
+			r.repair_id,
+			r.date_in,
+			r.device_name,
+			r.device_sn,
+			r.problem_desc,
+			c.name AS customer_name,
+			c.number AS customer_contact
+		FROM RepairJob r
+		JOIN Customer c ON r.cus_id = c.cus_id
+		WHERE r.repair_id = $P{repairId}]]></query>
+	<field name="repair_id" class="java.lang.Integer"/>
+	<field name="date_in" class="java.sql.Timestamp"/>
+	<field name="device_name" class="java.lang.String"/>
+	<field name="device_sn" class="java.lang.String"/>
+	<field name="problem_desc" class="java.lang.String"/>
+	<field name="customer_name" class="java.lang.String"/>
+	<field name="customer_contact" class="java.lang.String"/>
+	<background splitType="Stretch"/>
+	<title height="80" splitType="Stretch">
+		<element kind="staticText" uuid="a1b2c3d4-e5f6-4789-0123-456789abcdef" x="0" y="0" width="380" height="30" forecolor="#2C3E50" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[ETec Computers]]></text>
+		</element>
+		<element kind="staticText" uuid="b2c3d4e5-f6a7-4890-1234-567890abcdef" x="0" y="30" width="380" height="20" forecolor="#7F8C8D" fontSize="10.0" hTextAlign="Center">
+			<text><![CDATA[Nagoda, Galle, Sri Lanka | Tel: +94 00 000 0000]]></text>
+		</element>
+		<element kind="line" uuid="c3d4e5f6-a7b8-4901-2345-678901abcdef" x="0" y="60" width="380" height="1" forecolor="#BDC3C7">
+			<pen lineWidth="2.0" lineStyle="Solid"/>
+		</element>
+		<element kind="staticText" uuid="d4e5f6a7-b8c9-4012-3456-789012abcdef" x="0" y="60" width="380" height="20" fontSize="12.0" bold="true" underline="false" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[REPAIR INTAKE RECEIPT]]></text>
+		</element>
+	</title>
+	<detail>
+		<band height="460" splitType="Stretch">
+			<element kind="rectangle" uuid="e5f6a7b8-c9d0-4123-4567-890123abcdef" x="0" y="10" width="380" height="50" backcolor="#ECF0F1" radius="5">
+				<property name="com.jaspersoft.studio.unit.penLineWidth" value="px"/>
+				<pen lineWidth="0.0"/>
+			</element>
+			<element kind="staticText" uuid="f6a7b8c9-d0e1-4234-5678-901234abcdef" x="10" y="15" width="80" height="15" forecolor="#7F8C8D" fontSize="9.0" bold="true">
+				<text><![CDATA[TICKET NO:]]></text>
+			</element>
+			<element kind="textField" uuid="12345678-1234-1234-1234-1234567890ab" x="10" y="30" width="120" height="25" forecolor="#E74C3C" fontSize="16.0" bold="true" vTextAlign="Top">
+				<expression><![CDATA["#" + $F{repair_id}]]></expression>
+			</element>
+			<element kind="staticText" uuid="23456789-2345-2345-2345-2345678901bc" x="240" y="15" width="130" height="15" forecolor="#7F8C8D" fontSize="9.0" bold="true" hTextAlign="Right">
+				<text><![CDATA[DATE IN:]]></text>
+			</element>
+			<element kind="textField" uuid="34567890-3456-3456-3456-3456789012cd" x="200" y="30" width="170" height="20" fontSize="11.0" pattern="MMM d, yyyy h:mm a" hTextAlign="Right">
+				<expression><![CDATA[$F{date_in}]]></expression>
+			</element>
+			<element kind="staticText" uuid="45678901-4567-4567-4567-4567890123de" x="0" y="70" width="180" height="20" forecolor="#2980B9" fontSize="11.0" bold="true" vTextAlign="Middle">
+				<text><![CDATA[Customer Details]]></text>
+			</element>
+			<element kind="line" uuid="56789012-5678-5678-5678-5678901234ef" x="0" y="90" width="180" height="1" forecolor="#2980B9"/>
+			<element kind="textField" uuid="67890123-6789-6789-6789-6789012345fa" x="0" y="95" width="180" height="15" fontSize="10.0">
+				<expression><![CDATA[$F{customer_name}]]></expression>
+			</element>
+			<element kind="textField" uuid="78901234-7890-7890-7890-7890123456fb" x="0" y="110" width="180" height="15" fontSize="10.0">
+				<expression><![CDATA[$F{customer_contact}]]></expression>
+			</element>
+			<element kind="staticText" uuid="89012345-8901-8901-8901-8901234567fc" x="200" y="70" width="180" height="20" forecolor="#2980B9" fontSize="11.0" bold="true" vTextAlign="Middle">
+				<text><![CDATA[Device Details]]></text>
+			</element>
+			<element kind="line" uuid="90123456-9012-9012-9012-9012345678fd" x="200" y="90" width="180" height="1" forecolor="#2980B9"/>
+			<element kind="textField" uuid="01234567-0123-0123-0123-0123456789fe" x="200" y="95" width="180" height="15" fontSize="10.0" bold="true">
+				<expression><![CDATA[$F{device_name}]]></expression>
+			</element>
+			<element kind="textField" uuid="12345678-1234-1234-1234-1234567890ff" x="200" y="110" width="180" height="15" forecolor="#7F8C8D" fontSize="9.0">
+				<expression><![CDATA["SN: " + ($F{device_sn} != null ? $F{device_sn} : "N/A")]]></expression>
+			</element>
+			<element kind="staticText" uuid="23456789-2345-2345-2345-2345678901aa" x="0" y="140" width="380" height="20" fontSize="10.0" bold="true" vTextAlign="Middle">
+				<text><![CDATA[Reported Problem / Intake Notes:]]></text>
+			</element>
+			<element kind="rectangle" uuid="34567890-3456-3456-3456-3456789012bb" x="0" y="160" width="380" height="60">
+				<pen lineWidth="0.5" lineStyle="Dashed" lineColor="#95A5A6"/>
+			</element>
+			<element kind="textField" uuid="45678901-4567-4567-4567-4567890123cc" x="5" y="165" width="370" height="50" fontSize="10.0" textAdjust="StretchHeight" italic="true">
+				<expression><![CDATA[$F{problem_desc}]]></expression>
+			</element>
+			<element kind="staticText" uuid="56789012-5678-5678-5678-5678901234dd" x="0" y="240" width="380" height="80" forecolor="#555555" fontSize="7.0" hTextAlign="Justified">
+				<text><![CDATA[TERMS & CONDITIONS:
+1. ETec Computers is not responsible for any data loss during the repair process. Customers are advised to backup data.
+2. Items left unclaimed for more than 50 days after notification of completion will be disposed of to recover costs.
+3. The initial estimate is tentative. If additional parts are required, the customer will be notified for approval.
+4. Warranty applies only to the specific parts replaced and labor performed for this repair ticket.]]></text>
+			</element>
+			<element kind="line" uuid="67890123-6789-6789-6789-6789012345ee" x="10" y="380" width="150" height="1">
+				<pen lineWidth="0.5" lineStyle="Dotted"/>
+			</element>
+			<element kind="staticText" uuid="78901234-7890-7890-7890-7890123456ff" x="10" y="385" width="150" height="15" fontSize="8.0" hTextAlign="Center">
+				<text><![CDATA[Customer Signature]]></text>
+			</element>
+			<element kind="line" uuid="89012345-8901-8901-8901-8901234567aa" x="220" y="380" width="150" height="1">
+				<pen lineWidth="0.5" lineStyle="Dotted"/>
+			</element>
+			<element kind="staticText" uuid="90123456-9012-9012-9012-9012345678bb" x="220" y="385" width="150" height="15" fontSize="8.0" hTextAlign="Center">
+				<text><![CDATA[Technician Signature]]></text>
+			</element>
+			<element kind="staticText" uuid="01234567-0123-0123-0123-0123456789cc" x="0" y="420" width="380" height="20" fontSize="9.0" bold="true" italic="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[Thank you for choosing ETec Computers!]]></text>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

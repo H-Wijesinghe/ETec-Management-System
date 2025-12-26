@@ -24,7 +24,7 @@ public class RepairJobModel {
         // JOIN Query to get Customer details along with Repair Job
         String sql = "SELECT r.repair_id, r.cus_id, r.user_id, r.device_name, r.device_sn, " +
                 "r.problem_desc, r.diagnosis_desc, r.repair_results, " + // <--- Added here
-                "r.status, r.date_in, r.date_out, r.labor_cost, r.parts_cost, r.total_amount, r.payment_status, " +
+                "r.status, r.date_in, r.date_out, r.labor_cost, r.parts_cost, r.total_amount, r.discount, r.payment_status, r.paid_amount, " +
                 "c.name AS cus_name, c.number AS cus_contact, " +
                 "c.email AS cus_email, c.address AS cus_address " +
                 "FROM RepairJob r " +
@@ -51,6 +51,8 @@ public class RepairJobModel {
                     resultSet.getDouble("labor_cost"),
                     resultSet.getDouble("parts_cost"),
                     resultSet.getDouble("total_amount"),
+                    resultSet.getDouble("paid_amount"),
+                    resultSet.getDouble("discount"),
                     PaymentStatus.valueOf(resultSet.getString("payment_status"))
             );
 
@@ -75,7 +77,7 @@ public class RepairJobModel {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection connection = DBConnection.getInstance().getConnection();
-        PreparedStatement pstm = connection.prepareStatement(sql);
+        PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
         pstm.setInt(1, dto.getCusId());
         pstm.setInt(2, dto.getUserId());
@@ -94,7 +96,21 @@ public class RepairJobModel {
         // Default Payment Status
         pstm.setString(8, "PENDING");
 
-        return pstm.executeUpdate() > 0;
+        if (pstm.executeUpdate() <= 0) {
+            return false;
+        }
+
+        // Get the generated Sale ID
+        int repairId = -1;
+        ResultSet rs = pstm.getGeneratedKeys();
+        if (rs.next()) {
+            repairId = rs.getInt(1);
+        }
+        if(repairId > 0) {
+            dto.setRepairId(repairId); // Set the generated ID back to DTO
+            return true;
+        }
+        return false;
     }
 
     public boolean updateRepairJob(RepairJobDTO dto) throws SQLException {
@@ -286,7 +302,7 @@ public class RepairJobModel {
     }
 
     public boolean completeCheckout(int repairId, int customerId, int userId,
-                                    double totalAmount, double paidAmount, String paymentMethod) throws SQLException {
+                                    double totalAmount, double discount, double paidAmount, String paymentMethod) throws SQLException {
 
         Connection connection = null;
         try {
@@ -300,6 +316,15 @@ public class RepairJobModel {
                 payStatus = "PAID";
             } else if (paidAmount > 0) {
                 payStatus = "PARTIAL";
+            }
+
+            String sqlRepairJob = "UPDATE RepairJob SET paid_amount = ?,total_amount = ?, discount = ? WHERE repair_id = ?";
+            try(PreparedStatement pstmRepairJob = connection.prepareStatement(sqlRepairJob)) {
+                pstmRepairJob.setDouble(1, paidAmount);
+                pstmRepairJob.setDouble(2, totalAmount);
+                pstmRepairJob.setDouble(3, discount); // Assuming no discount for now
+                pstmRepairJob.setInt(4, repairId);
+                pstmRepairJob.executeUpdate();
             }
 
             // 2. CREATE SALES RECORD (The Invoice)

@@ -34,8 +34,13 @@
                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                     </padding>
                     <children>
-                        <!-- Search -->
-                        <TextField fx:id="txtSearch" promptText="Search by Item Name or Serial Number..." styleClass="search-box" />
+                  <HBox spacing="10.0">
+                     <children>
+                              <!-- Search -->
+                              <TextField fx:id="txtSearch" promptText="Search by Item Name or Serial Number..." styleClass="search-box" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#handleAddNewItem" prefHeight="30.0" styleClass="btn-success" text="+ New Item" />
+                     </children>
+                  </HBox>
 
                         <!-- Table -->
                         <TableView fx:id="tblStock" VBox.vgrow="ALWAYS">
