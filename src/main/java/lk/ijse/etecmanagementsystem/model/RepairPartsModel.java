@@ -20,7 +20,7 @@ public class RepairPartsModel {
         String sql = "SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, p.sell_price " +
                 "FROM ProductItem pi " +
                 "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "WHERE pi.status = 'AVAILABLE' AND pi.serial_number NOT LIKE 'PENDING%'";
+                "WHERE pi.status = 'AVAILABLE'";
 
         Connection connection = DBConnection.getInstance().getConnection();
         PreparedStatement pstm = connection.prepareStatement(sql);
@@ -40,6 +40,7 @@ public class RepairPartsModel {
 
         return list;
     }
+
     private ProductCondition fromConditionString(String s) {
         if (s == null) return ProductCondition.BOTH;
         try {

@@ -1,6 +1,5 @@
 package lk.ijse.etecmanagementsystem.controller;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,11 +13,12 @@ import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
+import lk.ijse.etecmanagementsystem.model.CustomersModel; // Model Import
+import lk.ijse.etecmanagementsystem.model.RepairJobModel; // Model Import
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UpdateRepairTicketController {
@@ -44,7 +44,10 @@ public class UpdateRepairTicketController {
     private final Map<String, CustomerDTO> customerMap = new HashMap<>();
     private final ObservableList<String> originalList = FXCollections.observableArrayList();
     private int selectedCustomerId = -1;
-    private boolean isCodeUpdate = false;
+
+    // --- MODELS ---
+    private final CustomersModel customersModel = new CustomersModel();
+    private final RepairJobModel repairJobModel = new RepairJobModel();
 
     // =========================================================
     // INITIALIZATION & DATA LOADING
@@ -60,7 +63,6 @@ public class UpdateRepairTicketController {
         this.currentJob = job;
         this.mainController = mainController;
 
-        // UPDATED: Using Standard Getters (POJO Style)
         lblJobId.setText("JOB #" + job.getRepairId());
 
         // 1. FILL DEVICE DETAILS
@@ -72,78 +74,103 @@ public class UpdateRepairTicketController {
         lblCusName.setText(job.getCustomerName());
         lblCusContact.setText(job.getContactNumber());
 
-        // If your TM/DTO has ID, set it.
+        // Fill extra details (Email/Address) by looking up the ID
         if (job.getOriginalDto() != null) {
             selectedCustomerId = job.getOriginalDto().getCusId();
             lblCusId.setText(String.valueOf(selectedCustomerId));
 
+            // Populate Email/Address from loaded map
+            populateCustomerDetailsById(selectedCustomerId);
+
             // Set ComboBox Text to current name
-            isCodeUpdate = true;
             cmbCustomer.getEditor().setText(job.getCustomerName());
-            isCodeUpdate = false;
+
+        }
+    }
+
+    private void populateCustomerDetailsById(int cusId) {
+        // Iterate through loaded customers to find the matching ID for display
+        for (CustomerDTO dto : customerMap.values()) {
+            if (dto.getId() == cusId) {
+                lblCusEmail.setText(dto.getEmailAddress());
+                lblCusAddress.setText(dto.getAddress());
+                break;
+            }
         }
     }
 
     // =========================================================
-    // SEARCH LOGIC (SAME AS ADD TICKET)
+    // SEARCH LOGIC
     // =========================================================
 
     private void loadCustomerData() {
         customerMap.clear();
         originalList.clear();
 
-        // MOCK DATA (Replace with DB)
-        addMockCustomer(1, "Kamal Perera", "0771234567", "kamal@gmail.com", "Colombo 5");
-        addMockCustomer(2, "Kamal Perera", "0718889999", "kamal.p@yahoo.com", "Kandy");
-        addMockCustomer(3, "Nimal Siripala", "0751112222", "nimal@test.com", "Galle");
+        try {
+            // FETCH REAL DATA FROM DB
+            List<CustomerDTO> customers = customersModel.getAllCustomers();
 
-        cmbCustomer.setItems(FXCollections.observableArrayList(originalList));
-    }
+            for (CustomerDTO customer : customers) {
+                String key = customer.getName() + " | " + customer.getNumber();
+                customerMap.put(key, customer);
+                originalList.add(key);
+            }
+            cmbCustomer.setItems(FXCollections.observableArrayList(originalList));
 
-    private void addMockCustomer(int id, String name, String contact, String email, String address) {
-        CustomerDTO customer = new CustomerDTO(id, name, contact, email, address);
-        String key = name + " | " + contact;
-        customerMap.put(key, customer);
-        originalList.add(key);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to load customers.");
+        }
     }
 
     private void setupSearchFilter() {
-        cmbCustomer.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
-            if (isCodeUpdate) return;
-            if (newVal == null || newVal.isEmpty()) {
-                isCodeUpdate = true;
-                try {
-                    cmbCustomer.setItems(FXCollections.observableArrayList(originalList));
-                    cmbCustomer.hide();
-                } finally { isCodeUpdate = false; }
+        cmbCustomer.getEditor().textProperty().addListener((obs, old, newVal) -> {
+
+            if (newVal == null) return;
+
+            if (cmbCustomer.getSelectionModel().getSelectedItem() != null &&
+                    Objects.equals(cmbCustomer.getSelectionModel().getSelectedItem(), newVal)) {
                 return;
             }
 
-            String lowerVal = newVal.toLowerCase();
-            ObservableList<String> filtered = originalList.stream()
-                    .filter(item -> item.toLowerCase().contains(lowerVal))
+            cmbCustomer.getSelectionModel().clearSelection();
+
+
+            ObservableList<String> filteredList = originalList.stream()
+                    .filter(item -> item.toLowerCase().contains(newVal.trim().toLowerCase()))
                     .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-            isCodeUpdate = true;
-            try {
-                if (cmbCustomer.getItems().size() != filtered.size() || !cmbCustomer.getItems().containsAll(filtered)) {
-                    cmbCustomer.setItems(filtered);
-                }
+            if (!filteredList.isEmpty()) {
+                cmbCustomer.setItems(filteredList);
+
                 cmbCustomer.getEditor().setText(newVal);
-                if (newVal.length() > 0) cmbCustomer.getEditor().positionCaret(newVal.length());
-                if (!filtered.isEmpty()) cmbCustomer.show(); else cmbCustomer.hide();
-            } finally { isCodeUpdate = false; }
+                cmbCustomer.getEditor().positionCaret(newVal.length());
+
+                if (!cmbCustomer.isShowing()) {
+                    cmbCustomer.show();
+                }
+            } else {
+
+                cmbCustomer.hide();
+            }
         });
 
-        cmbCustomer.setOnAction(e -> handleCustomerSelection());
+
+        cmbCustomer.setOnAction(e -> {
+            String key = cmbCustomer.getSelectionModel().getSelectedItem();
+
+            if (key == null) key = cmbCustomer.getEditor().getText();
+
+            if (key != null && customerMap.containsKey(key)) {
+                handleCustomerSelection();
+            }
+        });
     }
 
     @FXML
     private void handleCustomerSelection() {
-        if (isCodeUpdate) return;
-
         String selectedKey = cmbCustomer.getSelectionModel().getSelectedItem();
-        if (selectedKey == null) selectedKey = cmbCustomer.getEditor().getText();
 
         if (selectedKey != null && customerMap.containsKey(selectedKey)) {
             CustomerDTO selectedCus = customerMap.get(selectedKey);
@@ -182,45 +209,65 @@ public class UpdateRepairTicketController {
             showAlert(Alert.AlertType.ERROR, "Validation", "Customer and Device are required.");
             return;
         }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Update details for Job #" + currentJob.getRepairId() + "?",
+                ButtonType.YES, ButtonType.NO);
+        alert.showAndWait();
+        if (alert.getResult() != ButtonType.YES) {
+            return;
+        }
 
         try {
             RepairJobDTO jobDTO = new RepairJobDTO();
-            // UPDATED: Using Standard Getter
+
+            // Set ID so DB knows which row to update
             jobDTO.setRepairId(currentJob.getRepairId());
 
-            // UPDATE: Use the selected ID (User might have changed it via Search)
+            // Set Updated Fields
             jobDTO.setCusId(selectedCustomerId);
-
             jobDTO.setDeviceName(txtDeviceName.getText());
-            // UPDATED: CamelCase
             jobDTO.setDeviceSn(txtSerial.getText());
             jobDTO.setProblemDesc(txtProblem.getText());
 
-            // TODO: Call RepairJobModel.update(jobDTO)
-            boolean success = true;
+            // CALL MODEL
+            boolean success = repairJobModel.updateRepairJob(jobDTO);
 
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Details Updated Successfully.");
-                mainController.refreshList();
+                mainController.refreshList(); // Reload main dashboard
                 closeWindow();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update record.");
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Update Failed.");
+            showAlert(Alert.AlertType.ERROR, "Database Error", e.getMessage());
         }
     }
 
     @FXML
     private void handleDelete() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        // UPDATED: Using Standard Getter
         alert.setHeaderText("Delete Job #" + currentJob.getRepairId() + "?");
+        alert.setContentText("This action cannot be undone.");
+
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // TODO: Call DAO Delete
-            mainController.refreshList();
-            closeWindow();
+            try {
+                // CALL MODEL
+                boolean success = repairJobModel.deleteRepairJob(currentJob.getRepairId());
+
+                if (success) {
+                    mainController.refreshList();
+                    closeWindow();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete record.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Database Error", e.getMessage());
+            }
         }
     }
 

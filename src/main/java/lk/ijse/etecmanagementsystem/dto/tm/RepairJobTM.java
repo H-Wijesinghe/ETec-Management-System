@@ -10,6 +10,8 @@ public class RepairJobTM {
     private int repairId;
     private String customerName;
     private String contactNumber;
+    private String email;
+    private String address;
     private String deviceName;
     private String serialNumber;
     private String problemDescription;
@@ -21,12 +23,14 @@ public class RepairJobTM {
     // Keep reference to original DTO for Database operations
     private RepairJobDTO originalDto;
 
-    public RepairJobTM(RepairJobDTO dto, String cusName, String cusContact) {
+    public RepairJobTM(RepairJobDTO dto, String cusName, String cusContact, String email, String address) {
         this.originalDto = dto;
 
         this.repairId = dto.getRepairId();
         this.customerName = cusName;
         this.contactNumber = cusContact;
+        this.email = email;
+        this.address = address;
         this.deviceName = dto.getDeviceName();
         this.serialNumber = dto.getDeviceSn();
         this.problemDescription = dto.getProblemDesc();
@@ -71,6 +75,13 @@ public class RepairJobTM {
 
     public RepairStatus getStatus() {
         return status;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public String getAddress() {
+        return address;
     }
 
     // --- Add Getters & Setters ---

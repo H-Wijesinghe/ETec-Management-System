@@ -43,6 +43,8 @@ public class RepairDashboardController {
     @FXML private Label lblDate;
     @FXML private Label lblCustomerName;
     @FXML private Label lblContact;
+    @FXML private Label lblEmail;
+    @FXML private Label lblAddress;
     @FXML private Label lblDeviceName;
     @FXML private Label lblSerial;
 
@@ -51,6 +53,8 @@ public class RepairDashboardController {
     @FXML private TextArea txtIntake;
     @FXML private TextArea txtDiagnosis;
     @FXML private TextArea txtResolution;
+    @FXML private TextField txtLaborCost;
+    @FXML private TextField txtTotalCost;
 
     // --- PARTS TABLE INJECTIONS ---
     @FXML private TableView<RepairPartTM> tblParts;
@@ -62,6 +66,9 @@ public class RepairDashboardController {
 
 
     @FXML private Button btnUpdateJob;
+    @FXML private Button btnSaveChanges; // <--- ADD THIS
+    @FXML private Button btnUnclaimed;   // <--- ADD THIS
+    @FXML private Button btnCheckout;    // <--- ADD THIS (If you want to disable Checkout too)
 
     // =========================================================
     // DATA & INITIALIZATION
@@ -90,6 +97,8 @@ public class RepairDashboardController {
 
         // 3. Load Data from DB
         loadDataFromDB();
+        listRepairJobs.refresh();
+
 
         // 4. Setup Filtering
         filteredData = new FilteredList<>(masterData, p -> true);
@@ -105,6 +114,38 @@ public class RepairDashboardController {
         deleteItem.setOnAction(event -> handleRemovePart()); // Links to the remove method
         contextMenu.getItems().add(deleteItem);
         tblParts.setContextMenu(contextMenu);
+    }
+
+    @FXML
+    private void handleCheckout() {
+        if (currentSelection == null) {
+            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a job.");
+            return;
+        }
+
+        // Optional: Block checkout if status is already delivered
+        if (currentSelection.getStatus() == RepairStatus.DELIVERED) {
+            showAlert(Alert.AlertType.INFORMATION, "Info", "This job is already delivered.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("view/RepairCheckout.fxml"));
+            Parent root = loader.load();
+
+            RepairCheckoutController controller = loader.getController();
+            controller.setInvoiceData(currentSelection, this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Repair Checkout");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Blocks main window
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "UI Error", "Could not open checkout window.");
+        }
     }
 
     @FXML
@@ -160,9 +201,16 @@ public class RepairDashboardController {
             String diagnosis = txtDiagnosis.getText();
             String resolution = txtResolution.getText();
 
-            // --- CALCULATE COSTS ---
-            // Get base labor cost (from DTO)
-            double laborCost = currentSelection.getOriginalDto().getLaborCost();
+            // --- CHANGED: Get Labor Cost from TextField ---
+            double laborCost = 0.0;
+            try {
+                if (!txtLaborCost.getText().isEmpty()) {
+                    laborCost = Double.parseDouble(txtLaborCost.getText());
+                }
+            } catch (NumberFormatException e) {
+                showAlert(Alert.AlertType.ERROR, "Invalid Input", "Labor Cost must be a number.");
+                return;
+            }
 
             // Sum part costs from the table
             double partsCost = 0.0;
@@ -193,14 +241,25 @@ public class RepairDashboardController {
                 currentSelection.setRepairResults(resolution);
 
                 // Update DTO Financials
+                currentSelection.getOriginalDto().setLaborCost(laborCost); // <--- Update Memory
                 currentSelection.getOriginalDto().setPartsCost(partsCost);
                 currentSelection.getOriginalDto().setTotalAmount(totalAmount);
 
                 // Clear Return Queue (DB has processed them)
                 partsToReturnList.clear();
 
-                showAlert(Alert.AlertType.INFORMATION, "Saved Successfully",
-                        "Job Updated.\nParts Cost: " + partsCost + "\nTotal: " + totalAmount);
+                if (currentSelection.getStatus() == RepairStatus.PENDING) {
+                    updateStatus(RepairStatus.DIAGNOSIS);
+
+                    showAlert(Alert.AlertType.INFORMATION, "Saved & Updated",
+                            "Details saved.\nStatus automatically moved to 'DIAGNOSIS'.");
+                } else {
+                    showAlert(Alert.AlertType.INFORMATION, "Saved Successfully",
+                            "Job Updated.\nParts Cost: " + partsCost + "\nTotal: " + totalAmount);
+                }
+
+
+
             } else {
                 showAlert(Alert.AlertType.ERROR, "Save Failed", "Database update failed.");
             }
@@ -220,7 +279,6 @@ public class RepairDashboardController {
             List<RepairJobTM> dbList = repairModel.getAllRepairJobs();
             masterData.clear();
             masterData.addAll(dbList);
-            listRepairJobs.refresh();
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to load repair jobs: " + e.getMessage());
@@ -229,6 +287,8 @@ public class RepairDashboardController {
 
     public void refreshList() {
         loadDataFromDB();
+        listRepairJobs.refresh();
+
         // Clear selection details if needed
         detailsPane.setVisible(false);
         currentSelection = null;
@@ -250,6 +310,28 @@ public class RepairDashboardController {
                 showDetails(newVal);
             } else {
                 detailsPane.setVisible(false);
+            }
+        });
+        txtLaborCost.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.equals(oldVal)) {
+                // Recalculate Total Cost
+                double laborCost = 0.0;
+                try {
+                    if (!newVal.isEmpty()) {
+                        laborCost = Double.parseDouble(newVal);
+                    }
+                } catch (NumberFormatException e) {
+                    txtLaborCost.setText(oldVal); // Revert to old value
+                    return;
+                }
+
+                double partsCost = 0.0;
+                for (RepairPartTM part : usedPartsList) {
+                    partsCost += part.getUnitPrice();
+                }
+
+                double totalAmount = laborCost + partsCost;
+                txtTotalCost.setText(String.valueOf(totalAmount));
             }
         });
     }
@@ -279,13 +361,21 @@ public class RepairDashboardController {
         lblDate.setText(job.getDateInFormatted());
         lblCustomerName.setText(job.getCustomerName());
         lblContact.setText(job.getContactNumber());
+        lblEmail.setText(job.getEmail());
+        lblAddress.setText(job.getAddress());
         lblDeviceName.setText(job.getDeviceName());
         lblSerial.setText(job.getSerialNumber());
         txtIntake.setText(job.getProblemDescription());   // Tab 1
         txtDiagnosis.setText(job.getDiagnosisDescription()); // Tab 2
         txtResolution.setText(job.getRepairResults());       // Tab 3
 
+        // --- NEW LINE: Load existing Labor Cost ---
+        txtLaborCost.setText(String.valueOf(job.getOriginalDto().getLaborCost()));
+        txtTotalCost.setText(String.valueOf(job.getOriginalDto().getTotalAmount()));
+
         refreshStatusUI(job.getStatus());
+
+//        updateButtonStates(job.getStatus());
 
         // --- LOAD PARTS FROM DB ---
         try {
@@ -326,12 +416,36 @@ public class RepairDashboardController {
     private void handleNextStatus() {
         if (currentSelection == null) return;
 
+
+
         RepairStatus current = currentSelection.getStatus();
         int nextOrdinal = current.ordinal() + 1;
 
         if (nextOrdinal < RepairStatus.values().length) {
             RepairStatus nextStatus = RepairStatus.values()[nextOrdinal];
             if (nextStatus != RepairStatus.CANCELLED) {
+
+                Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Are you sure you want to advance the status?",
+                        ButtonType.YES, ButtonType.NO);
+                confirmAlert.showAndWait();
+                if (confirmAlert.getResult() != ButtonType.YES) {
+                    return; // User cancelled
+                }
+
+                if(nextStatus == RepairStatus.DELIVERED){
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                            "Marking as DELIVERED is final. Are you sure?"+
+                                    "Do you want to check out now?",
+                            ButtonType.YES, ButtonType.NO);
+                    alert.showAndWait();
+                    if (alert.getResult() == ButtonType.YES) {
+                        handleCheckout();
+                    } else {
+                        return; // User cancelled
+                    }
+                }
+
                 updateStatus(nextStatus);
             }
         }
@@ -340,8 +454,19 @@ public class RepairDashboardController {
     @FXML
     private void handlePrevStatus() {
         if (currentSelection == null) return;
+
         int prevOrdinal = currentSelection.getStatus().ordinal() - 1;
         if (prevOrdinal >= 0) {
+            if(currentSelection.getStatus().equals(RepairStatus.DELIVERED)) {
+                showAlert(Alert.AlertType.WARNING, "Invalid Action", "Cannot move back from DELIVERED status.");
+                return;
+            }else if(currentSelection.getStatus().equals(RepairStatus.PENDING)) {
+                showAlert(Alert.AlertType.WARNING, "Invalid Action", "Cannot move back from PENDING status.");
+                return;
+            }else if(currentSelection.getStatus().equals(RepairStatus.CANCELLED)) {
+                updateStatus(RepairStatus.values()[prevOrdinal-1]);
+                return;
+            }
             updateStatus(RepairStatus.values()[prevOrdinal]);
         }
     }
@@ -397,6 +522,7 @@ public class RepairDashboardController {
 
             // Refresh list in case data changed
             loadDataFromDB();
+
             if(currentSelection != null) showDetails(currentSelection);
 
         } catch (IOException e) {
@@ -418,6 +544,10 @@ public class RepairDashboardController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
+            // Refresh list after adding new ticket
+            loadDataFromDB();
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -431,6 +561,7 @@ public class RepairDashboardController {
     private void refreshStatusUI(RepairStatus status) {
         lblStatusBadge.setText(status.toString());
         lblStatusBadge.getStyleClass().removeAll("status-pending", "status-warn", "status-done", "status-danger");
+
 
         switch (status) {
             case COMPLETED:
@@ -447,10 +578,45 @@ public class RepairDashboardController {
                 lblStatusBadge.getStyleClass().add("status-pending");
         }
 
+        updateButtonStates(status);
+
+
         double max = RepairStatus.DELIVERED.ordinal();
         double current = status.ordinal();
         if(current > max) current = 0;
         progressWorkflow.setProgress(current / max);
+    }
+
+    private void updateButtonStates(RepairStatus status) {
+        // 1. Reset: Enable everything by default
+        btnUpdateJob.setDisable(false);
+        btnSaveChanges.setDisable(false);
+        btnUnclaimed.setDisable(false);
+        if (btnCheckout != null) btnCheckout.setDisable(false);
+
+        // 2. Apply Rules
+        switch (status) {
+            case PENDING:
+                // All Active
+                break;
+
+            case DIAGNOSIS:
+            case WAITING_PARTS:
+            case COMPLETED:
+                // Only Update/Delete Details is disabled
+                btnUpdateJob.setDisable(true);
+                break;
+
+            case DELIVERED:
+            case CANCELLED:
+                // Disable almost everything (Read-Only mode)
+                btnUpdateJob.setDisable(true);
+                btnSaveChanges.setDisable(true);
+                btnUnclaimed.setDisable(true);
+                // Ideally disable Checkout too if it's already delivered
+                if (btnCheckout != null) btnCheckout.setDisable(true);
+                break;
+        }
     }
 
     private void setupListView() {

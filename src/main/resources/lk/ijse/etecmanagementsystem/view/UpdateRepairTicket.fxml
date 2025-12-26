@@ -158,7 +158,7 @@
                                 <Button onAction="#handleDelete" styleClass="btn-danger" text="Delete Ticket" />
                                 <HBox HBox.hgrow="ALWAYS" />
                                 <Button cancelButton="true" onAction="#handleCancel" styleClass="btn-secondary" text="Cancel" />
-                                <Button defaultButton="true" onAction="#handleUpdate" styleClass="btn-primary" text="Update All" />
+                                <Button onAction="#handleUpdate" styleClass="btn-primary" text="Update All" />
                             </children>
                             <padding>
                                 <Insets top="10.0" />

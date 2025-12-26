@@ -141,7 +141,7 @@
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                             <children>
                                 <Button cancelButton="true" mnemonicParsing="false" onAction="#handleCancel" styleClass="btn-secondary" text="Cancel" />
-                                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSaveTicket" styleClass="btn-primary" text="Create Ticket" />
+                                <Button mnemonicParsing="false" onAction="#handleSaveTicket" styleClass="btn-primary" text="Create Ticket" />
                             </children>
                             <padding>
                                 <Insets top="10.0" />

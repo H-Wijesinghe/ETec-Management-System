@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 30;"
+      xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="lk.ijse.etecmanagementsystem.controller.RepairCheckoutController">
+
+    <Label text="Repair Checkout" textFill="#2c3e50">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <Separator />
+
+    <GridPane hgap="20" vgap="10">
+        <Label text="Job ID:" textFill="#7f8c8d" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="lblJobId" text="#1001" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Customer:" textFill="#7f8c8d" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="lblCustomer" text="John Doe" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    </GridPane>
+
+    <VBox spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 5; -fx-border-color: #ecf0f1; -fx-border-radius: 5;">
+        <HBox>
+            <Label text="Parts Total:" textFill="#7f8c8d" minWidth="100"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblPartsTotal" text="0.00" />
+        </HBox>
+        <HBox>
+            <Label text="Labor Cost:" textFill="#7f8c8d" minWidth="100"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblLaborTotal" text="0.00" />
+        </HBox>
+        <Separator/>
+        <HBox>
+            <Label text="GRAND TOTAL:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #e74c3c;"/>
+        </HBox>
+    </VBox>
+
+    <VBox spacing="10">
+        <Label text="Payment Method:" textFill="#2c3e50"/>
+        <ComboBox fx:id="cmbPaymentMethod" prefWidth="300" />
+
+        <Label text="Amount Receiving Now:" textFill="#2c3e50"/>
+        <TextField fx:id="txtAmountPaid" promptText="0.00" style="-fx-font-size: 14px;"/>
+
+        <HBox style="-fx-padding: 10 0 0 0;">
+            <Label text="Balance / Due:" style="-fx-font-weight: bold;"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblBalance" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        </HBox>
+    </VBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button text="Cancel" onAction="#handleCancel"
+                style="-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-text-fill: #7f8c8d;"/>
+
+        <Button text="Confirm &amp; Deliver" onAction="#handleConfirm" defaultButton="true"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 10 20;"/>
+    </HBox>
+
+</VBox>
