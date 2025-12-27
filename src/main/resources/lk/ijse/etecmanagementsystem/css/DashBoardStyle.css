@@ -1,0 +1,33 @@
+/* Remove default gray borders and background from the list container */
+.custom-list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+/* Remove the blue focus ring when you click the list */
+.custom-list-view:focused {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+/* Style the individual cells */
+.custom-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 5px; /* Add vertical spacing between items */
+    -fx-border-color: #ecf0f1; /* Very light gray separator line */
+    -fx-border-width: 0 0 1 0; /* Only draw border at the bottom */
+}
+
+/* Add a subtle hover effect */
+.custom-list-view .list-cell:filled:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-cursor: hand;
+}
+
+/* Remove the blue selection color (optional, keeps it clean) */
+.custom-list-view .list-cell:filled:selected {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: black;
+}

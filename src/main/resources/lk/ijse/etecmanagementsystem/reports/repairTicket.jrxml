@@ -1,7 +1,16 @@
 <!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
-<jasperReport name="RepairTicket" language="java" pageWidth="420" pageHeight="595" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="16353344-7890-4a12-8877-654321abcdef">
+<jasperReport name="RepairTicket" language="java" columnCount="1" pageWidth="420" pageHeight="595" orientation="Landscape" columnWidth="380" leftMargin="20" rightMargin="20" topMargin="10" bottomMargin="5" uuid="16353344-7890-4a12-8877-654321abcdef">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MYSQL"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="repairId" class="java.lang.Integer"/>
 	<query language="SQL"><![CDATA[SELECT
 			r.repair_id,
@@ -22,18 +31,23 @@
 	<field name="customer_name" class="java.lang.String"/>
 	<field name="customer_contact" class="java.lang.String"/>
 	<background splitType="Stretch"/>
-	<title height="80" splitType="Stretch">
-		<element kind="staticText" uuid="a1b2c3d4-e5f6-4789-0123-456789abcdef" x="0" y="0" width="380" height="30" forecolor="#2C3E50" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+	<title height="119" splitType="Stretch">
+		<element kind="staticText" uuid="a1b2c3d4-e5f6-4789-0123-456789abcdef" x="0" y="38" width="380" height="30" forecolor="#2C3E50" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[ETec Computers]]></text>
 		</element>
-		<element kind="staticText" uuid="b2c3d4e5-f6a7-4890-1234-567890abcdef" x="0" y="30" width="380" height="20" forecolor="#7F8C8D" fontSize="10.0" hTextAlign="Center">
+		<element kind="staticText" uuid="b2c3d4e5-f6a7-4890-1234-567890abcdef" x="0" y="68" width="380" height="20" forecolor="#7F8C8D" fontSize="10.0" hTextAlign="Center">
 			<text><![CDATA[Nagoda, Galle, Sri Lanka | Tel: +94 00 000 0000]]></text>
 		</element>
-		<element kind="line" uuid="c3d4e5f6-a7b8-4901-2345-678901abcdef" x="0" y="60" width="380" height="1" forecolor="#BDC3C7">
+		<element kind="line" uuid="c3d4e5f6-a7b8-4901-2345-678901abcdef" x="0" y="93" width="380" height="1" forecolor="#BDC3C7">
 			<pen lineWidth="2.0" lineStyle="Solid"/>
 		</element>
-		<element kind="staticText" uuid="d4e5f6a7-b8c9-4012-3456-789012abcdef" x="0" y="60" width="380" height="20" fontSize="12.0" bold="true" underline="false" hTextAlign="Center" vTextAlign="Middle">
+		<element kind="staticText" uuid="d4e5f6a7-b8c9-4012-3456-789012abcdef" x="0" y="97" width="380" height="20" fontSize="12.0" bold="true" underline="false" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[REPAIR INTAKE RECEIPT]]></text>
+		</element>
+		<element kind="image" uuid="61627cc6-7987-4287-b91a-5763ad297cf2" x="160" y="3" width="60" height="40" onErrorType="Blank" linkType="None" linkTarget="Self" hImageAlign="Center">
+			<expression><![CDATA["src/main/resources/lk/ijse/etecmanagementsystem/images/ETBatch.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 	</title>
 	<detail>

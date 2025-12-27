@@ -218,7 +218,7 @@ public class RepairJobModel {
             // We check if the link already exists to avoid duplicates
             String sqlCheck = "SELECT id FROM RepairItem WHERE repair_id=? AND item_id=?";
             String sqlInsertLink = "INSERT INTO RepairItem (repair_id, item_id) VALUES (?, ?)";
-            String sqlMarkSold = "UPDATE ProductItem SET status='SOLD', sold_date=NOW() WHERE item_id=?";
+            String sqlMarkSold = "UPDATE ProductItem SET status='IN_REPAIR_USE', sold_date=NOW() WHERE item_id=?";
             String sqlFixPlaceholders = "UPDATE ProductItem " +
                     "SET serial_number = CONCAT('REPAIR-', SUBSTRING(serial_number, 9)) " +
                     "WHERE item_id=? AND serial_number LIKE 'PENDING-%'";
@@ -302,7 +302,7 @@ public class RepairJobModel {
     }
 
     public boolean completeCheckout(int repairId, int customerId, int userId,
-                                    double totalAmount, double discount, double paidAmount, String paymentMethod) throws SQLException {
+                                    double totalAmount, double discount,double partsTotal, double paidAmount, String paymentMethod) throws SQLException {
 
         Connection connection = null;
         try {
@@ -322,57 +322,99 @@ public class RepairJobModel {
             try(PreparedStatement pstmRepairJob = connection.prepareStatement(sqlRepairJob)) {
                 pstmRepairJob.setDouble(1, paidAmount);
                 pstmRepairJob.setDouble(2, totalAmount);
-                pstmRepairJob.setDouble(3, discount); // Assuming no discount for now
+                pstmRepairJob.setDouble(3, discount);
                 pstmRepairJob.setInt(4, repairId);
                 pstmRepairJob.executeUpdate();
             }
 
-            // 2. CREATE SALES RECORD (The Invoice)
-            // Note: We use Statement.RETURN_GENERATED_KEYS to get the new sale_id
-            String sqlSale = "INSERT INTO Sales (customer_id, user_id, sale_date, sub_total, discount, grand_total, payment_status, description) " +
-                    "VALUES (?, ?, NOW(), ?, 0, ?, ?, ?)";
 
-            PreparedStatement pstmSale = connection.prepareStatement(sqlSale, java.sql.Statement.RETURN_GENERATED_KEYS);
-            pstmSale.setInt(1, customerId);
-            pstmSale.setInt(2, userId);
-            pstmSale.setDouble(3, totalAmount); // Subtotal
-            pstmSale.setDouble(4, totalAmount); // Grand Total
-            pstmSale.setString(5, payStatus);
-            pstmSale.setString(6, "Repair Job Checkout - Job #" + repairId);
 
-            if (pstmSale.executeUpdate() <= 0) {
-                connection.rollback();
-                return false;
+
+            boolean hasParts = false;
+            int  saleId = -1;
+            String sqlIsPartExist = "SELECT 1 FROM RepairItem WHERE repair_id = ?";
+            try(PreparedStatement pstmIsPartExist = connection.prepareStatement(sqlIsPartExist)){
+                pstmIsPartExist.setInt(1, repairId);
+                ResultSet rsPartExist = pstmIsPartExist.executeQuery();
+                if(rsPartExist.next()){
+                    hasParts = true;
+                }
             }
 
-            // Get the generated Sale ID
-            int saleId = -1;
-            ResultSet rs = pstmSale.getGeneratedKeys();
-            if (rs.next()) {
-                saleId = rs.getInt(1);
+            // 2. CREATE SALE RECORD (Sales Table)
+            // Only if there are parts used
+            if(hasParts){
+
+
+                String sqlMarkSold = "UPDATE ProductItem SET status='SOLD', sold_date=NOW() WHERE item_id=?";
+                try(PreparedStatement pstmSold = connection.prepareStatement(sqlMarkSold)) {
+                    // Mark all used parts as SOLD
+                    String sqlGetParts = "SELECT item_id FROM RepairItem WHERE repair_id = ?";
+                    try(PreparedStatement pstmGetParts = connection.prepareStatement(sqlGetParts)){
+                        pstmGetParts.setInt(1, repairId);
+                        ResultSet rsParts = pstmGetParts.executeQuery();
+                        while(rsParts.next()){
+                            int itemId = rsParts.getInt("item_id");
+                            pstmSold.setInt(1, itemId);
+                            pstmSold.addBatch();
+                        }
+                        if(pstmSold.executeBatch().length == 0){
+                            connection.rollback();
+                            return false;
+                        }
+                    }
+                }
+
+
+                String sqlSale = "INSERT INTO Sales (customer_id, user_id, sale_date, sub_total, discount, grand_total, payment_status, description) " +
+                        "VALUES (?, ?, NOW(), ?, 0, ?, ?, ?)";
+
+                PreparedStatement pstmSale = connection.prepareStatement(sqlSale, java.sql.Statement.RETURN_GENERATED_KEYS);
+                pstmSale.setInt(1, customerId);
+                pstmSale.setInt(2, userId);
+                pstmSale.setDouble(3, partsTotal); // Subtotal
+                pstmSale.setDouble(4, partsTotal); // Grand Total
+                pstmSale.setString(5, payStatus);
+                pstmSale.setString(6, "Repair Job Checkout - Job #" + repairId);
+
+                if (pstmSale.executeUpdate() <= 0) {
+                    connection.rollback();
+                    return false;
+                }
+
+                // Get the generated Sale ID
+                ResultSet rs = pstmSale.getGeneratedKeys();
+                if (rs.next()) {
+                    saleId = rs.getInt(1);
+
+                }else {
+                    connection.rollback();
+                    return false;
+                }
+
+                // 3. LINK REPAIR TO SALE (RepairSale Table)
+                String sqlLink = "INSERT INTO RepairSale (repair_id, sale_id) VALUES (?, ?)";
+                PreparedStatement pstmLink = connection.prepareStatement(sqlLink);
+                pstmLink.setInt(1, repairId);
+                pstmLink.setInt(2, saleId);
+                pstmLink.executeUpdate();
             }
 
-            // 3. LINK REPAIR TO SALE (RepairSale Table)
-            String sqlLink = "INSERT INTO RepairSale (repair_id, sale_id) VALUES (?, ?)";
-            PreparedStatement pstmLink = connection.prepareStatement(sqlLink);
-            pstmLink.setInt(1, repairId);
-            pstmLink.setInt(2, saleId);
-            pstmLink.executeUpdate();
+
 
             // 4. RECORD THE PAYMENT (TransactionRecord Table)
             // Only if they actually paid something now
-            if (paidAmount > 0) {
-                String sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, repair_id, user_id, reference_note) " +
-                        "VALUES ('REPAIR_PAYMENT', ?, ?, 'IN', ?, ?, ?, ?)";
+
+                String sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, repair_id, user_id, reference_note) " +
+                        "VALUES ('REPAIR_PAYMENT', ?, ?, 'IN', ?, ?, ?)";
                 PreparedStatement pstmTrans = connection.prepareStatement(sqlTrans);
                 pstmTrans.setString(1, paymentMethod);
                 pstmTrans.setDouble(2, paidAmount);
-                pstmTrans.setInt(3, saleId);
-                pstmTrans.setInt(4, repairId);
-                pstmTrans.setInt(5, userId);
-                pstmTrans.setString(6, "Repair Checkout Payment");
+                pstmTrans.setInt(3, repairId);
+                pstmTrans.setInt(4, userId);
+                pstmTrans.setString(5, "Repair Checkout Payment");
                 pstmTrans.executeUpdate();
-            }
+
 
             // 5. UPDATE REPAIR JOB STATUS
             // Status -> DELIVERED, Payment -> Updated
@@ -389,7 +431,11 @@ public class RepairJobModel {
             if (connection != null) connection.rollback();
             e.printStackTrace();
             throw e;
-        } finally {
+        }catch (Exception ex){
+            if (connection != null) connection.rollback();
+            ex.printStackTrace();
+            throw new SQLException("Failed to complete checkout: " + ex.getMessage());
+        }finally {
             if (connection != null) connection.setAutoCommit(true);
         }
     }

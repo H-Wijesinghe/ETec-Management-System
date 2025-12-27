@@ -63,9 +63,9 @@ public class SalesModel {
             // STEP 2: Insert into Sales Table
             // ---------------------------------------------------------------------------------
             String sqlSales = "INSERT INTO Sales " +
-                    "(customer_id, user_id, sale_date, sub_total, discount, grand_total, " +
+                    "(customer_id, user_id, sale_date, sub_total, discount, grand_total, paid_amount, " +
                     "payment_status, description) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement pstmSales = con.prepareStatement(sqlSales, Statement.RETURN_GENERATED_KEYS);
 
@@ -81,9 +81,11 @@ public class SalesModel {
             pstmSales.setDouble(4, salesDTO.getSubtotal());
             pstmSales.setDouble(5, salesDTO.getDiscount());
             pstmSales.setDouble(6, salesDTO.getGrandTotal());
+            pstmSales.setDouble(7, salesDTO.getPaidAmount());
 
-            pstmSales.setString(7, salesDTO.getPaymentStatus().toString()); // Enum to String
-            pstmSales.setString(8, salesDTO.getDescription());
+
+            pstmSales.setString(8, salesDTO.getPaymentStatus().toString()); // Enum to String
+            pstmSales.setString(9, salesDTO.getDescription());
 
             int affectedRows = pstmSales.executeUpdate();
             if (affectedRows == 0) {
@@ -149,7 +151,7 @@ public class SalesModel {
             PreparedStatement pstmTrans = con.prepareStatement(sqlTransaction);
             pstmTrans.setString(1, "SALE_PAYMENT");
             pstmTrans.setString(2, "CASH"); // You can pass this from Controller if needed
-            pstmTrans.setDouble(3, salesDTO.getGrandTotal());
+            pstmTrans.setDouble(3, salesDTO.getPaidAmount());
             pstmTrans.setString(4, "IN");
             pstmTrans.setInt(5, saleId);
             pstmTrans.setInt(6, salesDTO.getUserId());
@@ -179,9 +181,19 @@ public class SalesModel {
                     System.out.println("Rollback failed: " + ex.getMessage());
                 }
             }
-            e.printStackTrace();
             System.out.println("Transaction failed: " + e.getMessage());
-            return false;
+            throw e;
+        } catch (Exception e) {
+            if(con != null) {
+                try {
+                    con.rollback();
+                } catch (SQLException ex) {
+                    System.out.println("Rollback failed: " + ex.getMessage());
+
+                }
+            }
+            System.out.println("Unexpected error: " + e.getMessage());
+            throw e;
         } finally {
             if (con != null) {
                 try {

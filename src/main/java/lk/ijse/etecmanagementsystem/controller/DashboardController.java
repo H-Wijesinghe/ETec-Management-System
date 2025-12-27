@@ -1,193 +1,350 @@
 package lk.ijse.etecmanagementsystem.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import lk.ijse.etecmanagementsystem.dto.TopProductDTO;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
 
-import java.net.URL;
 import java.sql.*;
-        import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.time.LocalDate;
 
-public class DashboardController implements Initializable {
+public class DashboardController {
 
-    // --- FXML INJECTIONS (You must add these fx:id to your FXML file) ---
+    // --- FXML Injections ---
+    // Top Dashboard Cards
+    @FXML
+    private Label lblTodayIncome;
+    @FXML
+    private Label lblActiveRepairs;
+    @FXML
+    private Label lblPendingPayment;
+    @FXML
+    private Label lblLowStock;
 
-    // Top Stats Cards
-    @FXML private Label lblTodaySales, lblTodaySalesGrowth;
-    @FXML private Label lblTotalOrders, lblTotalOrdersGrowth;
-    @FXML private Label lblPartsSold, lblPartsSoldGrowth; // Using 'ProductItem' count
-    @FXML private Label lblNewClients, lblNewClientsGrowth;
+    // The Beautiful Lists (Replaces the ugly TableViews)
+    @FXML
+    private ListView<UrgentRepairModel> listUrgentRepairs;
+    @FXML
+    private ListView<DebtModel> listUnpaid;
 
-    // Charts
-    @FXML private LineChart<String, Number> chartVisitorInsights;
-    @FXML private BarChart<String, Number> chartTotalRevenue;
-    @FXML private BarChart<String, Number> chartTargetReality;
-    @FXML private StackedBarChart<String, Number> chartVolumeService;
+    // Bottom Chart
+    @FXML
+    private BarChart<String, Number> chartSales;
 
-    // Top Products (Since your FXML uses a static Grid, we map the rows manually)
-    @FXML private Label lblTop1Name, lblTop1Pct; @FXML private ProgressBar pbTop1;
-    @FXML private Label lblTop2Name, lblTop2Pct; @FXML private ProgressBar pbTop2;
-    @FXML private Label lblTop3Name, lblTop3Pct; @FXML private ProgressBar pbTop3;
-    @FXML private Label lblTop4Name, lblTop4Pct; @FXML private ProgressBar pbTop4;
+    // --- Initialization ---
+    public void initialize() {
+        // 1. Load the Numbers (Top Cards)
+        loadDashboardStats();
 
-    // Database Connection String (Update with your DB credentials)
-    private final String DB_URL = "jdbc:mysql://localhost:3306/ETec";
-    private final String DB_USER = "root";
-    private final String DB_PASS = "mysql";
+        // 2. Configure the "Card" Look for the Lists
+        setupRepairListDesign();
+        setupDebtListDesign();
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        loadSummaryCards();
-        loadRevenueChart();
-        loadTopProducts();
-        loadServiceVsVolumeChart();
-        // initializeVisitorChart(); // Mock data as DB doesn't track raw "visitors"
+        // 3. Load Data into Lists
+        loadUrgentRepairs();
+        loadUnpaidDebts();
+
+        // 4. Load the Graph
+        loadSalesChart();
     }
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+    // =================================================================================
+    // SECTION 1: VISUAL DESIGN (CELL FACTORIES)
+    // =================================================================================
+
+    /**
+     * Renders each Urgent Repair as a clean row with an orange ID badge.
+     */
+    private void setupRepairListDesign() {
+        listUrgentRepairs.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(UrgentRepairModel item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                    setStyle("-fx-background-color: transparent;"); // Keep empty cells clear
+                } else {
+                    // Main Container
+                    HBox hBox = new HBox(15);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+                    hBox.setStyle("-fx-padding: 5 0 5 0;");
+
+                    // 1. The Badge (Orange Circle with ID)
+                    StackPane badge = new StackPane();
+                    Circle circle = new Circle(15, Color.web("#e67e22"));
+                    Label idLbl = new Label(String.valueOf(item.getId()));
+                    idLbl.setTextFill(Color.WHITE);
+                    idLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 11px;");
+                    badge.getChildren().addAll(circle, idLbl);
+
+                    // 2. Middle Text (Device Name & Status)
+                    VBox vBox = new VBox(3);
+                    Label deviceLbl = new Label(item.getDevice());
+                    deviceLbl.setFont(Font.font("System", FontWeight.BOLD, 14));
+                    deviceLbl.setTextFill(Color.web("#2c3e50"));
+
+                    Label statusLbl = new Label(item.getStatus());
+                    statusLbl.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px;");
+                    vBox.getChildren().addAll(deviceLbl, statusLbl);
+
+                    // 3. Spacer ( pushes Date to right)
+                    Region spacer = new Region();
+                    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                    // 4. Right Side (Date)
+                    Label dateLbl = new Label(item.getDate());
+                    dateLbl.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 12px;");
+
+                    hBox.getChildren().addAll(badge, vBox, spacer, dateLbl);
+                    setGraphic(hBox);
+                }
+            }
+        });
     }
 
-    // --- 1. LOAD SUMMARY CARDS ---
-    private void loadSummaryCards() {
-        try (Connection conn = getConnection()) {
+    /**
+     * Renders each Debt as a row with the Customer Name and Red Amount.
+     */
+    private void setupDebtListDesign() {
+        listUnpaid.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(DebtModel item, boolean empty) {
+                super.updateItem(item, empty);
 
-            // A. Today's Sales (From TransactionRecord where type is payment)
-            String sqlSales = "SELECT SUM(amount) FROM TransactionRecord " +
-                    "WHERE transaction_type IN ('SALE_PAYMENT', 'REPAIR_PAYMENT') " +
-                    "AND flow = 'IN' AND DATE(transaction_date) = CURDATE()";
-            try (PreparedStatement ps = conn.prepareStatement(sqlSales); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    double sales = rs.getDouble(1);
-                    lblTodaySales.setText("$" + String.format("%.2f", sales));
-                    // Logic for growth calculation would require querying yesterday's data similarly
-                    lblTodaySalesGrowth.setText("+5% from yesterday"); // Placeholder logic
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                    setStyle("-fx-background-color: transparent;");
+                } else {
+                    HBox hBox = new HBox(15);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+                    hBox.setStyle("-fx-padding: 5 0 5 0;");
+
+                    // 1. Icon (S for Sale, R for Repair)
+                    Label icon = new Label(item.getType().substring(0, 1));
+                    String iconColor = item.getType().equals("SALE") ? "#3498db" : "#9b59b6";
+                    icon.setStyle("-fx-background-color: " + iconColor + "; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 5 10; -fx-font-weight: bold;");
+
+                    // 2. Customer Name
+                    VBox vBox = new VBox(3);
+                    Label nameLbl = new Label(item.getCustomer());
+                    nameLbl.setFont(Font.font("System", FontWeight.BOLD, 14));
+                    nameLbl.setTextFill(Color.web("#2c3e50"));
+
+                    Label typeLbl = new Label(item.getType() + " Payment");
+                    typeLbl.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 10px;");
+                    vBox.getChildren().addAll(nameLbl, typeLbl);
+
+                    // 3. Spacer
+                    Region spacer = new Region();
+                    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                    // 4. Amount Due (Bold Red)
+                    Label amountLbl = new Label(String.format("%.2f", item.getAmount()));
+                    amountLbl.setTextFill(Color.web("#c0392b"));
+                    amountLbl.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                    hBox.getChildren().addAll(icon, vBox, spacer, amountLbl);
+                    setGraphic(hBox);
                 }
             }
+        });
+    }
 
-            // B. Total Orders (Count Sales from today)
-            String sqlOrders = "SELECT COUNT(*) FROM Sales WHERE DATE(sale_date) = CURDATE()";
-            try (PreparedStatement ps = conn.prepareStatement(sqlOrders); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    lblTotalOrders.setText(String.valueOf(rs.getInt(1)));
-                }
+    // =================================================================================
+    // SECTION 2: DATA LOADING (DATABASE)
+    // =================================================================================
+
+    private void loadDashboardStats() {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = DBConnection.getInstance().getConnection();
+            stmt = conn.createStatement();
+            LocalDate today = LocalDate.now();
+
+            // A. Today's Income (Sum of IN transactions)
+            String sqlIncome = "SELECT SUM(amount) FROM TransactionRecord WHERE flow='IN' AND DATE(transaction_date) = '" + today + "'";
+            ResultSet rs1 = stmt.executeQuery(sqlIncome);
+            if (rs1.next()) {
+                double val = rs1.getDouble(1);
+                lblTodayIncome.setText(String.format("%.2f", val));
             }
 
-            // C. Parts Sold (From SalesItem joined with Sales)
-            String sqlParts = "SELECT SUM(si.qty) FROM SalesItem si " +
-                    "JOIN Sales s ON si.sale_id = s.sale_id " +
-                    "WHERE DATE(s.sale_date) = CURDATE()";
-            try (PreparedStatement ps = conn.prepareStatement(sqlParts); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    lblPartsSold.setText(String.valueOf(rs.getInt(1)));
-                }
+            // B. Active Repairs (Anything NOT Completed/Delivered/Cancelled)
+            String sqlActiveRep = "SELECT COUNT(*) FROM RepairJob WHERE status NOT IN ('COMPLETED', 'DELIVERED', 'CANCELLED')";
+            ResultSet rs2 = stmt.executeQuery(sqlActiveRep);
+            if (rs2.next()) {
+                lblActiveRepairs.setText(String.valueOf(rs2.getInt(1)));
             }
 
-            // D. New Clients (Count Customers added today - assuming we track date, or just count distinct Sales today)
-            // Since Customer table doesn't have created_at, we count distinct customers in Sales today
-            String sqlClients = "SELECT COUNT(DISTINCT customer_id) FROM Sales WHERE DATE(sale_date) = CURDATE()";
-            try (PreparedStatement ps = conn.prepareStatement(sqlClients); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    lblNewClients.setText(String.valueOf(rs.getInt(1)));
-                }
+            // C. Low Stock (Alert if Qty < 5)
+            String sqlStock = "SELECT COUNT(*) FROM Product WHERE qty < 5";
+            ResultSet rs3 = stmt.executeQuery(sqlStock);
+            if (rs3.next()) {
+                lblLowStock.setText(String.valueOf(rs3.getInt(1)));
             }
 
+            // D. Total Pending Payments (Sales Balance + Repair Balance)
+            String sqlDebts = "SELECT " +
+                    "(SELECT COALESCE(SUM(grand_total - paid_amount),0) FROM Sales WHERE payment_status != 'PAID') + " +
+                    "(SELECT COALESCE(SUM(total_amount - paid_amount),0) FROM RepairJob WHERE payment_status != 'PAID' AND status != 'CANCELLED')";
+            ResultSet rs4 = stmt.executeQuery(sqlDebts);
+            if (rs4.next()) {
+                lblPendingPayment.setText(String.format("%.2f", rs4.getDouble(1)));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if(stmt != null){
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void loadUrgentRepairs() {
+        ObservableList<UrgentRepairModel> list = FXCollections.observableArrayList();
+        // Fetch oldest pending jobs first
+        String sql = "SELECT repair_id, device_name, status, DATE(date_in) as d_in FROM RepairJob " +
+                "WHERE status IN ('PENDING', 'DIAGNOSIS', 'WAITING_PARTS') " +
+                "ORDER BY date_in ASC LIMIT 15";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (ResultSet rs = conn.createStatement().executeQuery(sql)) {
+                while (rs.next()) {
+                    list.add(new UrgentRepairModel(
+                            rs.getInt("repair_id"),
+                            rs.getString("device_name"),
+                            rs.getString("status"),
+                            rs.getString("d_in")
+                    ));
+                }
+                listUrgentRepairs.setItems(list);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // --- 2. LOAD REVENUE CHART ---
-    private void loadRevenueChart() {
+    private void loadUnpaidDebts() {
+        ObservableList<DebtModel> list = FXCollections.observableArrayList();
+        // Combine Sales Debts AND Repair Debts into one list
+        String sql = "SELECT 'SALE' as type, c.name, (s.grand_total - s.paid_amount) as due FROM Sales s JOIN Customer c ON s.customer_id = c.cus_id WHERE s.payment_status != 'PAID' " +
+                "UNION ALL " +
+                "SELECT 'REPAIR' as type, c.name, (r.total_amount - r.paid_amount) as due FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status != 'PAID' AND r.status != 'CANCELLED'";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (ResultSet rs = conn.createStatement().executeQuery(sql)) {
+                while (rs.next()) {
+                    list.add(new DebtModel(
+                            rs.getString("type"),
+                            rs.getString("name"),
+                            rs.getDouble("due")
+                    ));
+                }
+                listUnpaid.setItems(list);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSalesChart() {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Revenue");
 
-        String sql = "SELECT DATE(transaction_date) as t_date, SUM(amount) as total " +
-                "FROM TransactionRecord " +
-                "WHERE flow = 'IN' " +
-                "GROUP BY DATE(transaction_date) " +
-                "ORDER BY t_date DESC LIMIT 7"; // Last 7 days
-
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                // In a real app, reverse the list so it goes Mon->Sun
-                series.getData().add(new XYChart.Data<>(rs.getString("t_date"), rs.getDouble("total")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        chartTotalRevenue.getData().add(series);
-    }
-
-    // --- 3. LOAD TOP PRODUCTS ---
-    private void loadTopProducts() {
-        // Query: Get Product Name and Sum of Qty sold, ordered by highest Sum
-        String sql = "SELECT p.name, SUM(si.qty) as total_sold " +
-                "FROM SalesItem si " +
-                "JOIN ProductItem pi ON si.item_id = pi.item_id " +
-                "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "GROUP BY p.stock_id " +
-                "ORDER BY total_sold DESC LIMIT 4";
-
-        List<TopProductDTO> products = new ArrayList<>();
-        double maxSold = 1.0; // Avoid divide by zero
-
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            int rank = 1;
-            while (rs.next()) {
-                String name = rs.getString("name");
-                int sold = rs.getInt("total_sold");
-                if (rank == 1) maxSold = sold; // Assume first is max
-
-                products.add(new TopProductDTO(rank++, name, (double)sold/maxSold, sold + " sold"));
+        // Get Last 7 Days revenue
+        String sql = "SELECT DATE(transaction_date) as d, SUM(amount) as total FROM TransactionRecord " +
+                "WHERE flow='IN' AND transaction_date >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(transaction_date) ORDER BY DATE(transaction_date)";
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            try (ResultSet rs = conn.createStatement().executeQuery(sql)) {
+                while (rs.next()) {
+                    series.getData().add(new XYChart.Data<>(rs.getString("d"), rs.getDouble("total")));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // Bind data to UI (Manual binding because FXML is static Grid)
-        if (products.size() > 0) updateProductRow(products.get(0), lblTop1Name, pbTop1, lblTop1Pct);
-        if (products.size() > 1) updateProductRow(products.get(1), lblTop2Name, pbTop2, lblTop2Pct);
-        if (products.size() > 2) updateProductRow(products.get(2), lblTop3Name, pbTop3, lblTop3Pct);
-        if (products.size() > 3) updateProductRow(products.get(3), lblTop4Name, pbTop4, lblTop4Pct);
+        chartSales.getData().clear();
+        chartSales.getData().add(series);
     }
 
-    private void updateProductRow(TopProductDTO p, Label name, ProgressBar pb, Label pct) {
-        name.setText(p.getName());
-        pb.setProgress(p.getPopularity());
-        pct.setText(p.getSalesPercentageText());
+    // =================================================================================
+    // SECTION 3: INNER DATA MODELS
+    // =================================================================================
+
+    public static class UrgentRepairModel {
+        private final int id;
+        private final String device;
+        private final String status;
+        private final String date;
+
+        public UrgentRepairModel(int id, String device, String status, String date) {
+            this.id = id;
+            this.device = device;
+            this.status = status;
+            this.date = date;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getDevice() {
+            return device;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getDate() {
+            return date;
+        }
     }
 
-    // --- 4. LOAD VOLUME VS SERVICES (Stacked Bar) ---
-    private void loadServiceVsVolumeChart() {
-        XYChart.Series<String, Number> seriesSales = new XYChart.Series<>();
-        seriesSales.setName("Product Sales");
+    public static class DebtModel {
+        private final String type;
+        private final String customer;
+        private final double amount;
 
-        XYChart.Series<String, Number> seriesRepairs = new XYChart.Series<>();
-        seriesRepairs.setName("Repairs");
+        public DebtModel(String type, String customer, double amount) {
+            this.type = type;
+            this.customer = customer;
+            this.amount = amount;
+        }
 
-        // Mocking logic for example (You would query GROUP BY MONTH)
-        seriesSales.getData().add(new XYChart.Data<>("Jan", 1135));
-        seriesRepairs.getData().add(new XYChart.Data<>("Jan", 635));
+        public String getType() {
+            return type;
+        }
 
-        seriesSales.getData().add(new XYChart.Data<>("Feb", 1400));
-        seriesRepairs.getData().add(new XYChart.Data<>("Feb", 500));
+        public String getCustomer() {
+            return customer;
+        }
 
-        chartVolumeService.getData().addAll(seriesSales, seriesRepairs);
+        public double getAmount() {
+            return amount;
+        }
     }
 }

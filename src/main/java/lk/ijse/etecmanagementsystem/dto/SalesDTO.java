@@ -13,6 +13,7 @@ public class SalesDTO {
     private double subtotal;
     private double discount;
     private double grandTotal;
+    private double paidAmount;
     private int customerWarrantyMonths;
     private PaymentStatus paymentStatus;
     private String description;
@@ -32,7 +33,7 @@ public class SalesDTO {
         this.description = description;
     }
 
-    public SalesDTO(int saleId, int customerId, int userId, int qty, Date saleDate, double subtotal, double discount, double grandTotal, int customerWarrantyMonths, PaymentStatus paymentStatus, String description) {
+    public SalesDTO(int saleId, int customerId, int userId, int qty, Date saleDate, double subtotal, double discount, double grandTotal, double paidAmount, int customerWarrantyMonths, PaymentStatus paymentStatus, String description) {
         this.saleId = saleId;
         this.customerId = customerId;
         this.userId = userId;
@@ -41,6 +42,7 @@ public class SalesDTO {
         this.subtotal = subtotal;
         this.discount = discount;
         this.grandTotal = grandTotal;
+        this.paidAmount = paidAmount;
         this.customerWarrantyMonths = customerWarrantyMonths;
         this.paymentStatus = paymentStatus;
         this.description = description;
@@ -134,6 +136,14 @@ public class SalesDTO {
         this.description = description;
     }
 
+    public double getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(double paidAmount) {
+        this.paidAmount = paidAmount;
+    }
+
     @Override
     public String toString() {
         return "SalesDTO{" +
@@ -145,6 +155,7 @@ public class SalesDTO {
                 ", subtotal=" + subtotal +
                 ", discount=" + discount +
                 ", grandTotal=" + grandTotal +
+                ", paidAmount=" + paidAmount +
                 ", customerWarrantyMonths=" + customerWarrantyMonths +
                 ", paymentStatus=" + paymentStatus +
                 ", description='" + description + '\'' +

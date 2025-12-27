@@ -1,546 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.StackedBarChart?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<!-- Added fx:controller link here -->
-
-<BorderPane prefHeight="720.0" prefWidth="1000.0" style="-fx-background-color: #F7F8FA;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.DashboardController">
-    <center>
-        <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
-            <content>
-                <VBox maxWidth="1.7976931348623157E308" prefWidth="1000.0" spacing="20.0">
-                    <padding>
-                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-                    </padding>
-                    <children>
-
-                        <!-- Row 1: Sales Stats & Visitor Insights -->
-                        <GridPane hgap="20.0" vgap="20.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="60.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" percentWidth="40.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints vgrow="SOMETIMES" />
-                            </rowConstraints>
-                            <children>
-                                <!-- Sales Summary Block -->
-                                <VBox prefHeight="300.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT">
-                                            <children>
-                                                <VBox>
-                                                    <children>
-                                                        <Label text="Today's Sales" textFill="#05004e">
-                                                            <font>
-                                                                <Font name="System Bold" size="18.0" />
-                                                            </font>
-                                                        </Label>
-                                                        <Label text="Sales Summary" textFill="#737791" />
-                                                    </children>
-                                                </VBox>
-                                                <Pane HBox.hgrow="ALWAYS" />
-                                                <Button mnemonicParsing="false" style="-fx-background-color: white; -fx-border-color: #C3D3E2; -fx-border-radius: 5; -fx-background-radius: 5;" text="Export" />
-                                            </children>
-                                        </HBox>
-                                        <HBox spacing="15.0" VBox.vgrow="ALWAYS">
-                                            <children>
-                                                <!-- Card 1: Today Sales -->
-                                                <VBox prefHeight="150.0" prefWidth="180.0" style="-fx-background-color: #FFE2E5; -fx-background-radius: 15;" HBox.hgrow="ALWAYS">
-                                                    <padding>
-                                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                    </padding>
-                                                    <children>
-                                                        <Pane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #FA5A7D; -fx-background-radius: 20; -fx-max-width: 40; -fx-max-height: 40;" />
-                                                        <Label fx:id="lblTodaySales" text="\$0.00" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="24.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="10.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                        <Label text="Total Sales" textFill="#425166" />
-                                                        <Label fx:id="lblTodaySalesGrowth" text="+0% from yesterday" textFill="#4079ed">
-                                                            <font>
-                                                                <Font size="10.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="5.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                                <!-- Card 2: Total Orders -->
-                                                <VBox layoutX="10.0" layoutY="10.0" prefHeight="150.0" prefWidth="180.0" style="-fx-background-color: #FFF4DE; -fx-background-radius: 15;" HBox.hgrow="ALWAYS">
-                                                    <padding>
-                                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                    </padding>
-                                                    <children>
-                                                        <Pane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #FF947A; -fx-background-radius: 20; -fx-max-width: 40; -fx-max-height: 40;" />
-                                                        <Label fx:id="lblTotalOrders" text="0" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="24.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="10.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                        <Label text="Total Orders" textFill="#425166" />
-                                                        <Label fx:id="lblTotalOrdersGrowth" text="+0% from yesterday" textFill="#4079ed">
-                                                            <font>
-                                                                <Font size="10.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="5.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                                <!-- Card 3: Parts Sold -->
-                                                <VBox layoutX="165.0" layoutY="10.0" prefHeight="150.0" prefWidth="180.0" style="-fx-background-color: #DCFCE7; -fx-background-radius: 15;" HBox.hgrow="ALWAYS">
-                                                    <padding>
-                                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                    </padding>
-                                                    <children>
-                                                        <Pane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #3CD856; -fx-background-radius: 20; -fx-max-width: 40; -fx-max-height: 40;" />
-                                                        <Label fx:id="lblPartsSold" text="0" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="24.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="10.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                        <Label text="Parts Sold" textFill="#425166" />
-                                                        <Label fx:id="lblPartsSoldGrowth" text="+0% from yesterday" textFill="#4079ed">
-                                                            <font>
-                                                                <Font size="10.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="5.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                                <!-- Card 4: New Clients -->
-                                                <VBox layoutX="320.0" layoutY="10.0" prefHeight="150.0" prefWidth="180.0" style="-fx-background-color: #F3E8FF; -fx-background-radius: 15;" HBox.hgrow="ALWAYS">
-                                                    <padding>
-                                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                                    </padding>
-                                                    <children>
-                                                        <Pane prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #BF83FF; -fx-background-radius: 20; -fx-max-width: 40; -fx-max-height: 40;" />
-                                                        <Label fx:id="lblNewClients" text="0" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="24.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="10.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                        <Label text="New Clients" textFill="#425166" />
-                                                        <Label fx:id="lblNewClientsGrowth" text="0% from yesterday" textFill="#4079ed">
-                                                            <font>
-                                                                <Font size="10.0" />
-                                                            </font>
-                                                            <VBox.margin>
-                                                                <Insets top="5.0" />
-                                                            </VBox.margin>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-
-                                <!-- Visitor Insights Chart -->
-                                <VBox style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" GridPane.columnIndex="1">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <Label text="Visitor Insights" textFill="#05004e">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                        </Label>
-                                        <LineChart fx:id="chartVisitorInsights" createSymbols="false" prefHeight="250.0">
-                                            <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis side="LEFT" />
-                                            </yAxis>
-                                        </LineChart>
-                                        <HBox alignment="CENTER" spacing="20.0">
-                                            <children>
-                                                <Label graphicTextGap="5.0" text="Loyal Customers" textFill="#666666">
-                                                    <graphic>
-                                                        <Circle fill="#a700e0" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                    </graphic>
-                                                    <font>
-                                                        <Font size="11.0" />
-                                                    </font>
-                                                </Label>
-                                                <Label graphicTextGap="5.0" layoutX="10.0" layoutY="10.0" text="New Customers" textFill="#666666">
-                                                    <graphic>
-                                                        <Circle fill="#ef4444" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                    </graphic>
-                                                    <font>
-                                                        <Font size="11.0" />
-                                                    </font>
-                                                </Label>
-                                                <Label graphicTextGap="5.0" layoutX="111.0" layoutY="10.0" text="Unique Customers" textFill="#666666">
-                                                    <graphic>
-                                                        <Circle fill="#3cd856" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                    </graphic>
-                                                    <font>
-                                                        <Font size="11.0" />
-                                                    </font>
-                                                </Label>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </GridPane>
-
-                        <!-- Row 2: Revenue & Target -->
-                        <GridPane hgap="20.0" prefHeight="505.0" prefWidth="940.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                            <children>
-                                <!-- Total Revenue -->
-                                <VBox prefHeight="300.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <Label text="Total Revenue" textFill="#05004e">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                        </Label>
-                                        <BarChart fx:id="chartTotalRevenue" barGap="2.0" categoryGap="5.0" prefHeight="340.0" prefWidth="430.0">
-                                            <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis side="LEFT" />
-                                            </yAxis>
-                                        </BarChart>
-                                        <HBox alignment="CENTER" spacing="20.0">
-                                            <children>
-                                                <Label graphicTextGap="5.0" text="Last Month" textFill="#666666">
-                                                    <graphic>
-                                                        <Circle fill="#0095ff" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                    </graphic>
-                                                </Label>
-                                                <Label graphicTextGap="5.0" text="This Month" textFill="#666666">
-                                                    <graphic>
-                                                        <Circle fill="#00e096" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                    </graphic>
-                                                </Label>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-
-                                <!-- Target vs Reality -->
-                                <VBox prefHeight="300.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" GridPane.columnIndex="1">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <Label text="Target vs Reality" textFill="#05004e">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                        </Label>
-                                        <BarChart fx:id="chartTargetReality" prefHeight="319.0" prefWidth="430.0">
-                                            <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis side="LEFT" />
-                                            </yAxis>
-                                        </BarChart>
-                                        <VBox spacing="10.0">
-                                            <children>
-                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                    <children>
-                                                        <Pane prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: #E2FFF3; -fx-background-radius: 8;" />
-                                                        <VBox>
-                                                            <children>
-                                                                <Label text="Reality Sales" textFill="#151d48">
-                                                                    <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                    </font>
-                                                                </Label>
-                                                                <Label text="Global" textFill="#737791">
-                                                                    <font>
-                                                                        <Font size="10.0" />
-                                                                    </font>
-                                                                </Label>
-                                                            </children>
-                                                        </VBox>
-                                                        <Pane HBox.hgrow="ALWAYS" />
-                                                        <Label text="8.823" textFill="#27ae60">
-                                                            <font>
-                                                                <Font name="System Bold" size="14.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" spacing="10.0">
-                                                    <children>
-                                                        <Pane prefHeight="30.0" prefWidth="30.0" style="-fx-background-color: #FFF4DE; -fx-background-radius: 8;" />
-                                                        <VBox>
-                                                            <children>
-                                                                <Label text="Target Sales" textFill="#151d48">
-                                                                    <font>
-                                                                        <Font name="System Bold" size="12.0" />
-                                                                    </font>
-                                                                </Label>
-                                                                <Label text="Commercial" textFill="#737791">
-                                                                    <font>
-                                                                        <Font size="10.0" />
-                                                                    </font>
-                                                                </Label>
-                                                            </children>
-                                                        </VBox>
-                                                        <Pane HBox.hgrow="ALWAYS" />
-                                                        <Label text="12.122" textFill="#ffa412">
-                                                            <font>
-                                                                <Font name="System Bold" size="14.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                </HBox>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </GridPane>
-
-                        <!-- Row 3: Top Products & Volume -->
-                        <GridPane hgap="20.0" prefHeight="396.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                            <children>
-                                <!-- Top Products -->
-                                <VBox prefHeight="300.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <Label text="Top Products" textFill="#05004e">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                            <VBox.margin>
-                                                <Insets bottom="10.0" />
-                                            </VBox.margin>
-                                        </Label>
-                                        <!-- Using a GridPane for the table structure -->
-                                        <GridPane hgap="10.0" vgap="15.0">
-                                            <columnConstraints>
-                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0" prefWidth="30.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="50.0" />
-                                            </columnConstraints>
-                                            <rowConstraints>
-                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                            </rowConstraints>
-                                            <children>
-                                                <Label text="#" textFill="#a0a0a0" />
-                                                <Label text="Name" textFill="#a0a0a0" GridPane.columnIndex="1" />
-                                                <Label text="Popularity" textFill="#a0a0a0" GridPane.columnIndex="2" />
-                                                <Label text="Sales" textFill="#a0a0a0" GridPane.columnIndex="3" />
-
-                                                <!-- Row 1 -->
-                                                <Label text="01" textFill="#444444" GridPane.rowIndex="1" />
-                                                <Label fx:id="lblTop1Name" text="-" textFill="#444444" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                                    <font><Font name="System Bold" size="12.0" /></font>
-                                                </Label>
-                                                <ProgressBar fx:id="pbTop1" progress="0.0" style="-fx-accent: #0095FF;" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                                <Label fx:id="lblTop1Pct" style="-fx-background-color: #F0F9FF; -fx-text-fill: #0095FF; -fx-background-radius: 5; -fx-padding: 2 5 2 5;" text="0%" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-
-                                                <!-- Row 2 -->
-                                                <Label text="02" textFill="#444444" GridPane.rowIndex="2" />
-                                                <Label fx:id="lblTop2Name" text="-" textFill="#444444" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                                    <font><Font name="System Bold" size="12.0" /></font>
-                                                </Label>
-                                                <ProgressBar fx:id="pbTop2" progress="0.0" style="-fx-accent: #00E096;" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                                <Label fx:id="lblTop2Pct" style="-fx-background-color: #F0FDF4; -fx-text-fill: #00E096; -fx-background-radius: 5; -fx-padding: 2 5 2 5;" text="0%" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-
-                                                <!-- Row 3 -->
-                                                <Label text="03" textFill="#444444" GridPane.rowIndex="3" />
-                                                <Label fx:id="lblTop3Name" text="-" textFill="#444444" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                                                    <font><Font name="System Bold" size="12.0" /></font>
-                                                </Label>
-                                                <ProgressBar fx:id="pbTop3" progress="0.0" style="-fx-accent: #884DFF;" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                                <Label fx:id="lblTop3Pct" style="-fx-background-color: #FBF1FF; -fx-text-fill: #884DFF; -fx-background-radius: 5; -fx-padding: 2 5 2 5;" text="0%" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-
-                                                <!-- Row 4 -->
-                                                <Label text="04" textFill="#444444" GridPane.rowIndex="4" />
-                                                <Label fx:id="lblTop4Name" text="-" textFill="#444444" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                                    <font><Font name="System Bold" size="12.0" /></font>
-                                                </Label>
-                                                <ProgressBar fx:id="pbTop4" progress="0.0" style="-fx-accent: #FF8F0D;" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                                <Label fx:id="lblTop4Pct" style="-fx-background-color: #FEF6E6; -fx-text-fill: #FF8F0D; -fx-background-radius: 5; -fx-padding: 2 5 2 5;" text="0%" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                                            </children>
-                                        </GridPane>
-                                    </children>
-                                </VBox>
-
-                                <!-- Volume vs Service Level -->
-                                <VBox prefHeight="300.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" GridPane.columnIndex="1">
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                    <children>
-                                        <Label text="Volume vs Service Level" textFill="#05004e">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                        </Label>
-                                        <StackedBarChart fx:id="chartVolumeService" categoryGap="20.0" prefHeight="220.0">
-                                            <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis side="LEFT" />
-                                            </yAxis>
-                                        </StackedBarChart>
-                                        <HBox alignment="CENTER" spacing="20.0">
-                                            <children>
-                                                <VBox alignment="CENTER">
-                                                    <children>
-                                                        <Label graphicTextGap="5.0" text="Volume" textFill="#666666">
-                                                            <graphic>
-                                                                <Circle fill="#0095ff" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                            </graphic>
-                                                        </Label>
-                                                        <Label text="1,135" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                                <Separator orientation="VERTICAL" />
-                                                <VBox alignment="CENTER">
-                                                    <children>
-                                                        <Label graphicTextGap="5.0" text="Services" textFill="#666666">
-                                                            <graphic>
-                                                                <Circle fill="#00e096" radius="4.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-                                                            </graphic>
-                                                        </Label>
-                                                        <Label text="635" textFill="#151d48">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </GridPane>
-
-                    </children>
-                </VBox>
-            </content>
-        </ScrollPane>
-    </center>
-    <top>
-
-        <!-- Header Section -->
-        <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="1000.0" spacing="20.0" BorderPane.alignment="CENTER">
+<ScrollPane fitToWidth="true" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../css/DashBoardStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.DashboardController">
+    <content>
+        <VBox spacing="20.0" style="-fx-padding: 20; -fx-background-color: #ecf0f1;">
             <children>
-                <Label text="Dashboard" textFill="#151d48">
+                <Label text="Dashboard Overview" textFill="#2c3e50">
                     <font>
-                        <Font name="System Bold" size="30.0" />
+                        <Font name="System Bold" size="24.0" />
                     </font>
                 </Label>
-                <Region maxWidth="1.7976931348623157E308" prefHeight="45.0" HBox.hgrow="ALWAYS" />
-                <StackPane>
+
+                <GridPane hgap="20.0" vgap="20.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="100.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
                     <children>
-                        <Button mnemonicParsing="false" prefHeight="34.0" prefWidth="45.0" style="-fx-background-color: #FFFAF1; -fx-background-radius: 10;" text="🔔" textFill="#ffbf42" />
-                        <Circle fill="#ff5b5b" radius="4.0" stroke="WHITE" strokeType="INSIDE" StackPane.alignment="TOP_RIGHT">
-                            <StackPane.margin>
-                                <Insets right="8.0" top="8.0" />
-                            </StackPane.margin>
-                        </Circle>
-                    </children>
-                </StackPane>
-                <HBox alignment="CENTER" prefHeight="36.0" prefWidth="105.0" spacing="10.0">
-                    <children>
-                        <Pane prefHeight="34.0" prefWidth="45.0" style="-fx-background-color: #C4C4C4; -fx-background-radius: 10;" />
-                        <VBox alignment="CENTER_LEFT">
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;">
                             <children>
-                                <Label text="Hasitha">
+                                <Label text="Today's Income" textFill="#7f8c8d" />
+                                <Label fx:id="lblTodayIncome" text="0.00" textFill="#27ae60">
                                     <font>
-                                        <Font name="System Bold" size="14.0" />
+                                        <Font name="System Bold" size="28.0" />
                                     </font>
                                 </Label>
-                                <Label text="Admin" textFill="#737791">
+                                <Label text="Cash In (Sales + Repairs)" textFill="#bdc3c7">
                                     <font>
-                                        <Font size="12.0" />
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="1">
+                            <children>
+                                <Label text="Active Repairs" textFill="#7f8c8d" />
+                                <Label fx:id="lblActiveRepairs" text="0" textFill="#e67e22">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Pending &amp; Diagnosing" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="2">
+                            <children>
+                                <Label text="Pending Payments" textFill="#7f8c8d" />
+                                <Label fx:id="lblPendingPayment" text="0.00" textFill="#c0392b">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Total to Collect (Debts)" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="3">
+                            <children>
+                                <Label text="Low Stock Alerts" textFill="#7f8c8d" />
+                                <Label fx:id="lblLowStock" text="0" textFill="#8e44ad">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Products &lt; 5 Qty" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
                                     </font>
                                 </Label>
                             </children>
                         </VBox>
                     </children>
-                </HBox>
+                </GridPane>
+                
+                        <HBox prefHeight="350.0" spacing="20.0">
+                            <children>
+                                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Urgent Repair Jobs" textFill="#e67e22">
+                                            <font>
+                                                <Font name="System Bold" size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <ListView fx:id="listUrgentRepairs" styleClass="custom-list-view" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Unpaid Invoices / Debts" textFill="#c0392b">
+                                            <font>
+                                                <Font name="System Bold" size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <ListView fx:id="listUnpaid" styleClass="custom-list-view" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                <AnchorPane style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 5;">
+                    <children>
+                        <BarChart fx:id="chartSales" title="Sales Performance (Last 7 Days)" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <xAxis>
+                                <CategoryAxis label="Date" side="BOTTOM" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Revenue" side="LEFT" />
+                            </yAxis>
+                        </BarChart>
+                    </children>
+                </AnchorPane>
             </children>
-            <padding>
-                <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
-            </padding>
-        </HBox>
-    </top>
-</BorderPane>
+        </VBox>
+    </content>
+</ScrollPane>

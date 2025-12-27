@@ -116,8 +116,8 @@ WHERE s.sale_id = $P{saleId}]]></query>
 		<property name="com.jaspersoft.studio.field.tree.path" value="salesitem"/>
 	</field>
 	<background splitType="Stretch"/>
-	<title height="107" splitType="Stretch">
-		<element kind="image" uuid="6bfe79f1-3c91-499f-a645-b8f596d8dd39" x="160" y="0" width="60" height="40" onErrorType="Blank" hImageAlign="Center" vImageAlign="Middle">
+	<title height="106" splitType="Stretch">
+		<element kind="image" uuid="6bfe79f1-3c91-499f-a645-b8f596d8dd39" x="160" y="0" width="60" height="40" onErrorType="Blank" linkType="None" linkTarget="Self" hImageAlign="Center" vImageAlign="Middle">
 			<expression><![CDATA["src/main/resources/lk/ijse/etecmanagementsystem/images/ETBatch.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -126,16 +126,20 @@ WHERE s.sale_id = $P{saleId}]]></query>
 			<text><![CDATA[ETec Computers]]></text>
 		</element>
 		<element kind="staticText" uuid="ecfc290a-7ec6-4f70-b45a-7f832da0971b" x="0" y="63" width="380" height="12" forecolor="#000000" fontSize="8.0" hTextAlign="Center">
-			<text><![CDATA[123 Tech Street, Colombo 07]]></text>
+			<text><![CDATA[Nagoda, Galle, Sri Lanka]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="staticText" uuid="95e3f27a-bf66-4888-ae0b-d6977c1b85b0" x="0" y="75" width="380" height="12" forecolor="#000000" fontSize="8.0" bold="true" hTextAlign="Center">
-			<text><![CDATA[Tel: +94 77 123 4567]]></text>
+			<text><![CDATA[Tel: +94 00 000 0000]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="line" uuid="2e6e1a86-d734-4892-8240-bcd6c9cdba10" x="0" y="104" width="380" height="1" forecolor="#CCCCCC"/>
-		<element kind="staticText" uuid="bbd6b0f2-438d-4f86-9c1a-af1e96d474cf" x="0" y="85" width="380" height="18" fontSize="10.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+		<element kind="staticText" uuid="bbd6b0f2-438d-4f86-9c1a-af1e96d474cf" x="0" y="85" width="80" height="18" fontSize="10.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
 			<text><![CDATA[SALES INVOICE]]></text>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</element>
+		<element kind="textField" uuid="ce53f918-e889-4267-8b28-d1e77c8fefba" x="80" y="86" width="190" height="18" forecolor="#F0450C" fontSize="12.0" bold="true" vTextAlign="Top">
+			<expression><![CDATA["#" + $F{sale_id}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 	</title>
@@ -245,7 +249,7 @@ WHERE s.sale_id = $P{saleId}]]></query>
 			<text><![CDATA[Discount:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="7ab32794-cc95-402c-b8d4-8e86a2055b94" x="290" y="30" width="85" height="12" fontSize="8.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="7ab32794-cc95-402c-b8d4-8e86a2055b94" x="290" y="30" width="85" height="12" forecolor="rgba(212, 59, 13, 0.80784315)" fontSize="8.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{discount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
@@ -260,11 +264,11 @@ WHERE s.sale_id = $P{saleId}]]></query>
 		<element kind="line" uuid="fa456120-a760-44f1-9d53-49cb12c1a8f2" x="180" y="65" width="195" height="1" forecolor="#BDC3C7">
 			<pen lineWidth="1.0" lineStyle="Dashed"/>
 		</element>
-		<element kind="staticText" uuid="8bb09ff6-307e-49ef-bd3a-7fa8bf9ef3ec" x="180" y="69" width="100" height="12" forecolor="#000000" fontSize="7.0" hTextAlign="Right">
+		<element kind="staticText" uuid="8bb09ff6-307e-49ef-bd3a-7fa8bf9ef3ec" x="180" y="69" width="100" height="12" forecolor="#000000" fontSize="9.0" hTextAlign="Right">
 			<text><![CDATA[Paid Amount:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="be2c88b5-bfae-45a4-b06d-90ea16905a4a" x="290" y="69" width="85" height="12" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="be2c88b5-bfae-45a4-b06d-90ea16905a4a" x="290" y="69" width="85" height="12" forecolor="#095908" fontSize="9.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{paid_amount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
@@ -272,7 +276,7 @@ WHERE s.sale_id = $P{saleId}]]></query>
 			<text><![CDATA[Balance/Due:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="b23d5971-6b49-441f-9ae8-275252c7b486" x="290" y="83" width="85" height="12" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="b23d5971-6b49-441f-9ae8-275252c7b486" x="290" y="83" width="85" height="12" forecolor="#FF4C05" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{balance_amount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>

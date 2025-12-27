@@ -147,10 +147,26 @@ public class RepairCheckoutController {
                 new Alert(Alert.AlertType.ERROR, "Paid amount cannot exceed the grand total.").showAndWait();
                 return;
             }
+            if(paid == 0){
+                new Alert(Alert.AlertType.ERROR, "Paid amount cannot be zero.").showAndWait();
+                return;
+            }else if(paid < grandTotal){
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                        "The amount paid is less than the grand total. This will mark the job as PARTIALLY PAID. Do you want to proceed?",
+                        ButtonType.YES, ButtonType.NO);
+                alert.setTitle("Confirm Partial Payment");
+                alert.setHeaderText(null);
+                alert.showAndWait();
+                if (alert.getResult() != ButtonType.YES) {
+                    return;
+                }
+            }
+
 
             String method = cmbPaymentMethod.getValue();
             int userId = 1; // Replace with LoginUtil.getUserId();
             int cusId = jobTM.getOriginalDto().getCusId();
+            double partsTotal = jobTM.getOriginalDto().getPartsCost();
 
             // CALL MODEL TRANSACTION
             boolean success = repairModel.completeCheckout(
@@ -159,6 +175,7 @@ public class RepairCheckoutController {
                     userId,
                     grandTotal,
                     discount,
+                    partsTotal,
                     paid,
                     method
             );

@@ -149,16 +149,41 @@ public class SalesCheckoutController {
     private void handlePayment(ActionEvent event) {
         // 1. Validate Cash
         String cashText = txtCash.getText();
-        if (cashText.isEmpty()) {
-            new Alert(Alert.AlertType.WARNING, "Please enter the cash amount received.").show();
+        double cashGiven = 0.0;
+        PaymentStatus paymentStatus = PaymentStatus.PAID;
+        try{
+            cashGiven = Double.parseDouble(cashText);
+
+            if(cashGiven < 0){
+                throw new Exception();
+            }
+            if(cashGiven > grandTotalAmount){
+                new Alert(Alert.AlertType.ERROR, "Cash given cannot exceed the grand total!").show();
+                return;
+            }
+
+            if (cashText.isEmpty() || cashGiven == 0.0) {
+                new Alert(Alert.AlertType.ERROR, "Please enter a valid cash amount!").show();
+                return;
+            }else if (cashGiven < grandTotalAmount) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Provided cash amount not enough! Do you accept partial Payment?", ButtonType.YES, ButtonType.NO);
+                alert.setTitle("Confirm Partial Payment");
+                alert.showAndWait();
+                if (alert.getResult() == ButtonType.YES) {
+                    paymentStatus = PaymentStatus.PARTIAL;
+                } else {
+                    return;
+                }
+            }
+
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Insufficient cash!").show();
             return;
         }
 
-        double cashGiven = Double.parseDouble(cashText);
-        if (cashGiven < grandTotalAmount) {
-            new Alert(Alert.AlertType.ERROR, "Insufficient cash! Need " + (grandTotalAmount - cashGiven) + " more.").show();
-            return;
-        }
+
+
 
         // 2. Prepare Sales Data
         int totalQty = cartItems.stream().mapToInt(ItemCartTM::getQuantity).sum();
@@ -181,8 +206,9 @@ public class SalesCheckoutController {
                 subTotalAmount,         // Sub Total
                 discountAmount,         // Discount
                 grandTotalAmount,       // Grand Total
+                cashGiven,              // Paid Amount
                 generalWarranty,        // Customer Warranty (See Note above)
-                PaymentStatus.PAID,     // Payment Status Enum
+                paymentStatus,     // Payment Status Enum
                 "Point of Sale Transaction" // Description
         );
 

@@ -6,8 +6,11 @@
 	<query language="SQL"><![CDATA[SELECT
     rj.repair_id,
     s.sale_id,
-    DATE_FORMAT(s.sale_date, '%Y-%m-%d') as sale_date,
-    DATE_FORMAT(s.sale_date, '%h:%i:%s %p') as sale_time,
+-- 1. Get Date from RepairJob (date_out) instead of Sales
+    DATE_FORMAT(rj.date_out, '%Y-%m-%d') as sale_date,
+    DATE_FORMAT(rj.date_out, '%h:%i:%s %p') as sale_time,
+    
+    -- 2. Get Cashier/User from RepairJob directly
     u.name as cashier_name,
     c.name AS cus_name,
     c.number AS cus_contact,
@@ -20,16 +23,27 @@
     rj.total_amount AS grand_total,
     rj.paid_amount,
     (rj.total_amount - rj.paid_amount) AS balance_amount,
-    s.payment_status,
+    -- Default to 'Pending' if no payment status exists
+    COALESCE(s.payment_status, 'Pending') AS payment_status,
     p.name AS part_name,
     pi.serial_number AS part_serial,
     p.warranty_months AS part_warranty,
     p.sell_price AS part_price
 FROM RepairJob rj
-         JOIN RepairSale rs ON rj.repair_id = rs.repair_id
-         JOIN Sales s ON rs.sale_id = s.sale_id
-         JOIN User u ON s.user_id = u.user_id
+         -- CHANGE 1: Use LEFT JOIN here so the query works even if no "RepairSale" exists
+         LEFT JOIN RepairSale rs ON rj.repair_id = rs.repair_id
+         
+         -- CHANGE 2: Use LEFT JOIN here because if RS is null, S will be null too
+         LEFT JOIN Sales s ON rs.sale_id = s.sale_id
+         
+-- CHANGE 1: Join User directly to RepairJob using rj.user_id
+         -- Your schema shows user_id is NOT NULL, so INNER JOIN is safe here.
+         JOIN User u ON rj.user_id = u.user_id
+         
+         -- KEEP INNER JOIN for Customer (A repair always has a customer)
          JOIN Customer c ON rj.cus_id = c.cus_id
+         
+         -- These were already LEFT JOINs, which is good
          LEFT JOIN RepairItem ri ON rj.repair_id = ri.repair_id
          LEFT JOIN ProductItem pi ON ri.item_id = pi.item_id
          LEFT JOIN Product p ON pi.stock_id = p.stock_id
@@ -139,7 +153,7 @@ WHERE rj.repair_id = $P{repairId}]]></query>
 		<expression><![CDATA[$F{part_price} != null ? $F{part_price} : BigDecimal.ZERO]]></expression>
 	</variable>
 	<background splitType="Stretch"/>
-	<title height="107" splitType="Stretch">
+	<title height="106" splitType="Stretch">
 		<element kind="image" uuid="6bfe79f1-3c91-499f-a645-b8f596d8dd39" x="160" y="0" width="60" height="40" onErrorType="Blank" hImageAlign="Center" vImageAlign="Middle">
 			<expression><![CDATA["src/main/resources/lk/ijse/etecmanagementsystem/images/ETBatch.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -149,17 +163,20 @@ WHERE rj.repair_id = $P{repairId}]]></query>
 			<text><![CDATA[ETec Computers]]></text>
 		</element>
 		<element kind="staticText" uuid="ecfc290a-7ec6-4f70-b45a-7f832da0971b" x="0" y="63" width="380" height="12" forecolor="#000000" fontSize="8.0" hTextAlign="Center">
-			<text><![CDATA[123 Tech Street, Colombo 07]]></text>
+			<text><![CDATA[Nagoda, Galle, Sri Lanka]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="staticText" uuid="95e3f27a-bf66-4888-ae0b-d6977c1b85b0" x="0" y="75" width="380" height="12" forecolor="#000000" fontSize="8.0" bold="true" hTextAlign="Center">
-			<text><![CDATA[Tel: +94 77 123 4567]]></text>
+			<text><![CDATA[Tel: +94 00 000 0000]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="line" uuid="2e6e1a86-d734-4892-8240-bcd6c9cdba10" x="0" y="104" width="380" height="1" forecolor="#CCCCCC"/>
-		<element kind="staticText" uuid="bbd6b0f2-438d-4f86-9c1a-af1e96d474cf" x="0" y="85" width="380" height="18" fontSize="10.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+		<element kind="staticText" uuid="bbd6b0f2-438d-4f86-9c1a-af1e96d474cf" x="0" y="85" width="90" height="18" fontSize="10.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
 			<text><![CDATA[SERVICE INVOICE]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</element>
+		<element kind="textField" uuid="22b12a5a-7483-45ce-8ff7-77e8f0e9b881" x="90" y="85" width="190" height="18" forecolor="#FF531A" fontSize="12.0" bold="true" vTextAlign="Middle">
+			<expression><![CDATA["#" + $F{repair_id}]]></expression>
 		</element>
 	</title>
 	<pageHeader height="93" splitType="Stretch">
@@ -285,7 +302,7 @@ WHERE rj.repair_id = $P{repairId}]]></query>
 			<text><![CDATA[Discount:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="7ab32794-cc95-402c-b8d4-8e86a2055b94" x="290" y="48" width="85" height="12" fontSize="8.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="7ab32794-cc95-402c-b8d4-8e86a2055b94" x="290" y="48" width="85" height="12" forecolor="rgba(240, 32, 5, 0.6745098)" fontSize="8.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{discount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
@@ -300,11 +317,11 @@ WHERE rj.repair_id = $P{repairId}]]></query>
 		<element kind="line" uuid="fa456120-a760-44f1-9d53-49cb12c1a8f2" x="180" y="83" width="195" height="1" forecolor="#BDC3C7">
 			<pen lineWidth="1.0" lineStyle="Dashed"/>
 		</element>
-		<element kind="staticText" uuid="8bb09ff6-307e-49ef-bd3a-7fa8bf9ef3ec" x="180" y="87" width="100" height="12" forecolor="#000000" fontSize="7.0" hTextAlign="Right">
+		<element kind="staticText" uuid="8bb09ff6-307e-49ef-bd3a-7fa8bf9ef3ec" x="180" y="87" width="100" height="12" forecolor="#000000" fontSize="9.0" hTextAlign="Right">
 			<text><![CDATA[Paid Amount:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="be2c88b5-bfae-45a4-b06d-90ea16905a4a" x="290" y="87" width="85" height="12" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="be2c88b5-bfae-45a4-b06d-90ea16905a4a" x="290" y="87" width="85" height="12" forecolor="#185905" fontSize="9.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{paid_amount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
@@ -312,7 +329,7 @@ WHERE rj.repair_id = $P{repairId}]]></query>
 			<text><![CDATA[Balance/Due:]]></text>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
-		<element kind="textField" uuid="b23d5971-6b49-441f-9ae8-275252c7b486" x="290" y="101" width="85" height="12" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
+		<element kind="textField" uuid="b23d5971-6b49-441f-9ae8-275252c7b486" x="290" y="101" width="85" height="12" forecolor="#E63F19" fontSize="7.0" pattern="Rs #,##0.00" bold="true" hTextAlign="Right">
 			<expression><![CDATA[$F{balance_amount}]]></expression>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
