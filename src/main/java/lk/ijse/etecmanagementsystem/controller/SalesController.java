@@ -331,11 +331,13 @@ public class SalesController implements Initializable {
                 }
             }else {
                 // Exact match, add directly from table
+
                 addFieldItemToCart(newCartItem);
             }
         } else {
             // No table selection, pure manual entry
-            addFieldItemToCart(newCartItem);
+            addNewItemToInventory(newCartItem);
+//            addFieldItemToCart(newCartItem);
         }
     }
 

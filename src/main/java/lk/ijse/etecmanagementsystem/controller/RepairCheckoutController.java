@@ -165,8 +165,8 @@ public class RepairCheckoutController {
 
             if (success) {
                 new Alert(Alert.AlertType.INFORMATION, "Job Delivered Successfully!").showAndWait();
-                generateInvoice(jobTM.getRepairId(), paid);
                 mainController.refreshList(); // Reload Dashboard
+                generateInvoice(jobTM.getRepairId());
                 closeWindow();
             }
 
@@ -178,15 +178,15 @@ public class RepairCheckoutController {
         }
     }
 
-    public void generateInvoice(int saleId, double amountPaid) {
+    public void generateInvoice(int repairId) {
         try {
 
-            String path = "reports/salesInvoice.jasper";
+            String path = "reports/repairInvoice2.jasper";
 
             InputStream reportStream = App.class.getResourceAsStream(path);
 
             if (reportStream == null) {
-                System.err.println("Error: Could not find salesReceipt.jasper at " + path);
+                System.err.println("Error: Could not find repairInvoice.jasper at " + path);
                 return;
             }
 
@@ -194,9 +194,7 @@ public class RepairCheckoutController {
 
             Map<String, Object> parameters = new HashMap<>();
 
-            parameters.put("saleId", saleId);
-
-            parameters.put("amountPaid", BigDecimal.valueOf(amountPaid));
+            parameters.put("repairId", repairId);
 
             Connection connection = DBConnection.getInstance().getConnection();
 

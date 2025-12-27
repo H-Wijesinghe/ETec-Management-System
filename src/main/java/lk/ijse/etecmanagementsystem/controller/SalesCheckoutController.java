@@ -261,12 +261,12 @@ public class SalesCheckoutController {
     private void printBill(int saleId, double cash, double balance) {
 
         // Implement JasperReports logic here using the 'saleId'
-        generateInvoice(saleId, cash);
+        generateInvoice(saleId);
         System.out.println("Printing Bill for Sale ID: " + saleId);
 
     }
 
-    public void generateInvoice(int saleId, double amountPaid) {
+    public void generateInvoice(int saleId) {
         try {
 
             String path = "reports/salesInvoice.jasper";
@@ -283,8 +283,6 @@ public class SalesCheckoutController {
             Map<String, Object> parameters = new HashMap<>();
 
             parameters.put("saleId", saleId);
-
-            parameters.put("amountPaid", BigDecimal.valueOf(amountPaid));
 
             Connection connection = DBConnection.getInstance().getConnection();
 
