@@ -49,6 +49,7 @@ public class LayoutController {
     private void btnDashboardClicked()  {
         menuBar.setActive(btnDashboard);
         try {
+            contentArea.getChildren().clear();
             contentArea.getChildren().setAll(App.loadFXML("dashboard"));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -60,6 +61,7 @@ public class LayoutController {
     private void btnSalesClicked(){
         menuBar.setActive(btnSales);
         try {
+            contentArea.getChildren().clear();
             contentArea.getChildren().setAll(App.loadFXML("sales"));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -122,7 +124,7 @@ public class LayoutController {
     private void btnWarrantyClicked()  {
         menuBar.setActive(btnWarranty);
         try {
-            contentArea.getChildren().setAll(App.loadFXML("warranty"));
+            contentArea.getChildren().setAll(App.loadFXML("reports"));
         } catch (IOException e) {
             e.printStackTrace();
         }

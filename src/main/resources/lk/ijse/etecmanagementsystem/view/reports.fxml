@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="720.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.ReportsController">
+
+    <top>
+        <VBox style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="20.0" style="-fx-background-color: #2c3e50;">
+               <children>
+                  <Label text="Report/Invoise Management" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="23.5" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets left="20.0" right="20.0" />
+               </padding>
+            </HBox>
+            </children>
+        </VBox>
+    </top>
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <tabs>
+                <Tab fx:id="tabSales" text="Sales">
+                     <content>
+                        <SplitPane dividerPositions="0.465625" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                          <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadSale" mnemonicParsing="false" onAction="#btnLoadSaleOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Seles Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountSales" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitSales" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                              
+                                                                                                                        <Button fx:id="btnGenerateReportSale" mnemonicParsing="false" onAction="#btnGenerateReportSaleOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Sales Report">
+                                                          <padding>
+                                                              <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                          </padding>
+                                                      </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Invoise Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                       <children>
+                                          <Label text="Sales Id:" />
+                                          <TextField fx:id="txtSalesId" promptText="Enter Sales Id" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label fx:id="lblSalesExist" text="Check Invoise Exists" />
+                                       </children>
+                                    </HBox>
+                                    <Region prefHeight="44.0" prefWidth="1000.0" VBox.vgrow="ALWAYS" />
+                                    <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#btnGenerateSalesInvoiceOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Confirm">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                          <Button fx:id="btnGenerateSalesInvoice" mnemonicParsing="false" onAction="#handleGenerateSalesInvoice" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Print Invoice">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                       </padding>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                          </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="tabRepair" text="Repair">
+                     <content>
+                        <SplitPane dividerPositions="0.465625" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                           <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadRepair" mnemonicParsing="false" onAction="#btnLoadRepairOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Repair Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountRepair" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitRepair" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                                                <Button fx:id="btnGenerateReportRepair" mnemonicParsing="false" onAction="#btnGenerateReportRepairOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Repair Report">
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                   </padding>
+                                                </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Invoise Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                       <children>
+                                          <Label text="Repair Id:" />
+                                          <TextField fx:id="txtRepairId" promptText="Enter Repair Id" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label fx:id="lblRepairExists" text="Check Invoise Exists" />
+                                       </children>
+                                    </HBox>
+                                    <Region prefHeight="44.0" prefWidth="1000.0" VBox.vgrow="ALWAYS" />
+                                    <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#btnGenerateRepairInvoiceOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Confirm">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                          <Button fx:id="btnGenerateRepairInvoice" mnemonicParsing="false" onAction="#handleGenerateRepairInvoice" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Print Invoice">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                       </padding>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="tabTransaction" text="Transaction">
+                     <content>
+                        <SplitPane orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                           <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadTransaction" mnemonicParsing="false" onAction="#btnLoadTransactionOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Transaction Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountTransf" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitTransf" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                                                <Button fx:id="btnGenerateReportTransf" mnemonicParsing="false" onAction="#btnGenerateReportTransfOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Transaction Report">
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                   </padding>
+                                                </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                       <padding>
+                                          <Insets top="10.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="tabInventory" text="Inventory">
+                     <content>
+                        <SplitPane orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                           <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadInventory" mnemonicParsing="false" onAction="#btnLoadInventoryOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Inventory Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountInven" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitInven" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                                                <Button fx:id="btnGenerateReportInven" mnemonicParsing="false" onAction="#btnGenerateReportInvenOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Inventory Report">
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                   </padding>
+                                                </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                       <padding>
+                                          <Insets top="10.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="tabSupplier" text="Supplier">
+                     <content>
+                        <SplitPane orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                           <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadSupplier" mnemonicParsing="false" onAction="#btnLoadSupplierOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Supplier Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountSup" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitSup" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                                                <Button fx:id="btnGenerateReportSup" mnemonicParsing="false" onAction="#btnGenerateReportSupOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Supplier Report">
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                   </padding>
+                                                </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                       <padding>
+                                          <Insets top="10.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="tabCustomer" text="Customer">
+                     <content>
+                        <SplitPane orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                           <items>
+                              <VBox minHeight="300.0" prefHeight="282.0" prefWidth="1000.0">
+                                 <children>
+                                    <HBox alignment="CENTER">
+                                       <children>
+                                          <Label text="Report Generator">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox alignment="CENTER_RIGHT" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="200.0" spacing="15.0">
+                                       <children>
+                                          <Button fx:id="btnLoadCustomer" mnemonicParsing="false" onAction="#btnLoadCustomerOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load">
+                                             <padding>
+                                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                             </padding>
+                                          </Button>
+                                       </children>
+                                       <padding>
+                                          <Insets right="20.0" />
+                                       </padding>
+                                    </HBox>
+                                    <VBox prefWidth="1000.0">
+                                       <children>
+                                          <HBox alignment="CENTER">
+                                             <children>
+                                                <Label text="Customer Records Found - ">
+                                                   <font>
+                                                      <Font name="System Bold" size="14.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="lblRecordCountCus" prefHeight="17.0" prefWidth="33.0" text="0" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="1000.0" spacing="10.0">
+                                             <children>
+                                                <Label text="Record Limit:" />
+                                                <TextField fx:id="txtRLimitCus" promptText="Enter Record Limit" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="107.0" prefWidth="1000.0" spacing="20.0">
+                                             <children>
+                                                <Button fx:id="btnGenerateReportCus" mnemonicParsing="false" onAction="#btnGenerateReportCusOnAction" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Generate Customer Report">
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                                                   </padding>
+                                                </Button>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                                             </padding>
+                                          </HBox>
+                                       </children>
+                                       <padding>
+                                          <Insets top="10.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+                <HBox fx:id="hBoxDate" alignment="CENTER" fillHeight="false" layoutY="82.0" spacing="15.0" style="-fx-padding: 15;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="82.0">
+                    <children>
+                        <Label text="Report Filters:">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+
+                                                                                          <Separator orientation="VERTICAL" />
+
+                                                                                          <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="Duration" textFill="#757575">
+                                    <font>
+                              <Font size="10.0" fx:id="x3" />
+                           </font>
+                                </Label>
+                                <ComboBox fx:id="cmbDatePreset" prefWidth="120.0" promptText="This Month" />
+                            </children>
+                        </VBox>
+
+                                                                                          <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="From Date" textFill="#757575" />
+                                <DatePicker fx:id="dpFromDate" prefWidth="130.0" />
+                            </children>
+                        </VBox>
+
+                                                                                          <Label style="-fx-padding: 10 0 0 0;" text="-" />
+
+                                                                                          <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="To Date" textFill="#757575" />
+                                <DatePicker fx:id="dpToDate" prefWidth="130.0" />
+                            </children>
+                        </VBox>
+
+                                                                                          <Region HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+         </children>
+      </AnchorPane>
+   </center>
+
+</BorderPane>

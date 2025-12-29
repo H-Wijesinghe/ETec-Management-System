@@ -49,6 +49,20 @@ public class ProductItemDTO {
         this.status = status;
     }
 
+    public ProductItemDTO(int itemId, int stockId, int supplierId, String serialNumber, String productName, String supplierName, int supplierWarranty, int customerWarranty, String status, Date addedDate, Date soldDate) {
+        this.itemId = itemId;
+        this.stockId = stockId;
+        this.supplierId = supplierId;
+        this.serialNumber = serialNumber;
+        this.productName = productName;
+        this.supplierName = supplierName;
+        this.supplierWarranty = supplierWarranty;
+        this.customerWarranty = customerWarranty;
+        this.status = status;
+        this.addedDate = addedDate;
+        this.soldDate = soldDate;
+    }
+
     public int getItemId() {
         return itemId;
     }

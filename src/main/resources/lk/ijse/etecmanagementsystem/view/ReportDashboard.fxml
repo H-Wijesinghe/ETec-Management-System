@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.ReportDashboardController">
+
+    <top>
+        <VBox style="-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-padding: 15;">
+                    <children>
+                        <Label text="Report Filters:">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+
+                        <Separator orientation="VERTICAL" />
+
+                        <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="Duration" textFill="#757575">
+                                    <font><Font size="10.0" fx:id="x3" /></font>
+                                </Label>
+                                <ComboBox fx:id="cmbDatePreset" prefWidth="120.0" promptText="This Month" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="From Date" textFill="#757575" />
+                                <DatePicker fx:id="dpFromDate" prefWidth="130.0" />
+                            </children>
+                        </VBox>
+
+                        <Label style="-fx-padding: 10 0 0 0;" text="-" />
+
+                        <VBox spacing="2.0">
+                            <children>
+                                <Label font="$x3" text="To Date" textFill="#757575" />
+                                <DatePicker fx:id="dpToDate" prefWidth="130.0" />
+                            </children>
+                        </VBox>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <Button fx:id="btnLoadData" mnemonicParsing="false" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text="Load Preview">
+                            <padding>
+                                <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                            </padding>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10.0">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT">
+                    <children>
+                        <Label fx:id="lblActiveReportTitle" text="Select a report type...">
+                            <font>
+                                <Font name="System Bold" size="18.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblRecordCount" text="0 records found" textFill="#757575" />
+                    </children>
+                </HBox>
+
+                <TableView fx:id="tblReportPreview" VBox.vgrow="ALWAYS">
+                    <placeholder>
+                        <Label text="No data to display. Select a category and click Load." />
+                    </placeholder>
+                </TableView>
+            </children>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: #f5f5f5; -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+            </padding>
+            <children>
+                <Label text="Ready to print?" textFill="#757575" />
+                <Button fx:id="btnClear" mnemonicParsing="false" text="Clear" />
+                <Button fx:id="btnPrintPdf" mnemonicParsing="false" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" text="Print / Export PDF">
+                    <graphic>
+                    </graphic>
+                    <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                    </padding>
+                </Button>
+            </children>
+        </HBox>
+    </bottom>
+   <right>
+        <VBox prefWidth="220.0" spacing="10.0" style="-fx-background-color: #2c3e50;" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
+            </padding>
+            <children>
+                <Label text="REPORTS MENU" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="5.0" />
+                    </VBox.margin>
+                </Label>
+
+                <ListView fx:id="listReportTypes" style="-fx-background-color: transparent; -fx-control-inner-background: #2c3e50;" styleClass="report-list-cell" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+   </right>
+
+</BorderPane>

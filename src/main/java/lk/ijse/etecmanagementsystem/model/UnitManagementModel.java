@@ -2,8 +2,10 @@ package lk.ijse.etecmanagementsystem.model;
 
 import javafx.scene.control.Alert;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +14,40 @@ import java.util.List;
 import java.util.Map;
 
 public class UnitManagementModel {
+
+
+    public List<ProductItemDTO> getAllProductItems() throws SQLException {
+        List<ProductItemDTO> itemList = new ArrayList<>();
+        String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, " +
+                "p.name AS product_name, COALESCE(s.supplier_name, 'No Supplier') AS supplier_name, " +
+                "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
+                "FROM ProductItem pi " +
+                "JOIN Product p ON pi.stock_id = p.stock_id " +
+                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
+                "ORDER BY pi.item_id DESC";
+
+        ResultSet rs = CrudUtil.execute(sql);
+
+        while (rs.next()) {
+            ProductItemDTO item = new ProductItemDTO(
+                    rs.getInt("item_id"),
+                    rs.getInt("stock_id"),
+                    rs.getInt("supplier_id"),
+                    rs.getString("serial_number"),
+                    rs.getString("product_name"),
+                    rs.getString("supplier_name"),
+                    rs.getInt("supplier_warranty_mo"),
+                    rs.getInt("customer_warranty_mo"),
+                    rs.getString("status"),
+                    rs.getDate("added_date"),
+                    rs.getDate("sold_date")
+
+            );
+            itemList.add(item);
+        }
+        rs.close();
+        return itemList;
+    }
 
     // --- METHOD A: Create Empty Slots (Call this when adding a NEW Product) ---
     public boolean createPlaceholderItems(int stockId, int qty) throws SQLException {
@@ -110,8 +146,6 @@ public class UnitManagementModel {
     }
 
 
-
-
     public int addItemAndGetGeneratedId(ProductItemDTO dto) throws SQLException {
         Connection conn = null;
         try {
@@ -121,7 +155,7 @@ public class UnitManagementModel {
             // 1. Check if an Empty Slot (Placeholder) exists for this Product
             String findSql = "SELECT item_id FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' LIMIT 1 FOR UPDATE";
             int existingId = -1;
-            if(dto.getSerialNumber().isEmpty()){
+            if (dto.getSerialNumber().isEmpty()) {
                 dto.setSerialNumber(null);
             }
 
@@ -328,9 +362,9 @@ public class UnitManagementModel {
         ProductItemDTO productItemDTO = null;
 
         if (rs.next()) {
-             productItemDTO = new ProductItemDTO(
+            productItemDTO = new ProductItemDTO(
                     rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
-                     rs.getString("product_name"), rs.getString("supplier_name"),
+                    rs.getString("product_name"), rs.getString("supplier_name"),
                     rs.getInt("supplier_warranty_mo"), rs.getInt("customer_warranty_mo"),
                     rs.getString("status"), rs.getDate("added_date"), rs.getDate("sold_date")
             );
@@ -389,21 +423,54 @@ public class UnitManagementModel {
 
     public boolean updateItemStatus(String serial, String newStatus) throws SQLException {
         String sql = "UPDATE ProductItem SET status = ?, sold_date = CASE WHEN ? = 'SOLD' THEN NOW() ELSE sold_date END WHERE serial_number = ?";
-        return CrudUtil.execute(sql, newStatus, newStatus, serial);
+        String sqlQty = "UPDATE Product SET qty = CASE WHEN ? = 'AVAILABLE' THEN qty + 1 ELSE qty - 1 END WHERE stock_id = (SELECT stock_id FROM ProductItem WHERE serial_number = ?)";
+        Connection con = null;
+        boolean isStatusChange = false;
+        boolean isQtyChange = false;
+        try{
+            con = DBConnection.getInstance().getConnection();
+            con.setAutoCommit(false);
+
+            isStatusChange = CrudUtil.execute(sql, newStatus, newStatus, serial);
+            isQtyChange = CrudUtil.execute(sqlQty, newStatus, serial);
+
+            con.commit();
+        }catch(SQLException e){
+            if(con != null) con.rollback();
+            throw e;
+        }finally {
+            if(con != null) con.setAutoCommit(true);
+        }
+        return isStatusChange && isQtyChange;
+
     }
 
     // --- Data Classes ---
     public static class ProductMeta {
         public final int stockId;
         public final int defaultWarranty;
-        public ProductMeta(int id, int war) { this.stockId = id; this.defaultWarranty = war; }
-        public int getStockId() { return stockId; }
-        public int getDefaultWarranty() { return defaultWarranty; }
+
+        public ProductMeta(int id, int war) {
+            this.stockId = id;
+            this.defaultWarranty = war;
+        }
+
+        public int getStockId() {
+            return stockId;
+        }
+
+        public int getDefaultWarranty() {
+            return defaultWarranty;
+        }
     }
 
     public static class ItemIds {
         public final int stockId;
         public final int supplierId;
-        public ItemIds(int stId, int supId) { this.stockId = stId; this.supplierId = supId; }
+
+        public ItemIds(int stId, int supId) {
+            this.stockId = stId;
+            this.supplierId = supId;
+        }
     }
 }

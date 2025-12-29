@@ -222,11 +222,13 @@ public class RepairJobModel {
             String sqlFixPlaceholders = "UPDATE ProductItem " +
                     "SET serial_number = CONCAT('REPAIR-', SUBSTRING(serial_number, 9)) " +
                     "WHERE item_id=? AND serial_number LIKE 'PENDING-%'";
+            String sqlDeQty = "UPDATE Product SET qty = qty - 1 WHERE stock_id = (SELECT stock_id FROM ProductItem WHERE item_id=?)";
 
             PreparedStatement pstmCheck = connection.prepareStatement(sqlCheck);
             PreparedStatement pstmLink = connection.prepareStatement(sqlInsertLink);
             PreparedStatement pstmSold = connection.prepareStatement(sqlMarkSold);
             PreparedStatement pstmFixSn = connection.prepareStatement(sqlFixPlaceholders);
+            PreparedStatement pstmDeQty = connection.prepareStatement(sqlDeQty);
 
             for (RepairPartTM part : activeParts) {
                 // Check duplicate
@@ -245,11 +247,16 @@ public class RepairJobModel {
                     // 3. Fix Placeholder Serial Numbers
                     pstmFixSn.setInt(1, part.getItemId());
                     pstmFixSn.addBatch();
+
+                    // 4. Decrease Quantity in Product Table
+                    pstmDeQty.setInt(1, part.getItemId());
+                    pstmDeQty.addBatch();
                 }
             }
             pstmLink.executeBatch();
             pstmSold.executeBatch();
             pstmFixSn.executeBatch();
+            pstmDeQty.executeBatch();
 
 
 
@@ -261,11 +268,13 @@ public class RepairJobModel {
                 String sqlReplacePlaceholders = "UPDATE ProductItem " +
                         "SET serial_number = CONCAT('PENDING-', SUBSTRING(serial_number, 8)) " +
                         "WHERE item_id=? AND serial_number LIKE 'REPAIR-%'";
+                String sqlIncQty = "UPDATE Product SET qty = qty + 1 WHERE stock_id = (SELECT stock_id FROM ProductItem WHERE item_id=?)";
 
                 try (
                         PreparedStatement pstmDel = connection.prepareStatement(sqlDeleteLink);
                         PreparedStatement pstmStock = connection.prepareStatement(sqlRestock);
-                        PreparedStatement pstmReplaceSn = connection.prepareStatement(sqlReplacePlaceholders)
+                        PreparedStatement pstmReplaceSn = connection.prepareStatement(sqlReplacePlaceholders);
+                        PreparedStatement pstmIncQty = connection.prepareStatement(sqlIncQty);
 
                 ){
                     for (RepairPartTM part : returnedParts) {
@@ -282,10 +291,15 @@ public class RepairJobModel {
                         pstmReplaceSn.setInt(1, part.getItemId());
                         pstmReplaceSn.addBatch();
 
+                        // 4. Increase Quantity in Product Table
+                        pstmIncQty.setInt(1, part.getItemId());
+                        pstmIncQty.addBatch();
+
                     }
                     pstmDel.executeBatch();
                     pstmStock.executeBatch();
                     pstmReplaceSn.executeBatch();
+                    pstmIncQty.executeBatch();
                 }
             }
 

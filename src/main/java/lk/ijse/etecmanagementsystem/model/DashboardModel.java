@@ -1,0 +1,111 @@
+package lk.ijse.etecmanagementsystem.model;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.tm.DashboardTM;
+import lk.ijse.etecmanagementsystem.dto.tm.DebtTM;
+import lk.ijse.etecmanagementsystem.dto.tm.UrgentRepairTM;
+
+import java.sql.*;
+import java.time.LocalDate;
+
+public class DashboardModel {
+
+    // 1. GET TOP CARD STATISTICS
+    public DashboardTM getDashboardStats() throws SQLException {
+        Connection conn = DBConnection.getInstance().getConnection();
+        Statement stmt = conn.createStatement();
+        LocalDate today = LocalDate.now();
+
+        double income = 0;
+        int repairs = 0;
+        int stock = 0;
+        double debts = 0;
+
+        // A. Today's Income (Only 'IN' transactions)
+        ResultSet rs1 = stmt.executeQuery("SELECT COALESCE(SUM(amount), 0) FROM TransactionRecord WHERE flow='IN' AND DATE(transaction_date) = '" + today + "'");
+        if (rs1.next()) income = rs1.getDouble(1);
+
+        // B. Active Repairs (Not Completed/Delivered/Cancelled)
+        ResultSet rs2 = stmt.executeQuery("SELECT COUNT(*) FROM RepairJob WHERE status NOT IN ('COMPLETED', 'DELIVERED', 'CANCELLED')");
+        if (rs2.next()) repairs = rs2.getInt(1);
+
+        // C. Low Stock (Items with qty < 5)
+        ResultSet rs3 = stmt.executeQuery("SELECT COUNT(*) FROM Product WHERE qty < 5");
+        if (rs3.next()) stock = rs3.getInt(1);
+
+        // D. Total Pending Payments (Sales Due + Repair Due)
+        String sqlDebts = "SELECT " +
+                "(SELECT COALESCE(SUM(grand_total - paid_amount),0) FROM Sales WHERE payment_status != 'PAID') + " +
+                "(SELECT COALESCE(SUM(total_amount - paid_amount),0) FROM RepairJob WHERE payment_status != 'PAID' AND status != 'CANCELLED')";
+        ResultSet rs4 = stmt.executeQuery(sqlDebts);
+        if (rs4.next()) debts = rs4.getDouble(1);
+
+        stmt.close(); // Close statement to release resources
+        return new DashboardTM(income, repairs, stock, debts);
+    }
+
+    // 2. GET URGENT REPAIRS (Oldest Pending Jobs First)
+    public ObservableList<UrgentRepairTM> getUrgentRepairs() throws SQLException {
+        ObservableList<UrgentRepairTM> list = FXCollections.observableArrayList();
+        String sql = "SELECT repair_id, device_name, status, DATE(date_in) as d_in FROM RepairJob " +
+                "WHERE status IN ('PENDING', 'DIAGNOSIS', 'WAITING_PARTS') " +
+                "ORDER BY date_in ASC LIMIT 15";
+
+        Connection conn = DBConnection.getInstance().getConnection();
+        ResultSet rs = conn.createStatement().executeQuery(sql);
+        while (rs.next()) {
+            list.add(new UrgentRepairTM(
+                    rs.getInt("repair_id"),
+                    rs.getString("device_name"),
+                    rs.getString("status"),
+                    rs.getString("d_in")
+            ));
+        }
+        return list;
+    }
+
+    // 3. GET UNPAID DEBTS (Combines Sales & Repairs with IDs)
+    public ObservableList<DebtTM> getUnpaidDebts() throws SQLException {
+        ObservableList<DebtTM> list = FXCollections.observableArrayList();
+        // Uses UNION ALL to combine Sales and Repair tables
+        String sql = "SELECT 'SALE' as type, s.sale_id as ref_id, c.name, (s.grand_total - s.paid_amount) as due " +
+                "FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
+                "JOIN SalesItem si ON s.sale_id = si.sale_id " +
+                "WHERE s.payment_status != 'PAID' " +
+                "UNION ALL " +
+                "SELECT 'REPAIR' as type, r.repair_id as ref_id, c.name, (r.total_amount - r.paid_amount) as due " +
+                "FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status != 'PAID' AND r.status != 'CANCELLED'";
+
+        Connection conn = DBConnection.getInstance().getConnection();
+        ResultSet rs = conn.createStatement().executeQuery(sql);
+        while (rs.next()) {
+            list.add(new DebtTM(
+                    rs.getInt("ref_id"), // The ID (Sale ID or Repair ID)
+                    rs.getString("type"),
+                    rs.getString("name"),
+                    rs.getDouble("due")
+            ));
+        }
+        return list;
+    }
+
+    // 4. GET CHART DATA (Last 7 Days Revenue)
+    public XYChart.Series<String, Number> getSalesChartData() throws SQLException {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Revenue");
+
+        String sql = "SELECT DATE(transaction_date) as d, SUM(amount) as total FROM TransactionRecord " +
+                "WHERE flow='IN' AND transaction_date >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(transaction_date) ORDER BY DATE(transaction_date)";
+
+        Connection conn = DBConnection.getInstance().getConnection();
+        ResultSet rs = conn.createStatement().executeQuery(sql);
+        while (rs.next()) {
+            series.getData().add(new XYChart.Data<>(rs.getString("d"), rs.getDouble("total")));
+        }
+        return series;
+    }
+}

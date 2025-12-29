@@ -67,7 +67,7 @@
                             </children>
                         </HBox>
 
-                        <TableView fx:id="tblProductInventory" onMouseClicked="#handleProductTableClick" prefHeight="155.0" prefWidth="528.0" stylesheets="@../css/SalesTableStyle.css" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="tblProductInventory" onMouseClicked="#handleProductTableClick" prefHeight="155.0" prefWidth="528.0" stylesheets="@../css/TableStyle.css" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colItemId" prefWidth="64.0" text="Item ID" />
                                 <TableColumn fx:id="colItemName" prefWidth="131.0" text="Product Name" />
@@ -296,7 +296,7 @@
                             </padding>
                         </VBox>
 
-                        <TableView fx:id="tblCart" prefHeight="197.0" prefWidth="425.0" stylesheets="@../css/SalesTableStyle.css" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="tblCart" prefHeight="197.0" prefWidth="425.0" stylesheets="@../css/TableStyle.css" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colCartItem" prefWidth="146.0" text="Item" />
                                 <TableColumn fx:id="colCartSerial" prefWidth="144.0" text="Serial" />

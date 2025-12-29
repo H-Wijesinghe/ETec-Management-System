@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
@@ -15,38 +16,69 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class UnitManagementController {
 
+    @FXML
+    private TabPane tabPaneProductItem;
+    @FXML
+    private Tab tPAddNew;
+    @FXML
+    private Tab tPUpdateStatus;
+
     // --- TAB 1: VIEW ---
-    @FXML private ComboBox<String> cmbViewProduct;
-    @FXML private TableView<ProductItemDTO> tblView;
-    @FXML private TableColumn<?, ?> colViewSerial, colViewSupplier, colViewRemaining, colViewSupWar, colViewCustWar, colViewStatus;
+    @FXML
+    private ComboBox<String> cmbViewProduct;
+    @FXML
+    private TextField txtViewSearch;
+    @FXML
+    private TableView<ProductItemDTO> tblView;
+    @FXML
+    private TableColumn<?, ?> colViewSerial, colViewSupplier, colViewRemaining, colViewSupWar, colViewCustWar, colViewStatus;
 
     // --- TAB 2: ADD ---
-    @FXML private ComboBox<String> cmbProduct, cmbSupplier;
-    @FXML private Label lblProductId; // <--- NEW: Add this to FXML (fx:id="lblProductId")
-    @FXML private TextField txtSupplierWarranty, txtCustomerWarranty, txtSerialNumber;
-    @FXML private Label lblStagingCount;
-    @FXML private TableView<String> tblStaging;
-    @FXML private TableColumn<String, String> colStagedSerial;
-    @FXML private Button btnSaveAll;
+    @FXML
+    private ComboBox<String> cmbProduct, cmbSupplier;
+    @FXML
+    private Label lblProductId; // <--- NEW: Add this to FXML (fx:id="lblProductId")
+    @FXML
+    private TextField txtSupplierWarranty, txtCustomerWarranty, txtSerialNumber;
+    @FXML
+    private Label lblStagingCount;
+    @FXML
+    private TableView<String> tblStaging;
+    @FXML
+    private TableColumn<String, String> colStagedSerial;
+    @FXML
+    private Button btnSaveAll;
 
-    @FXML private TableView<ProductItemDTO> tblHistory;
-    @FXML private TableColumn<?, ?> colHistSerial, colHistSupplier, colHistSupWar, colHistCustWar, colHistStatus;
+    @FXML
+    private TableView<ProductItemDTO> tblHistory;
+    @FXML
+    private TableColumn<?, ?> colHistSerial, colHistSupplier, colHistSupWar, colHistCustWar, colHistStatus;
 
     // --- TAB 3: CORRECTION ---
-    @FXML private TextField txtFixSearch, txtFixSerial, txtFixSupWar;
-    @FXML private ComboBox<String> cmbFixProduct, cmbFixSupplier;
-    @FXML private VBox vboxFixDetails;
+    @FXML
+    private TextField txtFixSearch, txtFixSerial, txtFixSupWar;
+    @FXML
+    private ComboBox<String> cmbFixProduct, cmbFixSupplier;
+    @FXML
+    private VBox vboxFixDetails;
 
     // --- TAB 4: STATUS ---
-    @FXML private TextField txtStatusSearch;
-    @FXML private VBox vboxStatusUpdate;
-    @FXML private Label lblCurrentStatus;
-    @FXML private Label lblUpdateProductName;
-    @FXML private Label lblUpdateSupplier;
-    @FXML private ComboBox<String> cmbNewStatus;
+    @FXML
+    private TextField txtStatusSearch;
+    @FXML
+    private VBox vboxStatusUpdate;
+    @FXML
+    private Label lblCurrentStatus;
+    @FXML
+    private Label lblUpdateProductName;
+    @FXML
+    private Label lblUpdateSupplier;
+    @FXML
+    private ComboBox<String> cmbNewStatus;
 
     // --- DATA ---
     private int selectedStockId = -1;
@@ -55,25 +87,28 @@ public class UnitManagementController {
 
     // Maps to handle Name(ID) -> ID conversion
     // Key: "Cable (ID: 55)", Value: 55
-    private Map<String, Integer> productSelectionMap = new HashMap<>();
-    private Map<String, Integer> supplierSelectionMap = new HashMap<>();
+    private final Map<String, Integer> productSelectionMap = new HashMap<>();
+    private final Map<String, Integer> supplierSelectionMap = new HashMap<>();
 
     // Reverse Maps to handle ID -> Name(ID) conversion (For Fix Tab)
-    private Map<Integer, String> idToProductDisplayMap = new HashMap<>();
-    private Map<Integer, String> idToSupplierDisplayMap = new HashMap<>();
+    private final Map<Integer, String> idToProductDisplayMap = new HashMap<>();
+    private final Map<Integer, String> idToSupplierDisplayMap = new HashMap<>();
 
     private final UnitManagementModel model = new UnitManagementModel();
 
     private final ObservableList<String> stagingList = FXCollections.observableArrayList();
     private final ObservableList<ProductItemDTO> historyList = FXCollections.observableArrayList();
     private final ObservableList<ProductItemDTO> viewList = FXCollections.observableArrayList();
+    private final ObservableList<ProductItemDTO> productItemList = FXCollections.observableArrayList();
 
     public void initialize() {
         setupTables();
         loadInitialData();
         setupListeners();
-        cmbNewStatus.setItems(FXCollections.observableArrayList("AVAILABLE", "SOLD", "RMA", "RETURNED_TO_SUPPLIER", "DAMAGED"));
+        setupTooltipForTableView();
+        cmbNewStatus.setItems(FXCollections.observableArrayList("AVAILABLE", "SOLD", "RMA", "RETURNED_TO_SUPPLIER", "IN_REPAIR_USE", "DAMAGED"));
     }
+
 
     private void setupTables() {
         // Tab 1
@@ -101,9 +136,13 @@ public class UnitManagementController {
             // --- LOAD PRODUCTS (BY ID) ---
             productSelectionMap.clear();
             idToProductDisplayMap.clear();
+            productItemList.clear();
+
 
             Map<Integer, String> dbProducts = model.getAllProductMap();
             ObservableList<String> prodObList = FXCollections.observableArrayList();
+
+
 
             for (Map.Entry<Integer, String> entry : dbProducts.entrySet()) {
                 int id = entry.getKey();
@@ -141,8 +180,13 @@ public class UnitManagementController {
 
             cmbSupplier.setItems(supObList);
             cmbFixSupplier.setItems(supObList);
+            // Load all items to View Table initially
+            loadAllItemsToViewTable();
 
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Something went wrong!").show();
+            System.out.println(e.getMessage());
+        }
     }
 
     private void setupListeners() {
@@ -155,31 +199,127 @@ public class UnitManagementController {
         });
 
         cmbViewProduct.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
-            if (newVal != null) handleViewFilter(null);
+            if (newVal != null) handleViewFilter();
+        });
+
+        txtViewSearch.textProperty().addListener((o, old, newVal) -> {
+           if (newVal == null ) {
+               return;
+           }
+            String searchTxt = newVal.trim();
+           filterViewList(searchTxt);
         });
     }
 
     // --- TAB 1 LOGIC ---
-    @FXML void handleViewFilter(ActionEvent e) {
-        String selection = cmbViewProduct.getValue();
-        if (selection == null) return;
+    @FXML private void handleMouseDoubleClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            ProductItemDTO selectedItem = tblView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getSerialNumber() != null) {
+                if(selectedItem.getSerialNumber().isEmpty()){
+                    return;
+                }else if(selectedItem.getSerialNumber().contains("PENDING")){
+                    new Alert(Alert.AlertType.WARNING, "Cannot update status of a place holders.").show();
+                    return;
+                }
+                tabPaneProductItem.getSelectionModel().select(tPUpdateStatus);
+                txtStatusSearch.setText(selectedItem.getSerialNumber());
+                handleStatusSearch(null);
+                tblView.getSelectionModel().clearSelection();
+            }
+        }
+    }
+private void setupTooltipForTableView() {
+    Tooltip hintTooltip = new Tooltip("Double-click a row to update status");
+    hintTooltip.setStyle("-fx-font-size: 12px;");
 
+    // Install it on the TableView
+    Tooltip.install(tblView, hintTooltip);
+
+    // Optional: Make it appear faster (default delay is often too long for hints)
+    hintTooltip.setShowDelay(javafx.util.Duration.millis(200));
+    }
+    private void loadAllItemsToViewTable() {
+        try {
+            List<ProductItemDTO> allProductItems = model.getAllProductItems();
+            productItemList.setAll(allProductItems);
+
+            viewList.clear();
+            viewList.addAll(productItemList);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR,"DB Error").show();
+            System.out.println(e.getMessage());
+        }
+    }
+    private void filterViewList(String searchText) {
+        List<ProductItemDTO> filteredList = new ArrayList<>();
+
+        filteredList = viewList.stream()
+                .filter(item -> {
+                    // Prepare search text
+                    String lowerSearch = searchText.toLowerCase();
+                    String serial = item.getSerialNumber();
+                    String idStr = String.valueOf(item.getStockId());
+                    String itemName = item.getProductName().toLowerCase();
+
+                    boolean matchSerial = serial != null && serial.toLowerCase().contains(lowerSearch);
+                    boolean matchId = idStr.equals(searchText);
+                    boolean matchName = itemName != null && itemName.contains(lowerSearch);
+                    return matchSerial || matchId || matchName;
+                })
+                .toList();
+        if(!searchText.isEmpty()){
+            tblView.setItems(FXCollections.observableArrayList(filteredList));
+        } else {
+            tblView.setItems(viewList);
+        }
+    }
+
+    @FXML
+    private void handleViewFilter() {
+        String selection = cmbViewProduct.getValue();
         Integer stockId = productSelectionMap.get(selection);
-        if (stockId == null) return;
+
+        if(selection == null || stockId == null){
+            loadAllItemsToViewTable();
+            return;
+        }
 
         try {
             // Get Name just for the DTO display (optional, can extract from selection string too)
             String name = selection.substring(0, selection.lastIndexOf(" (ID:"));
+            name = name != null ? name.trim() :"";
+
+            if(name.isEmpty()){
+                loadAllItemsToViewTable();
+                return;
+            }
 
             viewList.clear();
             viewList.addAll(model.getUnitsByStockId(stockId, name));
-        } catch (SQLException ex) { ex.printStackTrace(); }
+        } catch (SQLException ex) {
+            new Alert(Alert.AlertType.ERROR,"DB Error").show();
+            System.out.println(ex.getMessage());
+        }
     }
 
-    @FXML void handleRefreshView(ActionEvent e) { handleViewFilter(null); }
+    @FXML
+    private void handleRefreshView(ActionEvent e) {
+        handleViewFilter();
+    }
+
+    @FXML
+    private void handleResetView(ActionEvent event) {
+        cmbViewProduct.getSelectionModel().clearSelection();
+        txtViewSearch.clear();
+        loadAllItemsToViewTable();
+    }
 
     // --- TAB 2 LOGIC ---
-    @FXML void handleClearSupplier(ActionEvent e) { cmbSupplier.getSelectionModel().clearSelection(); }
+    @FXML
+    private void handleClearSupplier(ActionEvent e) {
+        cmbSupplier.getSelectionModel().clearSelection();
+    }
 
     private void handleProductSelection(int stockId, String fullDisplayName) {
         try {
@@ -196,19 +336,35 @@ public class UnitManagementController {
                 String cleanName = fullDisplayName.substring(0, fullDisplayName.lastIndexOf(" (ID:"));
                 historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR,"Something went wrong!").show();
+            System.out.println(e.getMessage());
+        }
     }
 
-    @FXML void handleAddToStaging(ActionEvent e) {
+    @FXML
+    void handleAddToStaging(ActionEvent e) {
         String serial = txtSerialNumber.getText().trim();
         if (serial.isEmpty()) return;
-        if (stagingList.contains(serial)) { showAlert(Alert.AlertType.WARNING, "Duplicate in list"); return; }
+        if (stagingList.contains(serial)) {
+            showAlert(Alert.AlertType.WARNING, "Duplicate in list");
+            return;
+        }
 
         try {
             if (model.getItemBySerial(serial) != null) {
-                showAlert(Alert.AlertType.ERROR, "Duplicate in DB"); return;
+                showAlert(Alert.AlertType.ERROR, "Duplicate in DB");
+                return;
             }
-        } catch (SQLException ex) { ex.printStackTrace(); return; }
+        } catch (SQLException ex) {
+            if(ex.getMessage().contains("Duplicate entry")) {
+                showAlert(Alert.AlertType.ERROR, "Duplicate in DB");
+                return;
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Something went wrong!");
+                return;
+            }
+        }
 
         stagingList.add(serial);
         txtSerialNumber.clear();
@@ -217,7 +373,8 @@ public class UnitManagementController {
         txtSerialNumber.requestFocus();
     }
 
-    @FXML void handleRemoveFromStaging(ActionEvent e) {
+    @FXML
+    void handleRemoveFromStaging(ActionEvent e) {
         String s = tblStaging.getSelectionModel().getSelectedItem();
         if (s != null) {
             stagingList.remove(s);
@@ -231,7 +388,7 @@ public class UnitManagementController {
         if (selectedStockId == -1) return;
 
         // Get Common Data
-        Integer supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : 0;
+        int supId = (cmbSupplier.getValue() != null) ? supplierSelectionMap.get(cmbSupplier.getValue()) : 0;
         int supWar = txtSupplierWarranty.getText().isEmpty() ? 0 : Integer.parseInt(txtSupplierWarranty.getText());
         int custWar = Integer.parseInt(txtCustomerWarranty.getText());
 
@@ -264,7 +421,7 @@ public class UnitManagementController {
 
             // Refresh History Table
             String currentComboVal = cmbProduct.getValue();
-            if(currentComboVal != null) {
+            if (currentComboVal != null) {
                 historyList.clear();
                 String cleanName = currentComboVal.substring(0, currentComboVal.lastIndexOf(" (ID:"));
                 historyList.addAll(model.getUnitsByStockId(selectedStockId, cleanName));
@@ -310,7 +467,8 @@ public class UnitManagementController {
 //    }
 
     // --- TAB 3: CORRECTION ---
-    @FXML void handleFixSearch(ActionEvent e) {
+    @FXML
+    void handleFixSearch(ActionEvent e) {
         String s = txtFixSearch.getText().trim();
         if (s.isEmpty()) return;
         try {
@@ -335,11 +493,18 @@ public class UnitManagementController {
                         cmbFixSupplier.setValue(null);
                     }
                 }
-            } else { showAlert(Alert.AlertType.WARNING, "Not Found"); vboxFixDetails.setDisable(true); }
-        } catch (SQLException ex) { ex.printStackTrace(); }
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Not Found");
+                vboxFixDetails.setDisable(true);
+            }
+        } catch (SQLException ex) {
+            new Alert(Alert.AlertType.ERROR,"Something went wrong!").show();
+            System.out.println(ex.getMessage());
+        }
     }
 
-    @FXML void handleFixSave(ActionEvent e) {
+    @FXML
+    void handleFixSave(ActionEvent e) {
         try {
             String newSerial = txtFixSerial.getText().trim();
             String pVal = cmbFixProduct.getValue();
@@ -354,18 +519,20 @@ public class UnitManagementController {
                 showAlert(Alert.AlertType.INFORMATION, "Corrected");
                 vboxFixDetails.setDisable(true);
                 txtFixSearch.clear();
-                handleViewFilter(null);
+                handleViewFilter();
             }
         } catch (Exception ex) {
-            if(ex.getMessage().contains("Duplicate entry")) {
+            if (ex.getMessage().contains("Duplicate entry")) {
                 new Alert(Alert.AlertType.WARNING, "The new serial number already exists. Please use a different serial number.").showAndWait();
                 return;
             }
-            showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
+            showAlert(Alert.AlertType.ERROR, ex.getMessage());
+        }
     }
 
     // --- TAB 4: STATUS ---
-    @FXML void handleStatusSearch(ActionEvent e) {
+    @FXML
+    void handleStatusSearch(ActionEvent e) {
         String s = txtStatusSearch.getText().trim();
         if (s.isEmpty()) return;
         try {
@@ -379,11 +546,18 @@ public class UnitManagementController {
                 lblUpdateSupplier.setText(item.getSupplierName());
 
                 cmbNewStatus.setValue(item.getStatus());
-            } else { showAlert(Alert.AlertType.WARNING, "Not Found"); vboxStatusUpdate.setDisable(true); }
-        } catch (SQLException ex) { ex.printStackTrace(); }
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Not Found");
+                vboxStatusUpdate.setDisable(true);
+            }
+        } catch (SQLException ex) {
+            new Alert(Alert.AlertType.ERROR,"Something went wrong!").show();
+            System.out.println(ex.getMessage());
+        }
     }
 
-    @FXML void handleStatusSave(ActionEvent e) {
+    @FXML
+    void handleStatusSave(ActionEvent e) {
         String st = cmbNewStatus.getValue();
         if (st == null) return;
         try {
@@ -391,12 +565,16 @@ public class UnitManagementController {
                 showAlert(Alert.AlertType.INFORMATION, "Updated");
                 vboxStatusUpdate.setDisable(true);
                 txtStatusSearch.clear();
-                handleViewFilter(null);
+                handleViewFilter();
             }
-        } catch (SQLException ex) { showAlert(Alert.AlertType.ERROR, ex.getMessage()); }
+        } catch (SQLException ex) {
+            showAlert(Alert.AlertType.ERROR, ex.getMessage());
+        }
     }
 
     private void showAlert(Alert.AlertType t, String m) {
-        new Alert(t, m).show();
+        Alert alert = new Alert(t, m);
+        alert.setHeaderText(null);
+        alert.showAndWait();
     }
 }

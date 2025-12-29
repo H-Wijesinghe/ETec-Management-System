@@ -173,7 +173,7 @@
                             </effect>
                         </HBox>
 
-                        <TableView fx:id="tblCustomer" onMouseClicked="#handleTableClick" prefHeight="538.0" prefWidth="590.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" stylesheets="@../css/SalesTableStyle.css" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="tblCustomer" onMouseClicked="#handleTableClick" prefHeight="538.0" prefWidth="590.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;" stylesheets="@../css/TableStyle.css" VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
                                 <TableColumn fx:id="colName" prefWidth="200.0" text="Customer Name" />
