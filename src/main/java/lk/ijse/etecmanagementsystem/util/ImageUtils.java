@@ -18,7 +18,10 @@ public class ImageUtils {
         BufferedImage originalImage = ImageIO.read(sourceFile);
 
         // 2. Create a new empty image buffer with the target dimensions
-        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, originalImage.getType());
+        // FIX: Check if type is 0. If so, use ARGB (standard for JavaFX/PNGs).
+        int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, type);
+//        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, originalImage.getType());
 
         // 3. Scale the image using Graphics2D (High Quality)
         Graphics2D g = resizedImage.createGraphics();

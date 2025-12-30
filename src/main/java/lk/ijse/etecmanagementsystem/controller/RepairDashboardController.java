@@ -137,6 +137,9 @@ public class RepairDashboardController {
         // --- LINK DATA ---
         tblParts.setItems(usedPartsList);
 
+        // 5. Hide Details Pane Initially
+        detailsPane.setVisible(false);
+
         // --- ENABLE RIGHT-CLICK REMOVE ---
         ContextMenu contextMenu = new ContextMenu();
         MenuItem deleteItem = new MenuItem("Remove Part");
@@ -697,7 +700,7 @@ public class RepairDashboardController {
                         default:
                             setStyle(""); // Default
                     }
-                    Label name = new Label(item.getCustomerName() + " - " + item.getDeviceName());
+                    Label name = new Label("#"+item.getRepairId()+"_"+item.getCustomerName() + " - " + item.getDeviceName());
                     name.setStyle("-fx-font-weight: bold;");
 
                     Label status = new Label("Status: " + item.getStatus());

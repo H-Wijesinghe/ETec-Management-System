@@ -1,6 +1,7 @@
 package lk.ijse.etecmanagementsystem.controller;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,6 +15,7 @@ import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
 import lk.ijse.etecmanagementsystem.model.TransactionsModel;
+import lk.ijse.etecmanagementsystem.util.LoginUtil;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -28,6 +30,7 @@ public class TransactionsController {
     @FXML private Label lblTotalIncome, lblTotalExpense, lblNetProfit;
     @FXML private DatePicker dpFromDate, dpToDate;
     @FXML private ComboBox<String> comboTypeFilter;
+    @FXML private TextField txtSearchHistory;
 
     // Tables
     @FXML private TableView<TransactionTM> tblHistory;
@@ -56,6 +59,7 @@ public class TransactionsController {
         loadDashboardData();
         loadHistory();
         loadPendingSettlements();
+
     }
 
     private void setupTables() {
@@ -87,6 +91,8 @@ public class TransactionsController {
         comboTypeFilter.getSelectionModel().selectFirst();
     }
 
+
+
     // --- Loading Data via Model ---
 
     @FXML
@@ -96,9 +102,59 @@ public class TransactionsController {
             Date toD = Date.valueOf(dpToDate.getValue());
             List<TransactionTM> list = transactionsModel.getAllTransactions(fromD, toD);
             tblHistory.setItems(FXCollections.observableArrayList(list));
+            handleComboTypeFilter();
+            handleSearchHistory();
+            loadDashboardData();
+
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error loading history: " + e.getMessage()).show();
         }
+    }
+
+    private void handleComboTypeFilter() {
+        try{
+        String selectedType = comboTypeFilter.getSelectionModel().getSelectedItem();
+        ObservableList<TransactionTM> allTransactions = tblHistory.getItems();
+
+        if (selectedType.equals("All")) {
+            tblHistory.setItems(allTransactions);
+        } else {
+            ObservableList<TransactionTM> filteredList = allTransactions.filtered(
+                    transaction -> transaction.getType().equalsIgnoreCase(selectedType)
+            );
+            tblHistory.setItems(filteredList);
+        }
+        } catch (Exception e){
+            // ignore
+        }
+    }
+
+    private void handleSearchHistory() {
+        try{
+        String searchText = txtSearchHistory.getText().toLowerCase();
+        ObservableList<TransactionTM> allTransactions = tblHistory.getItems();
+
+        if (searchText.isEmpty()) {
+            tblHistory.setItems(allTransactions);
+        } else {
+            ObservableList<TransactionTM> filteredList = allTransactions.filtered(
+                    transaction -> transaction.getReference().toLowerCase().contains(searchText) ||
+                                   transaction.getUser().toLowerCase().contains(searchText)
+            );
+            tblHistory.setItems(filteredList);
+        }
+        } catch (Exception e){
+            // ignore
+        }
+    }
+
+    @FXML
+    private void handleResetHistoryFilters() {
+        dpFromDate.setValue(LocalDate.now());
+        dpToDate.setValue(LocalDate.now());
+        comboTypeFilter.getSelectionModel().selectFirst();
+        txtSearchHistory.setText("");
+        loadHistory();
     }
 
     public void loadPendingSettlements() {
@@ -112,7 +168,7 @@ public class TransactionsController {
 
     private void loadDashboardData() {
         try {
-            double[] stats = transactionsModel.getDashboardStats(LocalDate.now());
+            double[] stats = transactionsModel.getDashboardStats(Date.valueOf(dpFromDate.getValue()), Date.valueOf(dpToDate.getValue()));
             double in = stats[0];
             double out = stats[1];
             double net = in - out;
@@ -165,7 +221,7 @@ public class TransactionsController {
     private void saveManualTransaction(String type, double amount, String method, String note) {
         try {
             // Call Model
-            boolean success = transactionsModel.saveManualTransaction(type, amount, method, note, 1); // User ID 1
+            boolean success = transactionsModel.saveManualTransaction(type, amount, method, note, LoginUtil.getUserId()); // User ID 1
             if (success) {
                 new Alert(Alert.AlertType.INFORMATION, "Transaction Saved!").show();
                 loadDashboardData();
@@ -241,7 +297,7 @@ public class TransactionsController {
     private void processPayment(String type, int id, double amount) {
         try {
             // Delegate complex logic to Model
-            boolean success = transactionsModel.settlePayment(type, id, amount, 1); // User ID 1
+            boolean success = transactionsModel.settlePayment(type, id, amount, LoginUtil.getUserId()); // User ID 1
             if (success) {
                 new Alert(Alert.AlertType.INFORMATION, "Payment Successful!").show();
                 loadPendingSettlements();
@@ -252,4 +308,6 @@ public class TransactionsController {
             new Alert(Alert.AlertType.ERROR, "Database Error: " + e.getMessage()).show();
         }
     }
+
+
 }

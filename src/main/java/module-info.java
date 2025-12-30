@@ -11,7 +11,7 @@ module lk.ijse.etecmanagementsystem {
     requires javafx.graphics;
     requires jdk.httpserver;
     requires net.sf.jasperreports.core;
-
+    requires java.mail;
 
 
     exports lk.ijse.etecmanagementsystem;

@@ -10,6 +10,8 @@ import lk.ijse.etecmanagementsystem.dto.tm.UrgentRepairTM;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DashboardModel {
 
@@ -107,5 +109,42 @@ public class DashboardModel {
             series.getData().add(new XYChart.Data<>(rs.getString("d"), rs.getDouble("total")));
         }
         return series;
+    }
+
+    public List<XYChart.Series<String, Number>> getTrafficChartData() throws SQLException {
+        List<XYChart.Series<String, Number>> allSeries = new ArrayList<>();
+
+        // Series 1: Sales Count
+        XYChart.Series<String, Number> seriesSales = new XYChart.Series<>();
+        seriesSales.setName("Sales");
+
+        // Series 2: Repair Count
+        XYChart.Series<String, Number> seriesRepairs = new XYChart.Series<>();
+        seriesRepairs.setName("Repairs");
+
+        Connection conn = DBConnection.getInstance().getConnection();
+        Statement stmt = conn.createStatement();
+
+        // 1. Get Sales Count (Last 7 Days)
+        String sqlSales = "SELECT DATE(sale_date) as d, COUNT(*) as c FROM Sales " +
+                "WHERE sale_date >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(sale_date) ORDER BY DATE(sale_date)";
+        ResultSet rs1 = stmt.executeQuery(sqlSales);
+        while (rs1.next()) {
+            seriesSales.getData().add(new XYChart.Data<>(rs1.getString("d"), rs1.getInt("c")));
+        }
+
+        // 2. Get Repair Count (Last 7 Days)
+        String sqlRepairs = "SELECT DATE(date_in) as d, COUNT(*) as c FROM RepairJob " +
+                "WHERE date_in >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(date_in) ORDER BY DATE(date_in)";
+        ResultSet rs2 = stmt.executeQuery(sqlRepairs);
+        while (rs2.next()) {
+            seriesRepairs.getData().add(new XYChart.Data<>(rs2.getString("d"), rs2.getInt("c")));
+        }
+
+        allSeries.add(seriesSales);
+        allSeries.add(seriesRepairs);
+        return allSeries;
     }
 }

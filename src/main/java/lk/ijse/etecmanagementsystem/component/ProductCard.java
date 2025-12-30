@@ -66,7 +66,7 @@ public class ProductCard extends StackPane {
 
         } catch (Exception e) {
             // Keep your existing catch block for the placeholder
-            String placeholderPath = "/lk/ijse/etecmanagementsystem/images/placeholder.png";
+            String placeholderPath = "/lk/ijse/etecmanagementsystem/images/LogoAsPlaceholder.png";
             if (getClass().getResource(placeholderPath) != null) {
                 imgProduct.setImage(new Image(getClass().getResource(placeholderPath).toExternalForm()));
             }

@@ -12,11 +12,11 @@
 //
 //import static lk.ijse.etecmanagementsystem.util.ProductCondition.*;
 //
-//public class InventoryService {
+//public class InventoryUtil {
 //
 //    private final List<ProductDTO> masterList = new ArrayList<>();
 //
-//    public InventoryService() {
+//    public InventoryUtil() {
 //        masterList.addAll(ProductUtil.productCache);
 //    }
 //
@@ -75,18 +75,15 @@
 //        }
 //    }
 //}
-package lk.ijse.etecmanagementsystem.service;
+package lk.ijse.etecmanagementsystem.util;
 
 import javafx.collections.ObservableList;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
-import lk.ijse.etecmanagementsystem.util.ProductCondition;
-import lk.ijse.etecmanagementsystem.util.ProductUtil;
-import lk.ijse.etecmanagementsystem.util.Stock;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class InventoryService {
+public class InventoryUtil {
 
     public List<ProductDTO> getFilteredProducts(ObservableList<ProductDTO> productDataList, String searchText, String category, ProductCondition conditionFilter, Stock stockFilter) {
 

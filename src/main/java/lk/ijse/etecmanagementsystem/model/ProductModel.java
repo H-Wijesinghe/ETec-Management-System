@@ -120,11 +120,26 @@ public class ProductModel {
     }
 
     // 1. New Helper: Count only "Real" items (ignoring PENDING ones)
+//    public int getRealItemCount(int stockId) throws SQLException {
+//        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%' AND status = 'AVAILABLE'";
+//        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
+//            if (rs.next()) {
+//                return rs.getInt(1);
+//            }
+//        }
+//        return 0;
+//    }
+
     public int getRealItemCount(int stockId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%'";
+        System.out.println("DEBUG: Querying Real Item Count for Stock ID: " + stockId);
+
+        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%' AND status = 'AVAILABLE'";
+
         try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
             if (rs.next()) {
-                return rs.getInt(1);
+                int count = rs.getInt(1);
+                System.out.println("DEBUG: Database returned count: " + count);
+                return count;
             }
         }
         return 0;
@@ -169,7 +184,7 @@ public class ProductModel {
             // 1. Get current total count (Real + Placeholders) BEFORE the update committed effectively?
             // Actually, we need to compare the NEW Qty with the count of items currently in DB.
 
-            String countSql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ?";
+            String countSql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND status = 'AVAILABLE'";
             int currentTotalItems = 0;
             try (PreparedStatement psCount = connection.prepareStatement(countSql)) {
                 psCount.setString(1, p.getId());
@@ -196,7 +211,7 @@ public class ProductModel {
                 // DECREASE QTY: Delete 'abs(difference)' amount of Placeholders
                 // We strictly delete ONLY items that are PENDING placeholders
                 int removeCount = Math.abs(difference);
-                String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' LIMIT ?";
+                String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE' LIMIT ?";
 
                 try (PreparedStatement pstmDel = connection.prepareStatement(deleteSql)) {
                     pstmDel.setString(1, p.getId());

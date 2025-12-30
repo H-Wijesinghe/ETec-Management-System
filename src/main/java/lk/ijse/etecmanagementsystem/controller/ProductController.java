@@ -124,9 +124,6 @@ public class ProductController implements Initializable {
         FieldsValidation.formatTxtFieldAsNumber(txtQty, false);
 
 
-
-
-
         // 4. Add Listener for Table Selection
         tableProducts.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -225,46 +222,14 @@ public class ProductController implements Initializable {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
             }
         } catch (Exception e) {
-            if(e.getMessage().contains("UNIQUE constraint failed: Product.name")){
+            if(e.getMessage().contains("Duplicate entry") || e.getMessage().contains("UNIQUE constraint failed: Product.name")){
                 showAlert(Alert.AlertType.ERROR, "Validation Error", "Product with the same name already exists.");
                 return;
             }
-            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to save product: " );
+            System.out.println(e.getMessage());
         }
     }
-    // --- CRUD Operations ---
-
-//    private void saveProduct() {
-//        txtId.setText("auto generate!");
-//        if (validateFields()) return;
-//
-//
-//        ProductDTO newProduct = new ProductDTO(
-//
-//                txtName.getText().trim(),
-//                txtDescription.getText().trim(),
-//                Double.parseDouble(txtSellPrice.getText().trim()),
-//                cmbCategory.getValue(),
-//                cmbCondition.getValue(),
-//                Double.parseDouble(txtBuyPrice.getText().trim()),
-//                Integer.parseInt(txtWarranty.getText()),
-//                Integer.parseInt(txtQty.getText()),
-//                selectedImagePath
-//        );
-//        try {
-//            boolean result = productModel.save(newProduct);
-//
-//            if (result) {
-//                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved Successfully!");
-//                reFresh();
-//            } else {
-//                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
-//            }
-//        } catch (Exception e) {
-//            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to save product: " + e.getMessage());
-//        }
-//    }
-
 
     private void updateProduct() {
         // 1. Validation checks (ID existence, regex fields)
@@ -285,17 +250,15 @@ public class ProductController implements Initializable {
 
 
         try {
-            // --- STEP 1: SAFETY CHECK ---
-            // Get the number of "Real" (non-placeholder) items currently in DB
+
             int realItemCount = productModel.getRealItemCount(stockId);
 
-            // If user tries to set Qty lower than the number of actual items, STOP THEM.
             if (newQty < realItemCount) {
                 showAlert(Alert.AlertType.ERROR, "Quantity Error",
                         "Cannot reduce Quantity to " + newQty + ".\n" +
                                 "You have " + realItemCount + " physical items registered.\n" +
                                 "You must manually delete specific items first.");
-                // Reset the Qty field to the safe minimum
+
                 txtQty.setText(String.valueOf(realItemCount));
                 return;
             }
@@ -308,7 +271,6 @@ public class ProductController implements Initializable {
                 return;
             }
 
-            // --- STEP 2: PROCEED WITH UPDATE ---
             ProductDTO selected = new ProductDTO(
                     txtId.getText().trim(),
                     txtName.getText().trim(),
@@ -322,9 +284,6 @@ public class ProductController implements Initializable {
                     selectedImagePath
             );
 
-
-
-            // Call the new Sync method
             boolean result = productModel.updateProductWithQtySync(selected);
 
             if (result) {
@@ -334,72 +293,23 @@ public class ProductController implements Initializable {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
             }
 
-        } catch (SQLException e) {
-            // This catches the specific error thrown from the Model if the DELETE LIMIT fails
-            showAlert(Alert.AlertType.ERROR, "Update Failed", e.getMessage());
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "An unexpected error occurred: " + e.getMessage());
+
+            if(e.getMessage().contains("Duplicate entry") || e.getMessage().contains("UNIQUE constraint failed: Product.name")){
+                showAlert(Alert.AlertType.ERROR, "Validation Error", "Product with the same name already exists.");
+                return;
+            }
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update product: ");
+            System.out.println(e.getMessage());
+
         }
     }
 
-//    private void updateProduct() {
-//        ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-//        if(selected == null){
-//            selected = new ProductDTO();
-//        }
-//        if (txtId.getText() == null || txtId.getText().isEmpty()) {
-//            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to update.");
-//            return;
-//        }
-//        String id = txtId.getText();
-//        try {
-//            ResultSet product = productModel.findById(id);
-//            if(!product.next()){
-//                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " not found for update.");
-//                return;
-//            }
-//
-//        }catch (Exception e){
-//            showAlert(Alert.AlertType.ERROR, "Error", "Error retrieving product for update: " + e.getMessage());
-//            return;
-//        }
-//
-//        if (validateFields()) return;
-//
-//        // Update the object
-//        selected.setId(txtId.getText().trim());
-//        selected.setName(txtName.getText().trim());
-//        selected.setCategory(cmbCategory.getValue());
-//        selected.setCondition(cmbCondition.getValue());
-//        selected.setSellPrice(Double.parseDouble(txtSellPrice.getText()));
-//        selected.setBuyPrice(Double.parseDouble(txtBuyPrice.getText()));
-//        selected.setWarrantyMonth(Integer.parseInt(txtWarranty.getText()));
-//        selected.setQty(Integer.parseInt(txtQty.getText()));
-//        selected.setDescription(txtDescription.getText().trim());
-//        selected.setImagePath(selectedImagePath);
-//
-//        try {
-//            boolean result = productModel.update(selected);
-//
-//            if (result) {
-//                showAlert(Alert.AlertType.INFORMATION, "Success", "Product Updated Successfully!");
-//                reFresh();
-//            } else {
-//                showAlert(Alert.AlertType.ERROR, "Failure", "Failed to update product.");
-//            }
-//        } catch (Exception e) {
-//            showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to update product: " + e.getMessage());
-//        }
-//
-//    }
-
-    // In ProductController.java
-
     private void deleteProduct() {
-        // 1. Get Selection
+
         ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            // Fallback if they typed ID but didn't select from table
+
             if (txtId.getText() == null || txtId.getText().isEmpty()) {
 
                 showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
@@ -420,10 +330,9 @@ public class ProductController implements Initializable {
         }
 
         try {
-            // 2. INSPECT THE ITEMS (The new safety check)
+
             ProductModel.ItemDeleteStatus status = productModel.checkItemStatusForDelete(selected.getId());
 
-            // --- SCENARIO A: BLOCK DELETE (Has History) ---
             if (status.restrictedCount > 0) {
                 showAlert(Alert.AlertType.ERROR, "Deletion Blocked",
                         "Cannot delete this product.\n\n" +
@@ -432,7 +341,6 @@ public class ProductController implements Initializable {
                 return;
             }
 
-            // --- SCENARIO B: WARNING (Has Real Stock) ---
             if (status.realAvailableCount > 0) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Confirm Deletion of Physical Stock");
@@ -442,12 +350,12 @@ public class ProductController implements Initializable {
                                 "Deleting this product will remove these items from the database permanently.\n" +
                                 "Are you sure you want to proceed?");
 
-                // Wait for user response
+
                 if (alert.showAndWait().get() != ButtonType.OK) {
                     return; // User cancelled
                 }
             } else {
-                // --- SCENARIO C: STANDARD DELETE (Only Placeholders or Empty) ---
+
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                         "Are you sure you want to delete " + selected.getName() + "?\n(Only empty slots will be removed)",
                         ButtonType.YES, ButtonType.NO);
@@ -456,9 +364,6 @@ public class ProductController implements Initializable {
                 }
             }
 
-            // 3. EXECUTE DELETE
-            // This calls the robust deleteById method we wrote previously
-            // (which wipes the items first, then the product)
             boolean result = productModel.deleteById(selected.getId());
 
             if (result) {
@@ -473,34 +378,6 @@ public class ProductController implements Initializable {
         }
     }
 
-//    private void deleteProduct() {
-//        ProductDTO selected = tableProducts.getSelectionModel().getSelectedItem();
-//        if(selected == null){
-//            selected = new ProductDTO();
-//        }
-//        if (txtId.getText() == null || txtId.getText().isEmpty()) {
-//            showAlert(Alert.AlertType.WARNING, "Selection Error", "Please select a product to delete.");
-//            return;
-//        }
-//        selected.setId(txtId.getText().trim());
-//
-//        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete " + selected.getName() + "?", ButtonType.YES, ButtonType.NO);
-//        alert.showAndWait();
-//
-//        if (alert.getResult() == ButtonType.YES) {
-//            try {
-//                boolean result = productModel.deleteById(selected.getId());
-//                if (result) {
-//                    showAlert(Alert.AlertType.INFORMATION, "Success", "Product Deleted Successfully!");
-//                    reFresh();
-//                } else {
-//                    showAlert(Alert.AlertType.ERROR, "Failure", "Failed to delete product.");
-//                }
-//            } catch (Exception e) {
-//                showAlert(Alert.AlertType.ERROR, "Database Error", "Failed to delete product: " + e.getMessage());
-//            }
-//        }
-//    }
 
     @FXML
     private void getEnterKeyNav(KeyEvent Event) {
@@ -593,6 +470,7 @@ public class ProductController implements Initializable {
         txtQty.setText(String.valueOf(p.getQty()));
         txtDescription.setText(p.getDescription());
         selectedImagePath = p.getImagePath();
+        txtImagePath.setText(selectedImagePath != null ? selectedImagePath : "@...");
     }
 
     private boolean validateFields() {

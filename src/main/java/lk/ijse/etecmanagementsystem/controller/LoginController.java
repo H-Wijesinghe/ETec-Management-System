@@ -1,20 +1,21 @@
 package lk.ijse.etecmanagementsystem.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.model.LoginModel;
+import lk.ijse.etecmanagementsystem.util.ETecAlerts;
+import lk.ijse.etecmanagementsystem.util.EmailService;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
 import lk.ijse.etecmanagementsystem.service.ButtonStyle;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Optional;
+import java.util.Random;
 
 
 public class LoginController {
@@ -105,6 +106,7 @@ public class LoginController {
         String username = userNameField.getText() == null ? "" : userNameField.getText().trim();
         String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
         int userId = -1;
+        String role;
 
         if (checkIsEmpty(username, userNameBox)) return;
         if (checkIsEmpty(password, passwordBox)) return;
@@ -115,18 +117,21 @@ public class LoginController {
 
                 LoginUtil.setUserName(username);
                 userId = loginModel.getUserId(username);
+                role = loginModel.getUserRole(username);
+
 
                 if(userId == -1) {
-                    System.out.println("Failed to retrieve user ID for " + username);
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Login Error");
-                    alert.setHeaderText(null);
-                    alert.setContentText("An error occurred while retrieving user information. Please try again later.");
-                    alert.showAndWait();
+                ETecAlerts.showAlert(Alert.AlertType.ERROR, "Login Error", "Unable to retrieve user ID. Please contact support.");
+                    return;
+                }
+                if(role == null || role.isEmpty()) {
+                    ETecAlerts.showAlert(Alert.AlertType.ERROR, "Login Error", "Unable to retrieve user role. Please contact support.");
                     return;
                 }
 
                 LoginUtil.setUserId(userId);
+                LoginUtil.setUserRole(role);
+
                 System.out.println("Login successful for user: " + username + " with ID: " + userId);
 
                 try {
@@ -212,6 +217,91 @@ public class LoginController {
         buttonStyle.onMouseAction(loginBtn);
     }
 
+    @FXML
+    private void handleForgotPassword() {
 
+        String username = userNameField.getText() == null ? "" : userNameField.getText().trim();
+        if(username.isEmpty()) {
+            ETecAlerts.showAlert(Alert.AlertType.WARNING, "Input Required", "Please enter your username before proceeding.");
+            return;
+        }
+
+        if(!checkUserNameExists(username)) {
+            ETecAlerts.showAlert(Alert.AlertType.ERROR, "Email Error", "Invalid username. Please enter a registered username.");
+            return;
+        }
+
+        // 1. Show a dialog to get the user's email
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Get Password to Email");
+        dialog.setHeaderText("Forgot your password?");
+        dialog.setContentText("Please enter your registered email:");
+
+
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (!result.isPresent()) {
+            System.out.println("User closed the dialog.");
+            return;
+        }
+
+        String email = result.get().trim();
+
+        if (email.isEmpty()) {
+            ETecAlerts.showAlert(Alert.AlertType.WARNING, "Input Required", "Email input cannot be empty.");
+            return;
+        }
+
+        System.out.println("User entered: " + email);
+
+
+            if (isValidEmailInDatabase(username, email)) {
+
+                String userPassword = getUserPassword(username);
+                if (userPassword == null) {
+                    return;
+                }
+                // Send the password to the user's email
+                boolean isSent = EmailService.sendUserPasswordToEmail(email, userPassword);
+                if (!isSent) {
+                    return;
+                }
+                // Show confirmation alert
+                ETecAlerts.showAlert(Alert.AlertType.INFORMATION, "Email Successfully Sent", "Email Sent");
+
+            } else {
+                ETecAlerts.showAlert(Alert.AlertType.ERROR, "Email Error", "The provided email does not match our records for the given username.");
+            }
+
+    }
+
+    private boolean checkUserNameExists(String username) {
+        try {
+            return loginModel.validateUserName(username);
+        } catch (SQLException e) {
+            ETecAlerts.showAlert(Alert.AlertType.INFORMATION,"Database Error", "An error occurred while accessing the database. Please try again later.");
+            return false;
+        }
+    }
+
+    private String getUserPassword(String username) {
+        try {
+            return loginModel.getUserPassword(username);
+        } catch (SQLException e) {
+            ETecAlerts.showAlert(Alert.AlertType.INFORMATION,"Database Error", "An error occurred while accessing the database. Please try again later.");
+            return null;
+        }
+    }
+
+    private boolean isValidEmailInDatabase(String userName, String email) {
+
+        try {
+            return loginModel.validateUserEmail(userName, email);
+        } catch (SQLException e) {
+            ETecAlerts.showAlert(Alert.AlertType.INFORMATION,"Database Error", "An error occurred while accessing the database. Please try again later.");
+            return false;
+        }
+    }
 }
 

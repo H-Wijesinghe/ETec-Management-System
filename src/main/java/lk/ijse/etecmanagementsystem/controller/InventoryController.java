@@ -19,11 +19,10 @@ import lk.ijse.etecmanagementsystem.component.SkeletonCard;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.InventoryModel;
-import lk.ijse.etecmanagementsystem.service.InventoryService;
+import lk.ijse.etecmanagementsystem.util.InventoryUtil;
 import lk.ijse.etecmanagementsystem.service.ThreadService;
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
-import lk.ijse.etecmanagementsystem.util.ProductUtil;
 import javafx.scene.input.MouseEvent;
 import lk.ijse.etecmanagementsystem.util.Stock;
 
@@ -64,7 +63,7 @@ public class InventoryController {
     @FXML private  Button btnReset;
 
 
-    private final InventoryService inventoryService = new InventoryService();
+    private final InventoryUtil inventoryUtil = new InventoryUtil();
 
     private final ObservableList<ProductDTO> productDataList = FXCollections.observableArrayList();
     private List<ProductDTO> allFetchedData = new ArrayList<>(); // Stores ALL results from DB
@@ -233,7 +232,7 @@ public class InventoryController {
                 Thread.sleep(100);
 
                 // Fetch ALL matching data from Service
-                return inventoryService.getFilteredProducts(productDataList, txtSearch.getText(),
+                return inventoryUtil.getFilteredProducts(productDataList, txtSearch.getText(),
                         cmbCategory.getValue(), cmbCondition.getValue(), cmbStock.getValue());
             }
         };

@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lk.ijse.etecmanagementsystem.util.ETecAlerts;
 import lk.ijse.etecmanagementsystem.util.ImageUtils;
 
 import java.io.File;
@@ -71,6 +72,7 @@ public class ImagePopupController {
     @FXML
     protected void handleConfirmButtonClick() {
         if (selectedFile != null) {
+            ETecAlerts.showAlert(Alert.AlertType.INFORMATION, "Processing Image", "Processing and saving the image. Please wait...");
             try {
                 // Define your new settings
 
@@ -81,7 +83,14 @@ public class ImagePopupController {
                 // Combine it with the rest of your path
                 // Result: C:\Users\HASITHA\Documents\ETec Management System\images\
                 String destinationPath = userHome + File.separator + "Documents" + File.separator + "ETec Management System" + File.separator + "images" + File.separator;
-                String newName = productName + "_" + System.currentTimeMillis(); // New Name (Renaming)
+
+                // Sanitize the product name to create a safe file name
+                String rawName = productName;
+                // Replace any invalid filename characters with underscores
+                String safeName = rawName.replaceAll("[^a-zA-Z0-9\\.\\- ]", "_");
+                // Append timestamp to ensure uniqueness
+                String newName = safeName + "_" + System.currentTimeMillis(); // New Name (Renaming)
+
                 int newWidth = 200;  // Resize Width
                 int newHeight = 200; // Resize Height
 
@@ -99,9 +108,12 @@ public class ImagePopupController {
                 }
 
             } catch (IOException e) {
+                ETecAlerts.showAlert(Alert.AlertType.ERROR, "Image Processing Error", "Failed to process and save the image.");
                 e.printStackTrace();
                 // Handle error (e.g., show an Alert to the user)
             }
+        }else {
+            ETecAlerts.showAlert(Alert.AlertType.WARNING, "No Image Selected", "Please select an image before confirming.");
         }
     }
 

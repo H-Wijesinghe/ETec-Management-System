@@ -2,6 +2,7 @@
 
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -100,6 +101,36 @@
                         </VBox>
                     </children>
                 </GridPane>
+
+                <HBox prefHeight="400.0" spacing="20.0">
+                    <children>
+                        <AnchorPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 10;" HBox.hgrow="ALWAYS">
+                            <children>
+                                <BarChart fx:id="chartSales" layoutX="10.0" layoutY="14.0" legendVisible="false" stylesheets="@../css/DashboardChartStyle.css" title="Revenue (Last 7 Days)" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="14.0">
+                                    <xAxis>
+                                        <CategoryAxis label="Date" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Amount (Rs)" side="LEFT" />
+                                    </yAxis>
+                                </BarChart>
+                            </children>
+                        </AnchorPane>
+
+                        <AnchorPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 10;" HBox.hgrow="ALWAYS">
+                            <children>
+                                <LineChart fx:id="chartTraffic" layoutX="10.0" layoutY="10.0" stylesheets="@../css/DashboardChartStyle.css" title="Daily Activity (Sales vs Repairs)" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                    <xAxis>
+                                        <CategoryAxis label="Date" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Count" side="LEFT" />
+                                    </yAxis>
+                                </LineChart>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </HBox>
                 
                         <HBox prefHeight="350.0" spacing="20.0">
                             <children>
@@ -126,19 +157,6 @@
                                 </VBox>
                             </children>
                         </HBox>
-
-                <AnchorPane style="-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 5;">
-                    <children>
-                        <BarChart fx:id="chartSales" title="Sales Performance (Last 7 Days)" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <xAxis>
-                                <CategoryAxis label="Date" side="BOTTOM" />
-                            </xAxis>
-                            <yAxis>
-                                <NumberAxis label="Revenue" side="LEFT" />
-                            </yAxis>
-                        </BarChart>
-                    </children>
-                </AnchorPane>
             </children>
         </VBox>
     </content>

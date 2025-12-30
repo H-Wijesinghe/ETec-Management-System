@@ -45,7 +45,16 @@ public class LayoutController {
 
 
         String username = LoginUtil.getUserName();
+        String userRole = LoginUtil.getUserRole();
         btnUser.setText(username);
+
+        if (userRole.equals("ADMIN") || userRole.equals("MANAGER")) {
+            btnReports.setVisible(true);
+            btnUser.setVisible(true);
+        } else {
+            btnReports.setVisible(false);
+            btnUser.setVisible(false);
+        }
 
         System.out.println("is loadingThead deamon: "+ ThreadService.getInventoryLoadingThread().isDaemon());
         System.out.println("is loadingThead alive: "+ThreadService.getInventoryLoadingThread().isAlive());

@@ -82,13 +82,13 @@ public class TransactionsModel {
 
     // --- 5. Get Dashboard Stats (Income/Expense) ---
     // Returns an array: [TotalIncome, TotalExpense]
-    public double[] getDashboardStats(LocalDate date) throws SQLException {
+    public double[] getDashboardStats(Date fromDate, Date toDate) throws SQLException {
         String sql = "SELECT " +
                 "SUM(CASE WHEN flow = 'IN' THEN amount ELSE 0 END) as total_in, " +
                 "SUM(CASE WHEN flow = 'OUT' THEN amount ELSE 0 END) as total_out " +
-                "FROM TransactionRecord WHERE DATE(transaction_date) = ?";
+                "FROM TransactionRecord WHERE DATE(transaction_date) BETWEEN ? AND ?";
 
-        ResultSet rs = CrudUtil.execute(sql, Date.valueOf(date));
+        ResultSet rs = CrudUtil.execute(sql, fromDate, toDate);
         double[] newDoubleArray;
         if (rs.next()) {
 

@@ -36,7 +36,7 @@ public class App extends Application {
         primaryStage.setResizable(false);
         primaryStage.setMaximized(false);
         primaryStage.setTitle("ETec Management System - Login");
-        primaryStage.getIcons().add(new Image(Objects.requireNonNull(App.class.getResourceAsStream("images/logo.png"))));
+        primaryStage.getIcons().add(new Image(Objects.requireNonNull(App.class.getResourceAsStream("images/White256x256.png"))));
         primaryStage.setMinWidth(1000);
         primaryStage.setMinHeight(600);
         primaryStage.setScene(sceneLogin);

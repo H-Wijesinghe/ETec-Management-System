@@ -6,20 +6,20 @@ public class UserDTO {
     private  String contact;
     private String address;
     private  String email;
-    private String username;
+    private String userName;
     private String password;
     private String role;
 
     public UserDTO() {
     }
 
-    public UserDTO(int userId, String name, String contact, String address, String email, String username, String password, String role) {
+    public UserDTO(int userId, String name, String contact, String address, String email, String userName, String password, String role) {
         this.userId = userId;
         this.name = name;
         this.contact = contact;
         this.address = address;
         this.email = email;
-        this.username = username;
+        this.userName = userName;
         this.password = password;
         this.role = role;
     }
@@ -64,12 +64,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getPassword() {
@@ -96,7 +96,7 @@ public class UserDTO {
                 ", contact='" + contact + '\'' +
                 ", address='" + address + '\'' +
                 ", email='" + email + '\'' +
-                ", username='" + username + '\'' +
+                ", username='" + userName + '\'' +
                 ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
                 '}';
