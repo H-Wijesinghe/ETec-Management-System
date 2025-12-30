@@ -122,8 +122,19 @@
                   <Label text="📝" textFill="#cbd5e1" />
                </graphic>
             </Button>
+            <Button fx:id="btnUser" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnUserClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Users" textFill="#cbd5e1">
+               <padding>
+                  <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
+               </padding>
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <graphic>
+                  <Label text="👤" textFill="#cbd5e1" />
+               </graphic>
+            </Button>
             <Region VBox.vgrow="ALWAYS" />
-            <Button fx:id="btnUser" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnUserClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="User" textFill="#cbd5e1">
+            <Button fx:id="btnAdmin" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#btnAdminClicked" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Admin" textFill="#cbd5e1">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>

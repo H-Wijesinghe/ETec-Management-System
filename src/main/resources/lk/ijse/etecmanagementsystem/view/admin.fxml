@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="800.0" prefWidth="1050.0" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.AdminController">
+   <top>
+
+                  <HBox alignment="CENTER_LEFT" prefHeight="50.0" style="-fx-background-color: #2c3e50;" BorderPane.alignment="CENTER">
+                      <children>
+                          <Label text="Administrator Dashboard" textFill="WHITE">
+                              <font>
+                                  <Font name="System Bold" size="24.0" />
+                              </font>
+                          </Label>
+                      </children>
+                      <padding>
+                          <Insets left="30.0" right="30.0" />
+                      </padding>
+                  </HBox>
+   </top>
+   <center>
+
+                  <VBox spacing="20.0" style="-fx-background-color: #f3f4f6;" BorderPane.alignment="CENTER">
+                      <padding>
+                          <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                      </padding>
+                      <children>
+
+                          <VBox maxWidth="Infinity" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);">
+                              <padding>
+                                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                              </padding>
+                              <children>
+                                  <Label text="Database Maintenance" textFill="#2c3e50">
+                                      <font>
+                                          <Font name="System Bold" size="18.0" />
+                                      </font>
+                                  </Label>
+                                  <Label text="Manage your system data securely. Regular backups are recommended to prevent data loss." textFill="#7f8c8d" wrapText="true" />
+
+                                  <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                      <children>
+                                          <Button fx:id="btnBackup" onAction="#handleBackup" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: #27ae60; -fx-cursor: hand;" text="Create Backup" textFill="WHITE">
+                                              <font>
+                                                  <Font name="System Bold" size="14.0" />
+                                              </font>
+                                              <effect>
+                                                  <DropShadow color="#27ae604d" offsetY="3.0" />
+                                              </effect>
+                                          </Button>
+                                      </children>
+                                      <VBox.margin>
+                                          <Insets top="10.0" />
+                                      </VBox.margin>
+                                  </HBox>
+                              </children>
+                          </VBox>
+
+                      </children>
+                  </VBox>
+   </center>
+</BorderPane>

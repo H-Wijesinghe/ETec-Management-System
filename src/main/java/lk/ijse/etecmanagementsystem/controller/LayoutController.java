@@ -30,6 +30,7 @@ public class LayoutController {
     @FXML private Button btnReports;
     @FXML private Button btnLogout;
     @FXML private Button btnUser;
+    @FXML private Button btnAdmin;
 
     @FXML private StackPane contentArea;
 
@@ -46,14 +47,16 @@ public class LayoutController {
 
         String username = LoginUtil.getUserName();
         String userRole = LoginUtil.getUserRole();
-        btnUser.setText(username);
+        btnAdmin.setText(username);
 
         if (userRole.equals("ADMIN") || userRole.equals("MANAGER")) {
             btnReports.setVisible(true);
             btnUser.setVisible(true);
+            btnAdmin.setVisible(true);
         } else {
             btnReports.setVisible(false);
             btnUser.setVisible(false);
+            btnAdmin.setVisible(false);
         }
 
         System.out.println("is loadingThead deamon: "+ ThreadService.getInventoryLoadingThread().isDaemon());
@@ -144,6 +147,27 @@ public class LayoutController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void  btnAdminClicked()  {
+        menuBar.setActive(btnAdmin);
+        try {
+            contentArea.getChildren().setAll(App.loadFXML("admin"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void btnUserClicked()  {
+        menuBar.setActive(btnUser);
+        try {
+            contentArea.getChildren().setAll(App.loadFXML("user"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void btnLogoutClicked()  {
         menuBar.setActive(btnLogout);
@@ -162,15 +186,7 @@ public class LayoutController {
             e.printStackTrace();
         }
     }
-    @FXML
-    private void btnUserClicked()  {
-        menuBar.setActive(btnUser);
-        try {
-            contentArea.getChildren().setAll(App.loadFXML("user"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     private void setupMenuBar() {
 
@@ -184,6 +200,7 @@ public class LayoutController {
         menuBar.setupButton(btnReports);
         menuBar.setupButton(btnLogout);
         menuBar.setupButton(btnUser);
+        menuBar.setupButton(btnAdmin);
     }
 
 
