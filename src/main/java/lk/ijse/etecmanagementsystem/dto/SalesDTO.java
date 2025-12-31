@@ -113,6 +113,7 @@ public class SalesDTO {
     }
 
     public int getCustomerWarrantyMonths() {
+
         return customerWarrantyMonths;
     }
 

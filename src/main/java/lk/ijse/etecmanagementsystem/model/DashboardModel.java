@@ -79,7 +79,8 @@ public class DashboardModel {
                 "WHERE s.payment_status != 'PAID' " +
                 "UNION ALL " +
                 "SELECT 'REPAIR' as type, r.repair_id as ref_id, c.name, (r.total_amount - r.paid_amount) as due " +
-                "FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status != 'PAID' AND r.status != 'CANCELLED'";
+                "FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id " +
+                "WHERE r.payment_status != 'PAID' AND r.status = 'DELIVERED'";
 
         Connection conn = DBConnection.getInstance().getConnection();
         ResultSet rs = conn.createStatement().executeQuery(sql);

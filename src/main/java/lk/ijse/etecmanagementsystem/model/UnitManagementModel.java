@@ -53,10 +53,8 @@ public class UnitManagementModel {
     public boolean createPlaceholderItems(int stockId, int qty) throws SQLException {
         String sql = "INSERT INTO ProductItem (stock_id, serial_number, status, added_date) VALUES (?, ?, 'AVAILABLE', NOW())";
 
-        Connection conn = null;
+        Connection conn = DBConnection.getInstance().getConnection();
         try {
-            conn = DBConnection.getInstance().getConnection();
-            conn.setAutoCommit(false);
 
             try (PreparedStatement pstm = conn.prepareStatement(sql)) {
                 for (int i = 0; i < qty; i++) {
@@ -69,13 +67,11 @@ public class UnitManagementModel {
                 }
                 pstm.executeBatch();
             }
-            conn.commit();
+
             return true;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (conn != null) conn.rollback();
-            throw e;
-        } finally {
-            if (conn != null) conn.setAutoCommit(true);
+            throw new  SQLException("Failed to create placeholder items: " + e.getMessage());
         }
     }
 
@@ -168,49 +164,49 @@ public class UnitManagementModel {
                 }
             }
 
-            int finalId;
+//            int finalId ;
 
-            if (existingId != -1) {
-                // --- SCENARIO A: Placeholder Found -> UPDATE it ---
-                String updateSql = "UPDATE ProductItem SET serial_number = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
-                try (PreparedStatement updatePstm = conn.prepareStatement(updateSql)) {
-                    updatePstm.setString(1, dto.getSerialNumber());
-                    updatePstm.setInt(2, dto.getCustomerWarranty());
-                    updatePstm.setInt(3, existingId);
-                    updatePstm.executeUpdate();
-                }
-                finalId = existingId; // Return the ID of the slot we just filled
-            } else {
-                // --- SCENARIO B: No Placeholder -> INSERT New ---
-                String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, customer_warranty_mo, status, added_date) VALUES (?, ?, ?, 'AVAILABLE', NOW())";
-
-                try (PreparedStatement insertPstm = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-                    insertPstm.setInt(1, dto.getStockId());
-                    insertPstm.setString(2, dto.getSerialNumber());
-                    insertPstm.setInt(3, dto.getCustomerWarranty());
-
-                    int affectedRows = insertPstm.executeUpdate();
-                    if (affectedRows == 0) throw new SQLException("Creating item failed, no rows affected.");
-
-                    try (ResultSet generatedKeys = insertPstm.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            finalId = generatedKeys.getInt(1);
-                        } else {
-                            throw new SQLException("Creating item failed, no ID obtained.");
-                        }
-                    }
-                }
-
-                // CRITICAL: Since we added a NEW line, we must increase the Product Qty
-                String updateQtySql = "UPDATE Product SET qty = qty + 1 WHERE stock_id = ?";
-                try (PreparedStatement qtyPstm = conn.prepareStatement(updateQtySql)) {
-                    qtyPstm.setInt(1, dto.getStockId());
-                    qtyPstm.executeUpdate();
-                }
-            }
+//            if (existingId != -1) {
+//                // --- SCENARIO A: Placeholder Found -> UPDATE it ---
+//                String updateSql = "UPDATE ProductItem SET serial_number = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
+//                try (PreparedStatement updatePstm = conn.prepareStatement(updateSql)) {
+//                    updatePstm.setString(1, dto.getSerialNumber());
+//                    updatePstm.setInt(2, dto.getCustomerWarranty());
+//                    updatePstm.setInt(3, existingId);
+//                    updatePstm.executeUpdate();
+//                }
+//                finalId = existingId; // Return the ID of the slot we just filled
+//            } else {
+//                // --- SCENARIO B: No Placeholder -> INSERT New ---
+//                String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, customer_warranty_mo, status, added_date) VALUES (?, ?, ?, 'AVAILABLE', NOW())";
+//
+//                try (PreparedStatement insertPstm = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+//                    insertPstm.setInt(1, dto.getStockId());
+//                    insertPstm.setString(2, dto.getSerialNumber());
+//                    insertPstm.setInt(3, dto.getCustomerWarranty());
+//
+//                    int affectedRows = insertPstm.executeUpdate();
+//                    if (affectedRows == 0) throw new SQLException("Creating item failed, no rows affected.");
+//
+//                    try (ResultSet generatedKeys = insertPstm.getGeneratedKeys()) {
+//                        if (generatedKeys.next()) {
+//                            finalId = generatedKeys.getInt(1);
+//                        } else {
+//                            throw new SQLException("Creating item failed, no ID obtained.");
+//                        }
+//                    }
+//                }
+//
+//                // CRITICAL: Since we added a NEW line, we must increase the Product Qty
+//                String updateQtySql = "UPDATE Product SET qty = qty + 1 WHERE stock_id = ?";
+//                try (PreparedStatement qtyPstm = conn.prepareStatement(updateQtySql)) {
+//                    qtyPstm.setInt(1, dto.getStockId());
+//                    qtyPstm.executeUpdate();
+//                }
+//            }
 
             conn.commit();
-            return finalId;
+            return existingId <= 0 ? -1 : existingId;
 
         } catch (SQLException e) {
             if (conn != null) conn.rollback();

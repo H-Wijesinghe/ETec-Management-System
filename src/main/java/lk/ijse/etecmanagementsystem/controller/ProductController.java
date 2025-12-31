@@ -212,12 +212,10 @@ public class ProductController implements Initializable {
             int newStockId = productModel.saveProductAndGetId(newProduct);
 
             if (newStockId > 0) {
-                // 2. Create the empty slots (e.g., 10 "PENDING" items)
-                UnitManagementModel unitModel = new UnitManagementModel();
-                unitModel.createPlaceholderItems(newStockId, newProduct.getQty());
 
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Product Saved with " + newProduct.getQty() + " empty slots created!");
                 reFresh();
+
             } else {
                 showAlert(Alert.AlertType.ERROR, "Failure", "Failed to save product.");
             }

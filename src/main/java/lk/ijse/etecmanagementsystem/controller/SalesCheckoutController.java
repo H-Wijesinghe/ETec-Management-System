@@ -31,10 +31,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SalesCheckoutController {
 
@@ -211,6 +208,8 @@ public class SalesCheckoutController {
                 paymentStatus,     // Payment Status Enum
                 "Point of Sale Transaction" // Description
         );
+
+
 
         // 3. Save to Database via SalesModel
         try {

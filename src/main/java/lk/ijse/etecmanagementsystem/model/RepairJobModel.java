@@ -165,7 +165,7 @@ public class RepairJobModel {
         List<RepairPartTM> list = new ArrayList<>();
 
         // JOIN: RepairItem -> ProductItem -> Product (To get Name & Price)
-        String sql = "SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, p.sell_price " +
+        String sql = "SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, ri.unit_price " +
                 "FROM RepairItem ri " +
                 "JOIN ProductItem pi ON ri.item_id = pi.item_id " +
                 "JOIN Product p ON pi.stock_id = p.stock_id " +
@@ -184,7 +184,7 @@ public class RepairJobModel {
                     rs.getString("name"),
                     rs.getString("serial_number"),
                     fromConditionString(rs.getString("p_condition")),
-                    rs.getDouble("sell_price")
+                    rs.getDouble("unit_price")
             ));
         }
         return list;
@@ -217,8 +217,8 @@ public class RepairJobModel {
             // B. ADD NEW PARTS
             // We check if the link already exists to avoid duplicates
             String sqlCheck = "SELECT id FROM RepairItem WHERE repair_id=? AND item_id=?";
-            String sqlInsertLink = "INSERT INTO RepairItem (repair_id, item_id) VALUES (?, ?)";
-            String sqlMarkSold = "UPDATE ProductItem SET status='IN_REPAIR_USE', sold_date=NOW() WHERE item_id=?";
+            String sqlInsertLink = "INSERT INTO RepairItem (repair_id, item_id, unit_price) VALUES (?, ?, ?)";
+            String sqlMarkSold = "UPDATE ProductItem SET status='IN_REPAIR_USE' WHERE item_id=?";
             String sqlFixPlaceholders = "UPDATE ProductItem " +
                     "SET serial_number = CONCAT('REPAIR-', SUBSTRING(serial_number, 9)) " +
                     "WHERE item_id=? AND serial_number LIKE 'PENDING-%'";
@@ -238,9 +238,10 @@ public class RepairJobModel {
                     // 1. Insert Link in RepairItem
                     pstmLink.setInt(1, repairId);
                     pstmLink.setInt(2, part.getItemId());
+                    pstmLink.setDouble(3, part.getUnitPrice());
                     pstmLink.addBatch();
 
-                    // 2. Mark Stock as SOLD in ProductItem
+                    // 2. Mark Stock as IN_REPAIR_USE
                     pstmSold.setInt(1, part.getItemId());
                     pstmSold.addBatch();
 
@@ -264,7 +265,8 @@ public class RepairJobModel {
             // C. REMOVE RETURNED PARTS (Restock)
             if (!returnedParts.isEmpty()) {
                 String sqlDeleteLink = "DELETE FROM RepairItem WHERE repair_id=? AND item_id=?";
-                String sqlRestock = "UPDATE ProductItem SET status='AVAILABLE', sold_date=NULL WHERE item_id=?";
+                String sqlRestock = "UPDATE ProductItem SET status='AVAILABLE' WHERE item_id=?";
+
                 String sqlReplacePlaceholders = "UPDATE ProductItem " +
                         "SET serial_number = CONCAT('PENDING-', SUBSTRING(serial_number, 8)) " +
                         "WHERE item_id=? AND serial_number LIKE 'REPAIR-%'";

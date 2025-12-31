@@ -1,5 +1,6 @@
 package lk.ijse.etecmanagementsystem.model;
 
+import javafx.scene.control.Alert;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
@@ -44,6 +45,65 @@ public class SalesModel {
         return itemList;
     }
 
+    public int getPendingItemCount(int stockId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS pending_count FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%'";
+
+        try(ResultSet rs = CrudUtil.execute(sql, stockId)) {
+            if (rs.next()) {
+                return rs.getInt("pending_count");
+            }
+        }
+        return 0;
+    }
+
+    public List<ItemCartTM> replacePendingSerialNumberAndGetIds(ItemCartTM cartItem, int qty) throws SQLException {
+        String sqlSelectPending = "SELECT item_id FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' LIMIT ?";
+        String sqlUpdateSerial = "UPDATE ProductItem SET serial_number = ? WHERE item_id = ?";
+
+        List<ItemCartTM> updatedItems = new ArrayList<>();
+
+
+        String sqlGetStockId = "SELECT stock_id FROM ProductItem WHERE item_id = ?";
+        int stockId = -1;
+
+        try(ResultSet rsStock = CrudUtil.execute(sqlGetStockId, cartItem.getItemId())) {
+            if (rsStock.next()) {
+                stockId = rsStock.getInt("stock_id");
+            } else {
+                throw new SQLException("Item ID not found in database: " + cartItem.getItemId());
+            }
+        }
+
+        try(ResultSet rs = CrudUtil.execute(sqlSelectPending, stockId, qty)) {
+
+
+
+
+            while (rs.next()) {
+                int itemId = rs.getInt("item_id");
+
+                CrudUtil.execute(sqlUpdateSerial, null, itemId);
+                ItemCartTM updatedItem = new ItemCartTM(
+                        itemId,
+                        cartItem.getItemName(),
+                        null,
+                        cartItem.getWarrantyMonths(),
+                        1,// Each item now has qty = 1
+                        cartItem.getCondition(),
+                        cartItem.getUnitPrice(),
+                        cartItem.getDiscount(),
+                        cartItem.getTotal()
+                );
+                updatedItems.add(updatedItem);
+            }
+        }
+        return updatedItems;
+
+
+    }
+
+
+
     /**
      * THE MAIN TRANSACTION method.
      * 1. Saves Sale Header
@@ -58,6 +118,21 @@ public class SalesModel {
 
             // 1. Start Transaction
             con.setAutoCommit(false);
+
+
+            List<ItemCartTM> finalItemsToSave = new ArrayList<>();
+
+            for (ItemCartTM item : cartItems) {
+                if (item.getQuantity() > 1) {
+
+                    List<ItemCartTM> batchItems = replacePendingSerialNumberAndGetIds(item, item.getQuantity());
+                    finalItemsToSave.addAll(batchItems);
+
+                } else {
+                    finalItemsToSave.add(item);
+                }
+            }
+            cartItems = finalItemsToSave;
 
             // ---------------------------------------------------------------------------------
             // STEP 2: Insert into Sales Table
@@ -107,36 +182,43 @@ public class SalesModel {
             // ---------------------------------------------------------------------------------
             // STEP 3: Process Items (Insert SalesItem + Update ProductItem)
             // ---------------------------------------------------------------------------------
-            String sqlSalesItem = "INSERT INTO SalesItem (sale_id, item_id, qty, customer_warranty_months, "+
-                    "unit_price, discount, total) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sqlSalesItem = "INSERT INTO SalesItem (sale_id, item_id, customer_warranty_months, " +
+                    "unit_price, discount) VALUES (?, ?, ?, ?, ?)";
 
-            String sqlUpdateProductItem = "UPDATE ProductItem SET status = 'SOLD', sold_date = ?, " +
+            String sqlUpdateProductItem = "UPDATE ProductItem SET status = 'SOLD', sold_date = NOW(), " +
                     "customer_warranty_mo = ? WHERE item_id = ?";
+
+            String sqlUpdateProductQuantity = "UPDATE Product p " +
+                    "JOIN ProductItem pi ON p.stock_id = pi.stock_id " +
+                    "SET p.qty = p.qty - 1 " +
+                    "WHERE pi.item_id = ?";
 
             PreparedStatement pstmSalesItem = con.prepareStatement(sqlSalesItem);
             PreparedStatement pstmUpdateItem = con.prepareStatement(sqlUpdateProductItem);
+            PreparedStatement pstmUpdateProductQty = con.prepareStatement(sqlUpdateProductQuantity);
 
             for (ItemCartTM item : cartItems) {
                 // A. Add to SalesItem Table
                 pstmSalesItem.setInt(1, saleId);
                 pstmSalesItem.setInt(2, item.getItemId());
-                pstmSalesItem.setInt(3, item.getQuantity());
-                pstmSalesItem.setInt(4, salesDTO.getCustomerWarrantyMonths()); // Using SalesDTO warranty for all items
-                pstmSalesItem.setDouble(5, item.getUnitPrice());
-                pstmSalesItem.setDouble(6, item.getDiscount());
-                pstmSalesItem.setDouble(7, item.getTotal());
+                pstmSalesItem.setInt(3, item.getWarrantyMonths());
+                pstmSalesItem.setDouble(4, item.getUnitPrice());
+                pstmSalesItem.setDouble(5, item.getDiscount());
                 pstmSalesItem.addBatch();
 
                 // B. Update ProductItem Table (Mark as SOLD)
-                pstmUpdateItem.setTimestamp(1, new Timestamp(new java.util.Date().getTime())); // sold_date = now
-                // Use warranty from SaleDTO or specific item logic? using SalesDTO logic for now as per schema implies flexibility
-                pstmUpdateItem.setInt(2, salesDTO.getCustomerWarrantyMonths());
-                pstmUpdateItem.setInt(3, item.getItemId());
+                pstmUpdateItem.setInt(1, item.getWarrantyMonths());
+                pstmUpdateItem.setInt(2, item.getItemId());
                 pstmUpdateItem.addBatch();
+
+                // C. Update Product Quantity
+                pstmUpdateProductQty.setInt(1, item.getItemId());
+                pstmUpdateProductQty.addBatch();
             }
 
             pstmSalesItem.executeBatch();
             pstmUpdateItem.executeBatch();
+            pstmUpdateProductQty.executeBatch();
 
             // ---------------------------------------------------------------------------------
             // STEP 4: Record Transaction (Money In)
@@ -184,7 +266,7 @@ public class SalesModel {
             System.out.println("Transaction failed: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            if(con != null) {
+            if (con != null) {
                 try {
                     con.rollback();
                 } catch (SQLException ex) {

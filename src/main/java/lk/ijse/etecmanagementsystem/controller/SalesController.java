@@ -237,6 +237,8 @@ public class SalesController implements Initializable {
         }
     }
 
+
+
     @FXML
     private void handleAddToCartAction() {
 
@@ -271,6 +273,23 @@ public class SalesController implements Initializable {
 
         String conditionText = cmbCondition.getValue() == null ? "N/A" : cmbCondition.getValue().toString();
         InventoryItemDTO selectedInventoryItem = tblProductInventory.getSelectionModel().getSelectedItem();
+
+        // Validation: Serial Number with Quantity > 1
+        if( serialNumber.isEmpty() && qty > 1) {
+
+            try{
+                int productId = productModel.getIdByName(itemName);
+                int placeholderCount = salesModel.getPendingItemCount(productId);
+                if(qty > placeholderCount) {
+                    ETecAlerts.showAlert(Alert.AlertType.WARNING, "Not enough Quantity", "Insufficient Quantity");
+                    return;
+                }
+            } catch (SQLException e) {
+                ETecAlerts.showAlert(Alert.AlertType.ERROR, "Failed to generate placeholder serial number:", "Database error");
+                System.out.println(e.getMessage());
+                return;
+            }
+        }
 
 
         double calculatedTotal = (price * qty) - discount;
@@ -362,10 +381,12 @@ public class SalesController implements Initializable {
             return;
         }
 
-        if (isItemAlreadyInCart(item.getSerialNo())) {
+        if ((isItemAlreadyInCart(item.getSerialNo()))) {
             showAlert(Alert.AlertType.WARNING, "This serial number is already in the cart.");
             return;
         }
+
+
 
         cartItemList.add(item);
         calculateTotals();
@@ -392,13 +413,13 @@ public class SalesController implements Initializable {
                 cartItem.getSerialNo(),
                 cartItem.getWarrantyMonths()
         );
-        int newStockId = 0;
+        int newItemId = 0;
         try{
-            newStockId = unitManagementModel.addItemAndGetGeneratedId(productItemDTO);
-            if(newStockId > 0){
-                cartItem.setItemId(newStockId);
+            newItemId = unitManagementModel.addItemAndGetGeneratedId(productItemDTO);
+            if(newItemId != -1){
+                cartItem.setItemId(newItemId);
             } else {
-                showAlert(Alert.AlertType.ERROR, "Failed to add new item to inventory.");
+                ETecAlerts.showAlert(Alert.AlertType.WARNING,"Not Enough Stock","Insufficient Stock to add the item.");
                 return ;
             }
         } catch (Exception e) {
@@ -520,39 +541,6 @@ public class SalesController implements Initializable {
         }
 
     }
-
-//    public void generateReport() {
-//        try {
-//            // 1. Load the report template from your resources
-//            // Note: The path must start with a slash /
-//            InputStream reportStream = App.class.getResourceAsStream("reports/salesReceipt.jrxml");
-//
-//            if (reportStream == null) {
-//                System.out.println("File not found! Check the path.");
-//                return;
-//            }
-//
-//            // 2. Compile the report (from .jrxml to .jasper)
-//            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-//
-//            // 3. Create parameters (Empty for now, we will use this later for titles/dates)
-//            Map<String, Object> parameters = new HashMap<>();
-//
-//            // 4. Create an empty data source (Just to test the layout)
-//            // JREmptyDataSource(1) means "fake 1 row of data so the report prints once"
-//            JREmptyDataSource dataSource = new JREmptyDataSource(1);
-//
-//            // 5. Fill the report (Combine Template + Data)
-//            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-//
-//            // 6. View the report (Opens a separate window with the PDF preview)
-//            // 'false' means: Close the report window ONLY, not the whole app, when you click X
-//            JasperViewer.viewReport(jasperPrint, false);
-//
-//        } catch (JRException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private boolean handleCustomerAction() {
         CustomerDTO selectedCustomer = null;

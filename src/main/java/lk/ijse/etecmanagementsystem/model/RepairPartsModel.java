@@ -41,6 +41,8 @@ public class RepairPartsModel {
         return list;
     }
 
+
+
     private ProductCondition fromConditionString(String s) {
         if (s == null) return ProductCondition.BOTH;
         try {

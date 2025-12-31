@@ -5,30 +5,42 @@
 	<parameter name="saleId" class="java.lang.Integer"/>
 	<query language="SQL"><![CDATA[SELECT
     s.sale_id,
-    DATE_FORMAT(s.sale_date, '%Y-%m-%d') as sale_date,
-    DATE_FORMAT(s.sale_date, '%h:%i:%s %p') as sale_time,
-    u.name as cashier_name,
-    c.name AS cus_name,
-    c.number AS cus_contact,
-    c.email AS cus_email,
-    c.address AS cus_address,
-    s.sub_total,
-    s.discount,
-    s.grand_total,
-    s.paid_amount,
-    (s.grand_total - s.paid_amount) AS balance_amount,
+    DATE_FORMAT(MAX(s.sale_date), '%Y-%m-%d') as sale_date,
+    DATE_FORMAT(MAX(s.sale_date), '%h:%i:%s %p') as sale_time,
+    MAX(u.name) as cashier_name,
+    MAX(c.name) AS cus_name,
+    MAX(c.number) AS cus_contact,
+    MAX(c.email) AS cus_email,
+    MAX(c.address) AS cus_address,
+    MAX(s.sub_total) as sub_total,
+    MAX(s.discount) as discount,
+    MAX(s.grand_total) as grand_total,
+    MAX(s.paid_amount) as paid_amount,
+    (MAX(s.grand_total) - MAX(s.paid_amount)) AS balance_amount,
+
+    -- ITEM DETAILS
     p.name AS part_name,
     pi.serial_number AS part_serial,
-    si.customer_warranty_months AS part_warranty,
-    si.qty AS quantity,
-    si.total AS line_total
+    MAX(si.customer_warranty_months) AS part_warranty,
+
+    -- NEW LOGIC: Calculate Quantity by counting rows
+    COUNT(si.item_id) AS quantity,
+
+    -- NEW LOGIC: Calculate Total by summing unit prices
+    SUM(si.unit_price - si.discount) AS line_total
+
 FROM Sales s
     JOIN User u ON s.user_id = u.user_id
     LEFT JOIN Customer c ON s.customer_id = c.cus_id
     JOIN SalesItem si ON s.sale_id = si.sale_id
     JOIN ProductItem pi ON si.item_id = pi.item_id
     JOIN Product p ON pi.stock_id = p.stock_id
-WHERE s.sale_id = $P{saleId}]]></query>
+
+WHERE s.sale_id = $P{saleId}
+
+GROUP BY
+    p.stock_id,       -- Group same products together
+    pi.serial_number]]></query>
 	<field name="sale_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="sale_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="sale_id"/>
@@ -43,27 +55,27 @@ WHERE s.sale_id = $P{saleId}]]></query>
 		<property name="com.jaspersoft.studio.field.label" value="sale_time"/>
 	</field>
 	<field name="cashier_name" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="name"/>
+		<property name="com.jaspersoft.studio.field.name" value="cashier_name"/>
 		<property name="com.jaspersoft.studio.field.label" value="cashier_name"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="user"/>
 	</field>
 	<field name="cus_name" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="name"/>
+		<property name="com.jaspersoft.studio.field.name" value="cus_name"/>
 		<property name="com.jaspersoft.studio.field.label" value="cus_name"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="customer"/>
 	</field>
 	<field name="cus_contact" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="number"/>
+		<property name="com.jaspersoft.studio.field.name" value="cus_contact"/>
 		<property name="com.jaspersoft.studio.field.label" value="cus_contact"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="customer"/>
 	</field>
 	<field name="cus_email" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="email"/>
+		<property name="com.jaspersoft.studio.field.name" value="cus_email"/>
 		<property name="com.jaspersoft.studio.field.label" value="cus_email"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="customer"/>
 	</field>
 	<field name="cus_address" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="address"/>
+		<property name="com.jaspersoft.studio.field.name" value="cus_address"/>
 		<property name="com.jaspersoft.studio.field.label" value="cus_address"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="customer"/>
 	</field>
@@ -101,17 +113,17 @@ WHERE s.sale_id = $P{saleId}]]></query>
 		<property name="com.jaspersoft.studio.field.tree.path" value="productitem"/>
 	</field>
 	<field name="part_warranty" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="warranty_months"/>
+		<property name="com.jaspersoft.studio.field.name" value="part_warranty"/>
 		<property name="com.jaspersoft.studio.field.label" value="part_warranty"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="product"/>
 	</field>
-	<field name="quantity" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="qty"/>
+	<field name="quantity" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="quantity"/>
 		<property name="com.jaspersoft.studio.field.label" value="quantity"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="salesitem"/>
 	</field>
 	<field name="line_total" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="total"/>
+		<property name="com.jaspersoft.studio.field.name" value="line_total"/>
 		<property name="com.jaspersoft.studio.field.label" value="line_total"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="salesitem"/>
 	</field>

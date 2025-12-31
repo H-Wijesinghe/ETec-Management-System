@@ -9,21 +9,25 @@ public class RepairPartTM {
     private final String itemName;
     private final String serialNumber;
     private final ProductCondition condition; // <--- NEW FIELD
-    private final double unitPrice;
+    private  double unitPrice;
 
     public RepairPartTM(int itemId, String itemName, String serialNumber, ProductCondition condition, double unitPrice) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.serialNumber = serialNumber;
-        this.condition = condition; // <--- NEW ASSIGNMENT
+        this.condition = condition;
         this.unitPrice = unitPrice;
     }
+
 
     public int getItemId() { return itemId; }
     public String getItemName() { return itemName; }
     public String getSerialNumber() { return serialNumber; }
 
     public ProductCondition getCondition() { return condition; } // <--- NEW GETTER
-
     public double getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
 }

@@ -33,35 +33,60 @@ public class ProductModel {
     }
 
     public int saveProductAndGetId(ProductDTO p) throws SQLException {
+        UnitManagementModel unitModel = new UnitManagementModel();
+        Connection connection = null;
+
         String sql = "INSERT INTO Product (name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path) " +
                 "VALUES (?,?,?,?,?,?,?,?,?)";
 
-        Connection connection = DBConnection.getInstance().getConnection();
+        int newStockId;
 
-        // We must request RETURN_GENERATED_KEYS to get the new stock_id
-        try (PreparedStatement pstm = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setString(1, p.getName());
-            pstm.setString(2, p.getDescription());
-            pstm.setDouble(3, p.getSellPrice());
-            pstm.setString(4, p.getCategory());
-            pstm.setString(5, p.getCondition().getLabel());
-            pstm.setDouble(6, p.getBuyPrice());
-            pstm.setInt(7, p.getWarrantyMonth());
-            pstm.setInt(8, p.getQty());
-            pstm.setString(9, p.getImagePath());
 
-            int affectedRows = pstm.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creating product failed, no rows affected.");
-            }
+        try {
+            connection = DBConnection.getInstance().getConnection();
+            connection.setAutoCommit(false);
 
-            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // Return the new stock_id
-                } else {
-                    throw new SQLException("Creating product failed, no ID obtained.");
+            // We must request RETURN_GENERATED_KEYS to get the new stock_id
+            try (PreparedStatement pstm = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                pstm.setString(1, p.getName());
+                pstm.setString(2, p.getDescription());
+                pstm.setDouble(3, p.getSellPrice());
+                pstm.setString(4, p.getCategory());
+                pstm.setString(5, p.getCondition().getLabel());
+                pstm.setDouble(6, p.getBuyPrice());
+                pstm.setInt(7, p.getWarrantyMonth());
+                pstm.setInt(8, p.getQty());
+                pstm.setString(9, p.getImagePath());
+
+                int affectedRows = pstm.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Creating product failed, no rows affected.");
+                }
+
+                try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        newStockId = generatedKeys.getInt(1); // Return the new stock_id
+                    } else {
+                        throw new SQLException("Creating product failed, no ID obtained.");
+                    }
+                }
+
+                // --- STEP 2: Create Placeholder Items ---
+                boolean isCreate = unitModel.createPlaceholderItems(newStockId, p.getQty());
+                if (!isCreate) {
+                    connection.rollback();
+                    throw new SQLException("Failed to create placeholder items for the new product.");
                 }
             }
+
+            connection.commit();
+            return newStockId;
+
+        } catch (Exception e) {
+            if (connection != null) connection.rollback(); // Undo if error
+            throw e;
+        }finally {
+            if (connection != null) connection.setAutoCommit(true);
         }
     }
 
@@ -292,7 +317,7 @@ public class ProductModel {
                 String status = rs.getString("status");
 
                 // Ignore Placeholders completely (they are safe to delete)
-                if (serial.startsWith("PENDING-")) continue;
+                if (serial != null && serial.startsWith("PENDING")) continue;
 
                 if ("AVAILABLE".equals(status)) {
                     realAvailableCount++;
@@ -329,7 +354,7 @@ public class ProductModel {
         try (ResultSet rs = CrudUtil.execute(sql, name)) {
             if (rs.next()) {
                 return rs.getInt("stock_id");
-            }else {
+            } else {
                 return -1;
             }
         }
@@ -340,7 +365,7 @@ public class ProductModel {
 
         List<ProductDTO> products = new ArrayList<>();
 
-        try(ResultSet rs = CrudUtil.execute(sql)) {
+        try (ResultSet rs = CrudUtil.execute(sql)) {
             while (rs.next()) {
                 products.add(mapRow(rs));
             }
@@ -368,9 +393,9 @@ public class ProductModel {
     private ProductCondition fromConditionString(String s) {
         if (s == null) return ProductCondition.BOTH;
         try {
-            if(s.equalsIgnoreCase("USED")){
+            if (s.equalsIgnoreCase("USED")) {
                 return ProductCondition.USED;
-            }else if(s.equalsIgnoreCase("BRAND NEW")){
+            } else if (s.equalsIgnoreCase("BRAND NEW")) {
                 return ProductCondition.BRAND_NEW;
             }
             return ProductCondition.BOTH;
