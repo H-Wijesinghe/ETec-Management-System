@@ -28,7 +28,7 @@
     p.name AS part_name,
     pi.serial_number AS part_serial,
     p.warranty_months AS part_warranty,
-    p.sell_price AS part_price
+    ri.unit_price AS part_price
 FROM RepairJob rj
          -- CHANGE 1: Use LEFT JOIN here so the query works even if no "RepairSale" exists
          LEFT JOIN RepairSale rs ON rj.repair_id = rs.repair_id

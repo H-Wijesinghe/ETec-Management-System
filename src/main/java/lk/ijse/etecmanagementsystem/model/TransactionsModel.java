@@ -35,8 +35,7 @@ public class TransactionsModel {
 
     public ObservableList<PendingSaleTM> getPendingSales() throws SQLException {
         String saleSql = "SELECT s.sale_id, c.name, s.grand_total, s.paid_amount FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
-                "JOIN SalesItem si ON s.sale_id = si.sale_id " +
-                "WHERE s.payment_status IN ('PENDING', 'PARTIAL')";
+                "WHERE s.payment_status IN ('PENDING', 'PARTIAL') AND s.description LIKE 'Point of Sale Transaction'";
 
 
         ResultSet rs = CrudUtil.execute(saleSql);

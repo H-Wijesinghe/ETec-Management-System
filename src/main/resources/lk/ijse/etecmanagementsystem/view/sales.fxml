@@ -11,10 +11,13 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -29,15 +32,24 @@
                         <Font name="System Bold" size="24.0" />
                     </font>
                 </Label>
-                <Label fx:id="lblDate" text="2025-12-04" textFill="#bdc3c7">
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Label>
+            <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#handleLoadHistory" opacity="0.82" style="-fx-background-color: WHITE;" text="Sales History">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
                 <Label fx:id="lblCashierName" text="Cashier: Admin" textFill="#bdc3c7">
                     <HBox.margin>
                         <Insets left="20.0" />
                     </HBox.margin>
+                </Label>
+                <Label fx:id="lblDate" text="2025-12-04" textFill="#bdc3c7">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
                 </Label>
             </children>
             <padding>
@@ -197,13 +209,20 @@
                                  <cursor>
                                     <Cursor fx:constant="HAND" />
                                  </cursor></ToggleButton>
-                              <Button onAction="#clearCustomerFields" prefHeight="50.0" style="-fx-background-color: white;" text="R">
+                              <Button onAction="#clearCustomerFields" prefHeight="50.0" style="-fx-background-color: white;">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                                  <cursor>
                                     <Cursor fx:constant="HAND" />
                                  </cursor>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/reset-3215.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                               </Button>
                                     </children>
                                     <padding>
@@ -311,13 +330,20 @@
                         </TableView>
                   <HBox alignment="CENTER_RIGHT" prefHeight="22.0" prefWidth="414.0">
                      <children>
-                        <Button onAction="#clearCart" prefHeight="18.0" style="-fx-background-color: white;" text="R">
+                        <Button onAction="#clearCart" prefHeight="18.0" style="-fx-background-color: none;">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font>
                            <cursor>
                               <Cursor fx:constant="HAND" />
                            </cursor>
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/reset-3215.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
                         </Button>
                      </children>
                   </HBox>

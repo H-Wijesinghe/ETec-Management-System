@@ -3,6 +3,7 @@ package lk.ijse.etecmanagementsystem.controller;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -12,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import lk.ijse.etecmanagementsystem.App;
@@ -209,6 +211,29 @@ public class SalesController implements Initializable {
                 });
             }
         });
+    }
+
+    @FXML
+    private void handleLoadHistory(ActionEvent event) {
+        try {
+
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("view/salesHistory.fxml"));
+            Parent root = loader.load();
+
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Sales History");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+
+        } catch (IOException e) {
+            ETecAlerts.showAlert(Alert.AlertType.ERROR, "Error", "Could not open sales history popup.");
+            e.printStackTrace();
+
+        }
+
     }
 
     @FXML

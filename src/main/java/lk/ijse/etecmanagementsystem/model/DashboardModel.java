@@ -75,8 +75,7 @@ public class DashboardModel {
         // Uses UNION ALL to combine Sales and Repair tables
         String sql = "SELECT 'SALE' as type, s.sale_id as ref_id, c.name, (s.grand_total - s.paid_amount) as due " +
                 "FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
-                "JOIN SalesItem si ON s.sale_id = si.sale_id " +
-                "WHERE s.payment_status != 'PAID' " +
+                "WHERE s.payment_status != 'PAID' AND s.description LIKE 'Point of Sale Transaction'" +
                 "UNION ALL " +
                 "SELECT 'REPAIR' as type, r.repair_id as ref_id, c.name, (r.total_amount - r.paid_amount) as due " +
                 "FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id " +
