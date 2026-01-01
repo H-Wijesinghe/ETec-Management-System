@@ -10,6 +10,7 @@ import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.model.RepairJobModel;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
+import lk.ijse.etecmanagementsystem.util.LoginUtil;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -170,7 +171,7 @@ public class RepairCheckoutController {
 
 
             String method = cmbPaymentMethod.getValue();
-            int userId = 1; // Replace with LoginUtil.getUserId();
+            int userId = LoginUtil.getUserId();
             int cusId = jobTM.getOriginalDto().getCusId();
             double partsTotal = jobTM.getOriginalDto().getPartsCost();
 

@@ -15,6 +15,7 @@ import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.model.CustomersModel; // NEW IMPORT
 import lk.ijse.etecmanagementsystem.model.RepairJobModel; // NEW IMPORT
+import lk.ijse.etecmanagementsystem.util.LoginUtil;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -42,6 +43,8 @@ public class AddRepairTicketController {
     private Label lblCusContact;
     @FXML
     private Label lblCusId;
+    @FXML
+    private Label lblCusEmail;
     @FXML
     private Label lblCusAddress;
 
@@ -149,6 +152,7 @@ public class AddRepairTicketController {
             lblCusName.setText(selectedCus.getName());
             lblCusContact.setText(selectedCus.getNumber());
             lblCusId.setText(String.valueOf(selectedCus.getId()));
+            lblCusEmail.setText(selectedCus.getEmailAddress());
             lblCusAddress.setText(selectedCus.getAddress());
         }
     }
@@ -196,7 +200,7 @@ public class AddRepairTicketController {
             newJob.setStatus(RepairStatus.PENDING);
             newJob.setDateIn(new Date());
 
-            newJob.setUserId(1);
+            newJob.setUserId(LoginUtil.getUserId());
 
             boolean isSaved = repairJobModel.saveRepairJob(newJob);
 

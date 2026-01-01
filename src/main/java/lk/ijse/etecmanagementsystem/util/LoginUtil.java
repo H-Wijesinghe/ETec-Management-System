@@ -13,6 +13,7 @@ public class LoginUtil {
     }
 
     public  static void setUserId(int userId) {
+
         LoginUtil.userId = userId;
     }
     public  static int getUserId() {

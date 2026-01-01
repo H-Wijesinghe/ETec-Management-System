@@ -116,12 +116,12 @@ CREATE TABLE SalesItem
 CREATE TABLE RepairJob
 (
     repair_id      INT AUTO_INCREMENT PRIMARY KEY,
-    cus_id         INT          NOT NULL,                                                                              -- Link to Customer
-    user_id        INT          NOT NULL,                                                                              -- The Staff/Technician who took the job
+    cus_id         INT          NOT NULL,
+    user_id        INT          NOT NULL,
 
     -- Device Information
-    device_name    VARCHAR(150) NOT NULL,                                                                              -- e.g., "Dell Inspiron 15"
-    device_sn      VARCHAR(100),                                                                                       -- The CUSTOMER'S device Serial Number (Not your stock ID)
+    device_name    VARCHAR(150) NOT NULL,
+    device_sn      VARCHAR(100),
     problem_desc   TEXT         NOT NULL,
     diagnosis_desc TEXT,
     repair_results TEXT,
@@ -131,14 +131,14 @@ CREATE TABLE RepairJob
 
     -- Dates
     date_in        DATETIME                                                                              DEFAULT CURRENT_TIMESTAMP,
-    date_out       DATETIME     NULL,                                                                                  -- Set this when status becomes 'DELIVERED'
+    date_out       DATETIME     NULL,
 
     -- Financials (Derived from Diagram)
-    labor_cost     DECIMAL(10, 2)                                                                        DEFAULT 0.00, -- Service Fee
-    parts_cost     DECIMAL(10, 2)                                                                        DEFAULT 0.00, -- Total cost of spare parts used
+    labor_cost     DECIMAL(10, 2)                                                                        DEFAULT 0.00,
+    parts_cost     DECIMAL(10, 2)                                                                        DEFAULT 0.00,
     discount       DECIMAL(10, 2)                                                                        DEFAULT 0.00,
-    total_amount   DECIMAL(10, 2)                                                                        DEFAULT 0.00, -- (Labor + Parts)
-    paid_amount    DECIMAL(10, 2)                                                                        DEFAULT 0.00, -- Amount paid so far
+    total_amount   DECIMAL(10, 2)                                                                        DEFAULT 0.00,
+    paid_amount    DECIMAL(10, 2)                                                                        DEFAULT 0.00,
 
     -- Payment Flag (Like in Sales, actual money goes to TransactionRecord)
     payment_status ENUM ('PENDING', 'PARTIAL', 'PAID')                                                   DEFAULT 'PENDING',
@@ -213,3 +213,21 @@ CREATE TABLE TransactionRecord
     FOREIGN KEY (user_id) REFERENCES User (user_id)
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
+
+
+INSERT INTO User (name, contact, address, email, user_name, password, role)
+VALUES ('Admin User', '0771234567', '1, Admin Road, City', 'hasithawijesinghe8@gmail.com', 'admin', 'admin', 'ADMIN'),
+       ('John Doe', '0759876543', '2, Staff Lane, City', 'hasithalakshanwijesinghe@gmail.com', 'johndoe', 'password123', 'STAFF'),
+       ('Jane Smith', '0765432198', '3, Tech Street, City', '2', 'janesmith', 'securepass', 'TECHNICIAN');
+
+INSERT INTO Category (category_name, description)
+VALUES ('Laptops', 'Portable computers suitable for mobile use.'),
+       ('Desktops', 'Personal computers designed for regular use at a single location.'),
+       ('Monitors', 'Display screens for computers.'),
+       ('Printers', 'Devices that produce physical copies of digital documents.'),
+       ('Accessories', 'Peripheral devices and accessories for computers.');
+
+INSERT INTO Supplier (supplier_name, contact_number, email, address)
+VALUES ('Tech Supplies Co.', '123-456-7890', '', '123 Tech Street, Silicon Valley, CA'),
+       ('Gadget World', '987-654-3210', '', '456 Gadget Avenue, Tech City, NY'),
+       ('Computer Parts Inc.', '555-123-4567', '', '789 Computer Blvd, Hardware Town, TX');
