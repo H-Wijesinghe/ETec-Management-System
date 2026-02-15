@@ -1,15 +1,23 @@
 package lk.ijse.etecmanagementsystem.controller;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
+import lk.ijse.etecmanagementsystem.server.BarcodeServer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -79,6 +87,17 @@ public class UnitManagementController {
     private Label lblUpdateSupplier;
     @FXML
     private ComboBox<String> cmbNewStatus;
+
+    @FXML
+    private ToggleButton tglBtnScan;
+    @FXML
+    private BorderPane rootPane;
+
+    // Barcode Scanning
+    private final TextField barcodeInput = new TextField();
+    private final BarcodeServer barcodeServer = BarcodeServer.getBarcodeServerInstance(barcodeInput);
+    private final Stage newStage = new Stage();
+
 
     // --- DATA ---
     private int selectedStockId = -1;
@@ -207,6 +226,34 @@ public class UnitManagementController {
             }
             String searchTxt = newVal.trim();
             filterViewList(searchTxt);
+        });
+
+        tglBtnScan.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                tglBtnScan.setText("Stop");
+            } else {
+                tglBtnScan.setText("Scan");
+                barcodeServer.stopServer();
+                newStage.close();
+            }
+        });
+
+        barcodeInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && !newValue.trim().isEmpty()) {
+                String scannedCode = newValue.trim();
+                Platform.runLater(() -> {
+                    txtSerialNumber.setText(scannedCode);
+                    handleAddToStaging(null);
+                    barcodeInput.clear();
+                });
+            }
+        });
+
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                barcodeServer.stopServer();
+                newStage.close();
+            }
         });
     }
 
@@ -374,6 +421,37 @@ public class UnitManagementController {
         lblStagingCount.setText(stagingList.size() + " Items");
         btnSaveAll.setDisable(false);
         txtSerialNumber.requestFocus();
+    }
+
+    @FXML
+    private void handleScanBarcode(ActionEvent actionEvent) {
+        try {
+
+
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("view/barcode.fxml"));
+            Parent root = loader.load();
+
+            BarcodeScanController controller = loader.getController();
+            controller.setBarcodeInput(barcodeInput);
+
+            newStage.setTitle("Barcode Scanner");
+            newStage.setScene(new Scene(root));
+            newStage.setResizable(false);
+            newStage.show();
+            barcodeServer.startServer();
+
+            newStage.setOnCloseRequest(event -> {
+                barcodeServer.stopServer();
+                tglBtnScan.setSelected(false);
+            });
+            rootPane.getScene().getWindow().setOnCloseRequest(event -> {
+                barcodeServer.stopServer();
+                newStage.close();
+            });
+
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed to start barcode server: " + e.getMessage()).showAndWait();
+        }
     }
 
     @FXML

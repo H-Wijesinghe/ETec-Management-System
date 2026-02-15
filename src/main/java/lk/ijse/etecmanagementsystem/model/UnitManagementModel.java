@@ -6,7 +6,7 @@ import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
-import org.bridj.cpp.std.list;
+
 
 import java.sql.*;
 import java.util.ArrayList;

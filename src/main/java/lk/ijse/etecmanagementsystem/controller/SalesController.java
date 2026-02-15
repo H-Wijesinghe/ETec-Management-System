@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -155,7 +156,7 @@ public class SalesController implements Initializable {
 
     // Barcode Scanning
     private final TextField barcodeInput = new TextField();
-    private final BarcodeScanner barcodeScanner = BarcodeScanner.getInstance(barcodeInput);
+    private final BarcodeServer barcodeServer = BarcodeServer.getBarcodeServerInstance(barcodeInput);
     private final Stage newStage = new Stage();
 
     private final SalesModel salesModel = new SalesModel();
@@ -230,6 +231,7 @@ public class SalesController implements Initializable {
     private void handleScanAction() {
         try {
 
+
             FXMLLoader loader = new FXMLLoader(App.class.getResource("view/barcode.fxml"));
             Parent root = loader.load();
 
@@ -240,13 +242,14 @@ public class SalesController implements Initializable {
             newStage.setScene(new Scene(root));
             newStage.setResizable(false);
             newStage.show();
+            barcodeServer.startServer();
 
             newStage.setOnCloseRequest(event -> {
-                barcodeScanner.stopScan();
+                barcodeServer.stopServer();
                 tglBtnScan.setSelected(false);
             });
             rootPane.getScene().getWindow().setOnCloseRequest(event -> {
-//                barcodeScanner.stopScan();
+                barcodeServer.stopServer();
                 newStage.close();
             });
 
@@ -384,6 +387,7 @@ public class SalesController implements Initializable {
         } else {
             InventoryItemDTO itemBySerial = getItemBySerialNumber(serialNumber);
             if(!serialNumber.isEmpty() && itemBySerial != null){
+                newCartItem.setItemId(itemBySerial.getItemId());
                 addFieldItemToCart(newCartItem);
             }else {
                 // No table selection, pure manual entry
@@ -859,7 +863,7 @@ public class SalesController implements Initializable {
                 handleScanAction();
             } else {
                 tglBtnScan.setText("START SCAN");
-//                barcodeScanner.stopScan();
+                barcodeServer.stopServer();
                 newStage.close();
             }
         });
@@ -870,7 +874,8 @@ public class SalesController implements Initializable {
                 String scannedCode = newValue.trim();
                 Platform.runLater(() -> {
                     txtSerialNumber.setText(scannedCode);
-                    getItemBySerialNumber(scannedCode);
+                    txtSerialNumber.fireEvent(new ActionEvent());
+//                    getItemBySerialNumber(scannedCode);
                     barcodeInput.clear();
                 });
             }
@@ -878,7 +883,7 @@ public class SalesController implements Initializable {
 
         rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene == null) {
-//                barcodeScanner.stopScan();
+                barcodeServer.stopServer();
                 newStage.close();
             }
         });
@@ -892,7 +897,7 @@ public class SalesController implements Initializable {
             populateItemFields(item);
             return item;
         } else {
-            ETecAlerts.showAlert(Alert.AlertType.WARNING,"Item Not Found!", "No inventory item found with serial number: " + serialNumber);
+            ETecAlerts.showAlert(Alert.AlertType.WARNING,"Item Not Found!", "No Available inventory item found with serial number: " + serialNumber);
         }
         return null;
     }
@@ -985,6 +990,7 @@ public class SalesController implements Initializable {
         txtPrice.textProperty().addListener((o, old, val) -> txtDiscount.setText("0.0"));
 
         txtDiscount.textProperty().addListener((o, old, val) -> {
+            if( val.isEmpty()) return;
             if (txtDisPercentage.isFocused()) return;
             double price = parseDoubleOrZero(txtPrice.getText());
             double discount = parseDoubleOrZero(val);
@@ -994,6 +1000,14 @@ public class SalesController implements Initializable {
 
             if (price > 0) {
                 txtDisPercentage.setText(String.format("%.1f", (discount / (price * qty)) * 100));
+            }
+            if (discount >= price) {
+                Platform.runLater(() -> {
+                    txtDiscount.setText(old);
+                    showAlert(Alert.AlertType.WARNING, "Discount cannot be equal to or greater than the total price.");
+                });
+
+                return;
             }
             calculateFinalPrice();
         });

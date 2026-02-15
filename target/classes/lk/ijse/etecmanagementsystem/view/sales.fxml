@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="rootPane" prefHeight="720.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.SalesController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="20.0" style="-fx-background-color: #2c3e50;" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="SALES POINT" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+            <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#handleLoadHistory" opacity="0.82" style="-fx-background-color: WHITE;" text="Sales History">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+                <Label fx:id="lblCashierName" text="Cashier: Admin" textFill="#bdc3c7">
+                    <HBox.margin>
+                        <Insets left="20.0" />
+                    </HBox.margin>
+                </Label>
+                <Label fx:id="lblDate" text="2025-12-04" textFill="#bdc3c7">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </children>
+            <padding>
+                <Insets left="20.0" right="20.0" />
+            </padding>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.5470941883767535" BorderPane.alignment="CENTER">
+            <items>
+
+                <VBox spacing="10.0">
+                    <padding>
+                        <Insets bottom="15.0" left="10.0" right="10.0" top="15.0" />
+                    </padding>
+                    <children>
+                        <Label text="Inventory Items">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <TextField fx:id="txtSearchProduct" prefHeight="40.0" prefWidth="300.0" promptText="Search by Name, ID or Serial Number..." HBox.hgrow="ALWAYS" />
+                            </children>
+                        </HBox>
+
+                        <TableView fx:id="tblProductInventory" onMouseClicked="#handleProductTableClick" prefHeight="155.0" prefWidth="528.0" stylesheets="@../css/TableStyle.css" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colItemId" prefWidth="64.0" text="Item ID" />
+                                <TableColumn fx:id="colItemName" prefWidth="131.0" text="Product Name" />
+                                <TableColumn fx:id="colSerial" prefWidth="120.0" text="Serial No" />
+                                <TableColumn fx:id="colPrice" prefWidth="82.0" text="Price" />
+                                <TableColumn fx:id="colWarranty" prefWidth="75.0" text="Warranty" />
+                                <TableColumn fx:id="colCondition" prefWidth="82.0" text="Condition" />
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
+                        </TableView>
+                        <Separator prefWidth="200.0" />
+                        <HBox alignment="CENTER">
+                            <children>
+                        <ToggleButton fx:id="tglBtnScan" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="39.0" styleClass="btn-scan" stylesheets="@../css/ScanButtonStyle.css" text="SCAN MODE OFF" textFill="WHITE" HBox.hgrow="ALWAYS">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ToggleButton>
+                            </children>
+                            <padding>
+                                <Insets bottom="2.0" />
+                            </padding>
+                        </HBox>
+                        <Separator prefWidth="200.0" />
+                        <GridPane hgap="5.0" maxHeight="-Infinity" vgap="5.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="65.0" />
+                                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="248.0" />
+                                <ColumnConstraints hgrow="NEVER" maxWidth="95.0" minWidth="10.0" prefWidth="63.0" />
+                                <ColumnConstraints hgrow="NEVER" maxWidth="137.0" minWidth="-Infinity" prefWidth="137.0" />
+                            </columnConstraints>
+                            <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                            <children>
+                                <TextField fx:id="txtIProductName" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                                <TextField fx:id="txtSerialNumber" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                                <TextField fx:id="txtWarranty" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                                <Label text="Name:" />
+                                <Label prefHeight="17.0" prefWidth="55.0" text="Serial No:" GridPane.rowIndex="1" />
+                                <Label prefHeight="17.0" prefWidth="55.0" text="Warranty:" GridPane.rowIndex="2" />
+                                <Label prefHeight="17.0" prefWidth="60.0" text="Price:" GridPane.columnIndex="2" />
+                                <Label prefHeight="17.0" prefWidth="60.0" text="Discount:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                <Label prefWidth="60.0" text="Final Price:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                <TextField fx:id="txtPrice" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="100.0" promptText="0.00" GridPane.columnIndex="3" />
+                                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                    <children>
+                                        <TextField fx:id="txtDisPercentage" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="50.0" promptText="0 %" />
+                                        <TextField fx:id="txtDiscount" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="86.0" promptText="0.00" />
+                                    </children>
+                                </HBox>
+                                <TextField fx:id="txtFinalPrice" alignment="CENTER_RIGHT" editable="false" prefHeight="25.0" prefWidth="100.0" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="cmbCondition" promptText="Select Condition" style="-fx-background-color: white;" styleClass="combo-box" stylesheets="@../css/CmbBoxStyle.css" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ComboBox>
+                        <Label prefHeight="17.0" prefWidth="55.0" text="Condition:" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtItemQty" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="100.0" promptText="0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label prefHeight="17.0" prefWidth="60.0" text="Qty:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            </children>
+                        </GridPane>
+                        <Separator prefWidth="200.0" />
+
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                            <children>
+                                <Button onAction="#clearItemFields" style="-fx-background-color: f8af10; -fx-text-fill: white;" text="CLEAR" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                    <padding>
+                                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                                    </padding>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                                </Button>
+                        <Button fx:id="btnAddToCart1" onAction="#handleAddToCartAction" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="ADD TO CART ➔">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Button>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <VBox spacing="10.0" style="-fx-background-color: #ecf0f1;">
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                    </padding>
+                    <children>
+                        <Label text="Current Cart">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <VBox style="-fx-background-color: white; -fx-border-radius: 5; -fx-border-color: #bdc3c7;">
+                            <children>
+
+                                <HBox alignment="CENTER_LEFT" prefHeight="43.0" prefWidth="417.0" spacing="10.0">
+                                    <children>
+                                        <Label text="Customer:">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <ComboBox fx:id="comboCustomer" maxWidth="1.7976931348623157E308" promptText="Select Customer" style="-fx-background-color: white;" styleClass="combo-box" stylesheets="@../css/CmbBoxStyle.css" HBox.hgrow="ALWAYS">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor></ComboBox>
+                                        <ToggleButton fx:id="tglBtnCusAdd" mnemonicParsing="false" style="-fx-background-color: white;" text="DETAILS ▼">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor></ToggleButton>
+                              <Button onAction="#clearCustomerFields" prefHeight="50.0" style="-fx-background-color: white;">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/reset-3215.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    </padding>
+                                </HBox>
+                                <VBox fx:id="vboxCustomerDetails" maxHeight="-Infinity">
+                                    <children>
+
+                                        <Separator prefWidth="200.0">
+                                            <padding>
+                                                <Insets left="5.0" right="5.0" />
+                                            </padding>
+                                        </Separator>
+                                        <GridPane maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefHeight="128.0" prefWidth="415.0" vgap="2.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="209.0" minWidth="10.0" prefWidth="74.0" />
+                                                <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" prefWidth="353.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                            <children>
+                                                <Label text="Contact:" GridPane.rowIndex="2">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0" />
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <Label text="Name:" GridPane.rowIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0" />
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <Label text="Email:" GridPane.rowIndex="3">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0" />
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <Label text="Address:" GridPane.rowIndex="4">
+                                                    <GridPane.margin>
+                                                        <Insets left="10.0" />
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <TextField fx:id="txtCusName" prefHeight="25.0" prefWidth="348.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets right="2.0" />
+                                                    </GridPane.margin>
+                                                </TextField>
+                                                <TextField fx:id="txtCusContact" prefHeight="25.0" prefWidth="355.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2">
+                                                    <GridPane.margin>
+                                                        <Insets right="2.0" />
+                                                    </GridPane.margin>
+                                                </TextField>
+                                                <TextField fx:id="txtCusEmail" prefHeight="25.0" prefWidth="384.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3">
+                                                    <GridPane.margin>
+                                                        <Insets right="2.0" />
+                                                    </GridPane.margin>
+                                                </TextField>
+                                                <TextField fx:id="txtCusAddress" prefHeight="25.0" prefWidth="386.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4">
+                                                    <GridPane.margin>
+                                                        <Insets right="2.0" />
+                                                    </GridPane.margin>
+                                                </TextField>
+                                            </children>
+                                        </GridPane>
+                              <HBox alignment="CENTER_RIGHT" VBox.vgrow="ALWAYS">
+                                 <children>
+                                    <Button onAction="#saveNewCustomer" prefHeight="25.0" prefWidth="57.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="ADD">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </Button>
+                                 </children>
+                                 <padding>
+                                    <Insets right="2.0" top="2.0" />
+                                 </padding>
+                              </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                            <padding>
+                                <Insets bottom="5.0" left="2.0" right="5.0" />
+                            </padding>
+                        </VBox>
+
+                        <TableView fx:id="tblCart" prefHeight="197.0" prefWidth="425.0" stylesheets="@../css/TableStyle.css" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colCartItem" prefWidth="146.0" text="Item" />
+                                <TableColumn fx:id="colCartSerial" prefWidth="144.0" text="Serial" />
+                                <TableColumn fx:id="colCartPrice" prefWidth="116.0" text="Price" />
+                        <TableColumn fx:id="colCartQty" prefWidth="65.66668701171875" text="Qty" />
+                                <TableColumn fx:id="colCartDiscount" prefWidth="82.33331298828125" text="Disc." />
+                                <TableColumn fx:id="colCartTotal" prefWidth="90.0" text="Total" />
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
+                        </TableView>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="22.0" prefWidth="414.0">
+                     <children>
+                        <Button onAction="#clearCart" prefHeight="18.0" style="-fx-background-color: none;">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/reset-3215.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </HBox>
+
+                        <Separator prefWidth="200.0" />
+
+                        <GridPane hgap="10.0" minHeight="-Infinity" vgap="5.0">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                            <children>
+                                <Label text="Subtotal:" textFill="#7f8c8d" />
+                                <Label fx:id="lblSubTotal" text="0.00" GridPane.columnIndex="1" />
+
+                                <Label text="Discount:" textFill="#7f8c8d" GridPane.rowIndex="1" />
+                                <Label fx:id="lblDiscount" text="0.00" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                <Label text="GRAND TOTAL:" GridPane.rowIndex="2">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblGrandTotal" text="0.00" textFill="#27ae60" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <font>
+                                        <Font name="System Bold" size="24.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                            <padding>
+                                <Insets right="5.0" />
+                            </padding>
+                        </GridPane>
+
+                        <HBox spacing="10.0">
+                            <children>
+                                <Button fx:id="btnRemoveItem" onAction="#handleRemoveItemAction" prefHeight="50.0" prefWidth="100.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Remove">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor></Button>
+                        <Button onAction="#resetAllFields" prefHeight="50.0" style="-fx-background-color: f8af10; -fx-text-fill: white;" text="CLEAR FORM" textFill="WHITE" HBox.hgrow="ALWAYS">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Button>
+                                <Button fx:id="btnCheckout" maxWidth="1.7976931348623157E308" onAction="#handleCheckoutAction" prefHeight="50.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="CHECKOUT &amp; PAY" HBox.hgrow="ALWAYS">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                                </Button>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>

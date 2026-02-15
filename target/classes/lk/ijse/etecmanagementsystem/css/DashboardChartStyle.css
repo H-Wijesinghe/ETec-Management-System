@@ -1,0 +1,44 @@
+/* --- 1. General Chart Cleanup --- */
+/* Removes the gray background behind the charts */
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+/* Removes grid lines for a cleaner look */
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: transparent;
+}
+
+/* Styles the text on X and Y axes */
+.axis-label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 11px;
+    -fx-font-family: "System";
+}
+
+/* --- 2. Bar Chart (Revenue) Styling --- */
+/* Hide the bar legend since we use multiple colors */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+
+/* --- 3. Line Chart (Traffic) Styling --- */
+/* Thicker lines for better visibility */
+.chart-series-line {
+    -fx-stroke-width: 3px;
+}
+
+/* Make the data dots visible and round */
+.chart-line-symbol {
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+/* Color 1: Sales (Blue) */
+.default-color0.chart-series-line { -fx-stroke: #3498db; }
+.default-color0.chart-line-symbol { -fx-background-color: #3498db, white; }
+
+/* Color 2: Repairs (Orange) */
+.default-color1.chart-series-line { -fx-stroke: #e67e22; }
+.default-color1.chart-line-symbol { -fx-background-color: #e67e22, white; }

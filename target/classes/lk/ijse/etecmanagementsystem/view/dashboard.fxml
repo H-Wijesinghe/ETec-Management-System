@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane fitToWidth="true" prefHeight="720.0" prefWidth="1080.0" stylesheets="@../css/DashBoardStyle.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.etecmanagementsystem.controller.DashboardController">
+    <content>
+        <VBox spacing="20.0" style="-fx-padding: 20; -fx-background-color: #ecf0f1;">
+            <children>
+                <Label text="Dashboard Overview" textFill="#2c3e50">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+
+                <GridPane hgap="20.0" vgap="20.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="100.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;">
+                            <children>
+                                <Label text="Today's Income" textFill="#7f8c8d" />
+                                <Label fx:id="lblTodayIncome" text="0.00" textFill="#27ae60">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Cash In (Sales + Repairs)" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="1">
+                            <children>
+                                <Label text="Active Repairs" textFill="#7f8c8d" />
+                                <Label fx:id="lblActiveRepairs" text="0" textFill="#e67e22">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Pending &amp; Diagnosing" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="2">
+                            <children>
+                                <Label text="Pending Payments" textFill="#7f8c8d" />
+                                <Label fx:id="lblPendingPayment" text="0.00" textFill="#c0392b">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Total to Collect (Debts)" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" GridPane.columnIndex="3">
+                            <children>
+                                <Label text="Low Stock Alerts" textFill="#7f8c8d" />
+                                <Label fx:id="lblLowStock" text="0" textFill="#8e44ad">
+                                    <font>
+                                        <Font name="System Bold" size="28.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Products &lt; 5 Qty" textFill="#bdc3c7">
+                                    <font>
+                                        <Font size="10.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+
+                <HBox prefHeight="400.0" spacing="20.0">
+                    <children>
+                        <AnchorPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 10;" HBox.hgrow="ALWAYS">
+                            <children>
+                                <BarChart fx:id="chartSales" layoutX="10.0" layoutY="14.0" legendVisible="false" stylesheets="@../css/DashboardChartStyle.css" title="Revenue (Last 7 Days)" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="14.0">
+                                    <xAxis>
+                                        <CategoryAxis label="Date" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Amount (Rs)" side="LEFT" />
+                                    </yAxis>
+                                </BarChart>
+                            </children>
+                        </AnchorPane>
+
+                        <AnchorPane style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 10;" HBox.hgrow="ALWAYS">
+                            <children>
+                                <LineChart fx:id="chartTraffic" layoutX="10.0" layoutY="10.0" stylesheets="@../css/DashboardChartStyle.css" title="Daily Activity (Sales vs Repairs)" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                    <xAxis>
+                                        <CategoryAxis label="Date" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Count" side="LEFT" />
+                                    </yAxis>
+                                </LineChart>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </HBox>
+                
+                        <HBox prefHeight="350.0" spacing="20.0">
+                            <children>
+                                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Urgent Repair Jobs" textFill="#e67e22">
+                                            <font>
+                                                <Font name="System Bold" size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <ListView fx:id="listUrgentRepairs" styleClass="custom-list-view" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0); -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Unpaid Invoices / Debts" textFill="#c0392b">
+                                            <font>
+                                                <Font name="System Bold" size="16.0" />
+                                            </font>
+                                        </Label>
+                                        <ListView fx:id="listUnpaid" styleClass="custom-list-view" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

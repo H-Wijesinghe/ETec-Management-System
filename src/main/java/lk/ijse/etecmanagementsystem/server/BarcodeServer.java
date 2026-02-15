@@ -16,7 +16,7 @@ public class BarcodeServer {
 
     private HttpServer server;
     // Reference to your JavaFX TextField or Controller where you want the data
-    private final TextField targetField;
+    private TextField targetField;
 
     private static BarcodeServer barcodeServer;
 
@@ -47,6 +47,7 @@ public class BarcodeServer {
     public void stopServer() {
         if (server != null) {
             server.stop(0);
+            System.out.println("Barcode Server stopped.");
         }
     }
 
@@ -96,6 +97,14 @@ public class BarcodeServer {
             barcodeServer = new BarcodeServer(targetField);
         }
 
+        barcodeServer.setTargetField(targetField);
         return barcodeServer;
     }
+
+    public void setTargetField(TextField targetField) {
+        this.targetField = targetField;
+    }
+
+
+
 }
