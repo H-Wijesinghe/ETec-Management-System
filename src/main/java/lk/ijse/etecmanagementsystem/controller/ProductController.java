@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.dao.CategoryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.ProductModel;
 import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
@@ -97,6 +98,7 @@ public class ProductController implements Initializable {
     private String selectedImagePath = "";
 
     private final ProductDAOImpl productDAO = new ProductDAOImpl();
+    ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     private final ProductModel productModel = new ProductModel();
 
     private final String NAME_REGEX = "^[ -~]{3,30}$"; // Alphanumeric and special characters, 3-50 chars
@@ -251,7 +253,7 @@ public class ProductController implements Initializable {
 
         try {
 
-            int realItemCount = productModel.getRealItemCount(stockId);
+            int realItemCount = productItemDAO.getRealItemCount(stockId);
 
             if (newQty < realItemCount) {
                 showAlert(Alert.AlertType.ERROR, "Quantity Error",
@@ -511,8 +513,12 @@ public class ProductController implements Initializable {
     private boolean isProductIdExist() {
         String id = txtId.getText();
         try {
-            ResultSet product = productModel.findById(id);
-            if (!product.next()) {
+            ProductDTO product = productDAO.findById(id);
+//            if (!product.next()) {
+//                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " does not exist.");
+//                return false;
+//            }
+            if (product == null) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " does not exist.");
                 return false;
             }

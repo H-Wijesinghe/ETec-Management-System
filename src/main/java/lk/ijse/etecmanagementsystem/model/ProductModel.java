@@ -2,8 +2,10 @@ package lk.ijse.etecmanagementsystem.model;
 
 
 import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
+import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
@@ -59,10 +61,11 @@ public class ProductModel {
 
     public boolean update(ProductDTO p) throws SQLException {
         ProductDAOImpl productDAO = new ProductDAOImpl();
+        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         Connection connection = null;
 
-        String sqlItem = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
+//        String sqlItem = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
 
         try {
             connection = DBConnection.getInstance().getConnection();
@@ -96,13 +99,18 @@ public class ProductModel {
 
 
 
-            try (PreparedStatement pstmItem = connection.prepareStatement(sqlItem)) {
-                // Set new warranty period
-                pstmItem.setInt(1, p.getWarrantyMonth());
-                // Only for this product ID
-                pstmItem.setInt(2, Integer.parseInt(p.getId()));
-
-                pstmItem.executeUpdate();
+//            try (PreparedStatement pstmItem = connection.prepareStatement(sqlItem)) {
+//                // Set new warranty period
+//                pstmItem.setInt(1, p.getWarrantyMonth());
+//                // Only for this product ID
+//                pstmItem.setInt(2, Integer.parseInt(p.getId()));
+//
+//                pstmItem.executeUpdate();
+//            }
+            boolean isItemUpdated = productItemDAO.updateCustomerWarranty(p.getWarrantyMonth(), Integer.parseInt(p.getId()));
+            if (!isItemUpdated) {
+                connection.rollback();
+                return false;
             }
 
             connection.commit(); // Save both changes
@@ -116,20 +124,20 @@ public class ProductModel {
         }
     }
 
-    public int getRealItemCount(int stockId) throws SQLException {
-        System.out.println("DEBUG: Querying Real Item Count for Stock ID: " + stockId);
-
-        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%' AND status = 'AVAILABLE'";
-
-        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
-            if (rs.next()) {
-                int count = rs.getInt(1);
-                System.out.println("DEBUG: Database returned count: " + count);
-                return count;
-            }
-        }
-        return 0;
-    }
+//    public int getRealItemCount(int stockId) throws SQLException {
+//        System.out.println("DEBUG: Querying Real Item Count for Stock ID: " + stockId);
+//
+//        String sql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%' AND status = 'AVAILABLE'";
+//
+//        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
+//            if (rs.next()) {
+//                int count = rs.getInt(1);
+//                System.out.println("DEBUG: Database returned count: " + count);
+//                return count;
+//            }
+//        }
+//        return 0;
+//    }
 
     public boolean updateProductWithQtySync(ProductDTO p) throws SQLException {
         ProductDAOImpl productDAO = new ProductDAOImpl();
