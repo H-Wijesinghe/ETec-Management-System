@@ -16,21 +16,17 @@ import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.dao.CategoryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
-import lk.ijse.etecmanagementsystem.model.CategoryModel;
 import lk.ijse.etecmanagementsystem.model.ProductModel;
-import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.util.Category;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.FieldsValidation;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
-import lk.ijse.etecmanagementsystem.util.ProductUtil;
 
 import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -424,7 +420,7 @@ public class ProductController implements Initializable {
     private void loadProducts() {
         try {
 
-            List<ProductDTO> rawData = productDAO.findAll();
+            List<ProductDTO> rawData = productDAO.getAll();
             if (rawData != null) {
 //                ProductUtil.productCache.setAll(rawData);
                 productList.setAll(rawData);

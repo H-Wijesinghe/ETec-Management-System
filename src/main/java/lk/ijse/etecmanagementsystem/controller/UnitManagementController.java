@@ -15,6 +15,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.model.UnitManagementModel;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
@@ -477,6 +478,7 @@ public class UnitManagementController {
             int successCount = 0;
 
             // Loop through every serial in your Staging Table
+            ArrayList<ProductItemDTO> savedItems = new ArrayList<>();
             for (String serial : stagingList) {
 
                 ProductItemDTO itemDTO = new ProductItemDTO();
@@ -486,9 +488,13 @@ public class UnitManagementController {
                 itemDTO.setSupplierWarranty(supWar);
                 itemDTO.setCustomerWarranty(custWar);
 
-                if (model.registerRealItem(itemDTO)) {
-                    successCount++;
-                }
+                savedItems.add(itemDTO);
+
+            }
+            boolean allSaved = model.addNewSerialNo(savedItems);
+            if (allSaved) {
+                successCount = savedItems.size();
+                System.out.println("DEBUG: All items saved successfully."+" Count: " + successCount);
             }
 
             showAlert(Alert.AlertType.INFORMATION, "Successfully registered " + successCount + " items.");

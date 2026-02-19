@@ -17,9 +17,8 @@ import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.component.ProductCard;
 import lk.ijse.etecmanagementsystem.component.SkeletonCard;
 import lk.ijse.etecmanagementsystem.dao.CategoryDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
-import lk.ijse.etecmanagementsystem.model.CategoryModel;
-import lk.ijse.etecmanagementsystem.model.InventoryModel;
 import lk.ijse.etecmanagementsystem.util.InventoryUtil;
 import lk.ijse.etecmanagementsystem.util.ThreadService;
 import lk.ijse.etecmanagementsystem.util.Category;
@@ -79,7 +78,7 @@ public class InventoryController {
     private boolean isGridView = true;
 
 
-    private final InventoryModel inventoryModel = new InventoryModel();
+    private final ProductDAOImpl productDAO = new ProductDAOImpl();
 
 
     @FXML
@@ -103,7 +102,7 @@ public class InventoryController {
     private void loadProducts() {
         try {
 
-            List<ProductDTO> rawData = inventoryModel.findAll();
+            List<ProductDTO> rawData = productDAO.getAll();
             if (rawData != null) {
 //                ProductUtil.productCache.setAll(rawData);
                 productDataList.clear();

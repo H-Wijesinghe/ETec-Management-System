@@ -141,6 +141,7 @@ public class ProductModel {
 
     public boolean updateProductWithQtySync(ProductDTO p) throws SQLException {
         ProductDAOImpl productDAO = new ProductDAOImpl();
+        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         Connection connection = null;
         try {
@@ -173,49 +174,71 @@ public class ProductModel {
                 return false;
             }
 
-            String sqlWarranty = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
-            try (PreparedStatement pstmWar = connection.prepareStatement(sqlWarranty)) {
-                pstmWar.setInt(1, p.getWarrantyMonth());
-                pstmWar.setString(2, p.getId());
-                pstmWar.executeUpdate();
+//            String sqlWarranty = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
+//            try (PreparedStatement pstmWar = connection.prepareStatement(sqlWarranty)) {
+//                pstmWar.setInt(1, p.getWarrantyMonth());
+//                pstmWar.setString(2, p.getId());
+//                pstmWar.executeUpdate();
+//            }
+
+            boolean isItemUpdated = productItemDAO.updateCustomerWarranty(p.getWarrantyMonth(), Integer.parseInt(p.getId()));
+            if (!isItemUpdated) {
+                connection.rollback();
+                return false;
             }
 
-            String countSql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND status = 'AVAILABLE'";
-            int currentTotalItems = 0;
-            try (PreparedStatement psCount = connection.prepareStatement(countSql)) {
-                psCount.setString(1, p.getId());
-                ResultSet rs = psCount.executeQuery();
-                if (rs.next()) currentTotalItems = rs.getInt(1);
+//            String countSql = "SELECT COUNT(*) FROM ProductItem WHERE stock_id = ? AND status = 'AVAILABLE'";
+//            int currentTotalItems = 0;
+//            try (PreparedStatement psCount = connection.prepareStatement(countSql)) {
+//                psCount.setString(1, p.getId());
+//                ResultSet rs = psCount.executeQuery();
+//                if (rs.next()) currentTotalItems = rs.getInt(1);
+//            }
+
+            int currentTotalItems = productItemDAO.getAvailableItemCount(Integer.parseInt(p.getId()));
+            if(currentTotalItems <= 0) {
+                connection.rollback();
+                throw new SQLException("Data integrity issue: No available items found for this product. Cannot sync quantity.");
             }
 
             int targetQty = p.getQty();
             int difference = targetQty - currentTotalItems;
 
             if (difference > 0) {
-                // INCREASE QTY: Add 'difference' amount of Placeholders
-                String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, status, added_date) VALUES (?, ?, 'AVAILABLE', NOW())";
-                try (PreparedStatement pstmAdd = connection.prepareStatement(insertSql)) {
-                    for (int i = 0; i < difference; i++) {
-                        pstmAdd.setString(1, p.getId());
-                        String tempSerial = "PENDING-" + p.getId() + "-" + System.nanoTime() + "-" + i;
-                        pstmAdd.setString(2, tempSerial);
-                        pstmAdd.addBatch();
-                    }
-                    pstmAdd.executeBatch();
+//                String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, status, added_date) VALUES (?, ?, 'AVAILABLE', NOW())";
+//                try (PreparedStatement pstmAdd = connection.prepareStatement(insertSql)) {
+//                    for (int i = 0; i < difference; i++) {
+//                        pstmAdd.setString(1, p.getId());
+//                        String tempSerial = "PENDING-" + p.getId() + "-" + System.nanoTime() + "-" + i;
+//                        pstmAdd.setString(2, tempSerial);
+//                        pstmAdd.addBatch();
+//                    }
+//                    pstmAdd.executeBatch();
+//                }
+                boolean isCreate = productItemDAO.addPlaceHolderItem(Integer.parseInt(p.getId()), difference);
+                if (!isCreate) {
+                    connection.rollback();
+                    throw new SQLException("Failed to create placeholder items to sync quantity.");
                 }
             } else if (difference < 0) {
 
-                int removeCount = Math.abs(difference);
-                String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE' LIMIT ?";
-
-                try (PreparedStatement pstmDel = connection.prepareStatement(deleteSql)) {
-                    pstmDel.setString(1, p.getId());
-                    pstmDel.setInt(2, removeCount);
-                    int deletedRows = pstmDel.executeUpdate();
-
-                    if (deletedRows < removeCount) {
-                        throw new SQLException("Cannot reduce Quantity below " + (currentTotalItems - deletedRows) + ". You have real items registered that cannot be auto-deleted.");
-                    }
+//                int removeCount = Math.abs(difference);
+//                String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE' LIMIT ?";
+//
+//                try (PreparedStatement pstmDel = connection.prepareStatement(deleteSql)) {
+//                    pstmDel.setString(1, p.getId());
+//                    pstmDel.setInt(2, removeCount);
+//                    int deletedRows = pstmDel.executeUpdate();
+//
+//                    if (deletedRows < removeCount) {
+//                        throw new SQLException("Cannot reduce Quantity below " + (currentTotalItems - deletedRows) + ". You have real items registered that cannot be auto-deleted.");
+//                    }
+//                }
+                boolean isDeleted = productItemDAO.deletePlaceHolderItems(Integer.parseInt(p.getId()), Math.abs(difference));
+                if (!isDeleted) {
+                    connection.rollback();
+                    System.out.println("DEBUG: Failed to delete placeholder items to sync quantity. Difference: " + difference);
+                    return false;
                 }
             }
 
@@ -236,10 +259,17 @@ public class ProductModel {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false); // Start Transaction
 
-            String deleteItemsSql = "DELETE FROM ProductItem WHERE stock_id = ?";
-            try (PreparedStatement pstm = connection.prepareStatement(deleteItemsSql)) {
-                pstm.setString(1, stockId);
-                pstm.executeUpdate();
+//            String deleteItemsSql = "DELETE FROM ProductItem WHERE stock_id = ?";
+//            try (PreparedStatement pstm = connection.prepareStatement(deleteItemsSql)) {
+//                pstm.setString(1, stockId);
+//                pstm.executeUpdate();
+//            }
+
+            boolean isItemDeleted = new ProductItemDAOImpl().delete(Integer.parseInt(stockId));
+            if (!isItemDeleted) {
+                connection.rollback();
+                System.out.println("DEBUG: Failed to delete product items for Stock ID " + stockId);
+                return false;
             }
 
 //            String deleteProductSql = "DELETE FROM Product WHERE stock_id = ?";
@@ -279,26 +309,13 @@ public class ProductModel {
     }
 
     public ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException {
-        String sql = "SELECT serial_number, status FROM ProductItem WHERE stock_id = ?";
+        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
-        int realAvailableCount = 0;
-        int restrictedCount = 0; // SOLD, RMA, etc.
+        int realAvailableCount = productItemDAO.getRealItemCount(Integer.parseInt(stockId));
+        System.out.println("DEBUG: Real Available Item Count for Stock ID " + stockId + " is " + realAvailableCount);
+        int restrictedCount = productItemDAO.getRestrictedRealItemCount(Integer.parseInt(stockId));
+        System.out.println("DEBUG: Restricted Item Count for Stock ID " + stockId + " is " + restrictedCount);
 
-        try (ResultSet rs = CrudUtil.execute(sql, stockId)) {
-            while (rs.next()) {
-                String serial = rs.getString("serial_number");
-                String status = rs.getString("status");
-
-                if (serial != null && serial.startsWith("PENDING")) continue;
-
-                if ("AVAILABLE".equals(status)) {
-                    realAvailableCount++;
-                } else {
-
-                    restrictedCount++;
-                }
-            }
-        }
         return new ItemDeleteStatus(realAvailableCount, restrictedCount);
     }
 

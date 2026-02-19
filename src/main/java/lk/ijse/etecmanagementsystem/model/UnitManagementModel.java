@@ -1,6 +1,8 @@
 package lk.ijse.etecmanagementsystem.model;
 
 import javafx.scene.control.Alert;
+import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
@@ -75,58 +77,47 @@ public class UnitManagementModel {
         }
     }
 
-    public boolean registerRealItem(ProductItemDTO dto) throws SQLException {
+    public boolean addNewSerialNo(ArrayList<ProductItemDTO> itemDTOS) throws SQLException {
+        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+
         Connection conn = null;
         try {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
 
-            String findSql = "SELECT item_id FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' LIMIT 1 FOR UPDATE";
-            int placeholderId = -1;
+            ArrayList<ProductItemDTO> placeholders = productItemDAO.getPlaceHolderItems(itemDTOS.get(0).getStockId());
 
-            try (PreparedStatement findPstm = conn.prepareStatement(findSql)) {
-                findPstm.setInt(1, dto.getStockId());
-                try (ResultSet rs = findPstm.executeQuery()) {
-                    if (rs.next()) {
-                        placeholderId = rs.getInt("item_id");
+            int i = 0;
+            for(ProductItemDTO dto : itemDTOS){
+                int placeholderId = -1;
+
+                if (!placeholders.isEmpty() && i < placeholders.size()) {
+                    placeholderId = placeholders.get(i++).getItemId();
+                    System.out.println("DEBUG: Found placeholder with ID " + placeholderId + " for Stock ID " + dto.getStockId());
+                }
+                if (placeholderId != -1) {
+
+                    boolean isUpdated = productItemDAO.updateItem(dto);
+                    if (!isUpdated) {
+                        conn.rollback();
+                        throw new SQLException("Failed to update placeholder item with ID " + placeholderId);
+                    }
+                } else {
+
+                    boolean isAdded = productItemDAO.addProductItem(dto);
+                    if (!isAdded) {
+                        conn.rollback();
+                        throw new SQLException("Failed to add new item for Stock ID " + dto.getStockId());
+                    }
+
+                    ProductDAOImpl productDAO = new ProductDAOImpl();
+                    boolean isQtyUpdated = productDAO.updateQty(dto.getStockId());
+                    if (!isQtyUpdated) {
+                        conn.rollback();
+                        throw new SQLException("Failed to update product quantity for Stock ID " + dto.getStockId());
                     }
                 }
             }
-
-            if (placeholderId != -1) {
-
-                String updateSql = "UPDATE ProductItem SET serial_number = ?, supplier_id = ?, supplier_warranty_mo = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
-                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
-                    ps.setString(1, dto.getSerialNumber());
-                    if (dto.getSupplierId() == 0) ps.setNull(2, java.sql.Types.INTEGER);
-                    else ps.setInt(2, dto.getSupplierId());
-
-                    ps.setInt(3, dto.getSupplierWarranty());
-                    ps.setInt(4, dto.getCustomerWarranty());
-                    ps.setInt(5, placeholderId);
-                    ps.executeUpdate();
-                }
-            } else {
-
-                String insertSql = "INSERT INTO ProductItem (stock_id, supplier_id, serial_number, supplier_warranty_mo, customer_warranty_mo, status, added_date) VALUES (?, ?, ?, ?, ?, 'AVAILABLE', NOW())";
-                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
-                    ps.setInt(1, dto.getStockId());
-                    if (dto.getSupplierId() == 0) ps.setNull(2, java.sql.Types.INTEGER);
-                    else ps.setInt(2, dto.getSupplierId());
-
-                    ps.setString(3, dto.getSerialNumber());
-                    ps.setInt(4, dto.getSupplierWarranty());
-                    ps.setInt(5, dto.getCustomerWarranty());
-                    ps.executeUpdate();
-                }
-
-                String qtySql = "UPDATE Product SET qty = qty + 1 WHERE stock_id = ?";
-                try (PreparedStatement qtyPs = conn.prepareStatement(qtySql)) {
-                    qtyPs.setInt(1, dto.getStockId());
-                    qtyPs.executeUpdate();
-                }
-            }
-
             conn.commit();
             return true;
         } catch (SQLException e) {

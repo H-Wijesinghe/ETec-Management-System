@@ -4,7 +4,6 @@ import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -55,6 +54,11 @@ public class ProductDAOImpl {
         );
     }
 
+    public boolean updateQty(int stockId) throws SQLException {
+        String qtySql = "UPDATE Product SET qty = qty + 1 WHERE stock_id = ?";
+        return CrudUtil.execute(qtySql, stockId);
+    }
+
     public boolean delete(int id) throws SQLException {
         String deleteProductSql = "DELETE FROM Product WHERE stock_id = ?";
         return CrudUtil.execute(deleteProductSql, id);
@@ -94,9 +98,9 @@ public class ProductDAOImpl {
         }
     }
 
-    public List<ProductDTO> findAll() throws Exception {
-        String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
-
+    public List<ProductDTO> getAll() throws SQLException {
+//        String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
+        String sql = "SELECT * FROM Product";
         List<ProductDTO> products = new ArrayList<>();
 
         try (ResultSet rs = CrudUtil.execute(sql)) {

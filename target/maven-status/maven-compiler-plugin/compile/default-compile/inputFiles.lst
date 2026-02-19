@@ -1,4 +1,5 @@
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\App.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\InventoryBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\DebtListCell.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\ProductCard.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\SkeletonCard.java
@@ -29,7 +30,10 @@ E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\controller\
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\controller\UserController.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\CategoryDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\CustomerDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\ProductDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\ProductItemDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\SupplierDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\UserDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\db\DBConnection.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\CategoryDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\CustomerDTO.java

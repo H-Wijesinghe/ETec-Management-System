@@ -237,3 +237,4 @@ VALUES ('Tech Supplies Co.', '123-456-7890', '', '123 Tech Street, Silicon Valle
 SELECT COUNT(item_id) AS count  FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%';
 
 SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, p.sell_price FROM ProductItem pi JOIN Product p ON pi.stock_id = p.stock_id WHERE pi.status = 'AVAILABLE';
+SELECT item_id, stock_id, serial_number FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE';

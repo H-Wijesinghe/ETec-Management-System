@@ -744,7 +744,7 @@ public class SalesController implements Initializable {
     private void loadProducts() {
         try {
             productsList.clear();
-            productsList.addAll(productDAO.findAll());
+            productsList.addAll(productDAO.getAll());
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Failed to load products: " + e.getMessage());
         }
