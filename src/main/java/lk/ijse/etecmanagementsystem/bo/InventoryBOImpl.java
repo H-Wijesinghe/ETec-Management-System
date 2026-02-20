@@ -18,6 +18,7 @@ import java.util.Map;
 public class InventoryBOImpl {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+    SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
 
     public int saveProductAndGetId(ProductDTO p) throws SQLException {
         Connection connection = null;
@@ -188,7 +189,6 @@ public class InventoryBOImpl {
     }
 
     public boolean addNewSerialNo(ArrayList<ProductItemDTO> itemDTOS) throws SQLException {
-        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         Connection conn = null;
         try {
@@ -220,7 +220,6 @@ public class InventoryBOImpl {
                         throw new SQLException("Failed to add new item for Stock ID " + dto.getStockId());
                     }
 
-                    ProductDAOImpl productDAO = new ProductDAOImpl();
                     boolean isQtyUpdated = productDAO.updateQty(dto.getStockId(), 1);
                     if (!isQtyUpdated) {
                         conn.rollback();
@@ -239,7 +238,6 @@ public class InventoryBOImpl {
     }
 
     public Map<Integer, String> getAllProductMap() throws SQLException {
-        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         Map<Integer, String> map = new HashMap<>();
         List<ProductItemDTO> items = productItemDAO.getAllProductItems();
@@ -250,7 +248,6 @@ public class InventoryBOImpl {
     }
 
     public Map<Integer, String> getAllSuppliersMap() throws SQLException {
-        SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
 
         Map<Integer, String> map = new HashMap<>();
         List<SupplierDTO> suppliers = supplierDAO.getAllSuppliers();
@@ -262,7 +259,6 @@ public class InventoryBOImpl {
     }
 
     public ProductItemDTO getProductMetaById(int stockId) throws SQLException {
-        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         List<ProductItemDTO> items = productItemDAO.getAllProductItems();
         for (ProductItemDTO item : items) {
@@ -274,7 +270,6 @@ public class InventoryBOImpl {
     }
 
     public boolean correctItemMistake(String oldSerial, String newSerial, int newStockId, Integer newSupplierId, int newSupWar) throws SQLException {
-        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
 
         Connection con = null;
         try {
@@ -301,7 +296,6 @@ public class InventoryBOImpl {
 
             // Adjust stock counts if the product type changed
             if (oldStockId > 0 && oldStockId != newStockId) {
-                ProductDAOImpl productDAO = new ProductDAOImpl();
 
                 boolean isOldStockUpdated = productDAO.updateQty(oldStockId, 1);
                 if (!isOldStockUpdated) {
@@ -327,8 +321,6 @@ public class InventoryBOImpl {
     }
 
     public boolean updateItemStatus(String serial, String newStatus) throws SQLException {
-        ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
-        ProductDAOImpl productDAO = new ProductDAOImpl();
 
         ProductItemDTO item = productItemDAO.getItemBySerial(serial);
         if (item == null) {

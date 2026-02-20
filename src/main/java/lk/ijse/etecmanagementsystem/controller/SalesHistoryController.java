@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.ijse.etecmanagementsystem.dao.SalesDAOImpl;
 import lk.ijse.etecmanagementsystem.model.SalesModel;
 import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
 
@@ -49,6 +50,7 @@ public class SalesHistoryController {
     private TableColumn<SalesTM, Double> colPaid;
 
     private final SalesModel salesModel = new SalesModel();
+    SalesDAOImpl salesDAO = new SalesDAOImpl();
 
     @FXML
     public void initialize() {
@@ -69,7 +71,7 @@ public class SalesHistoryController {
 
     private void loadAllSales() {
         try {
-            List<SalesTM> salesList = salesModel.getAllSales();
+            List<SalesTM> salesList = salesDAO.getAllSales();
             ObservableList<SalesTM> obList = FXCollections.observableArrayList(salesList);
             tblSalesHistory.setItems(obList);
         } catch (SQLException e) {
@@ -93,7 +95,7 @@ public class SalesHistoryController {
         }
 
         try {
-            List<SalesTM> filteredList = salesModel.getSalesByDateRange(fromDate, toDate);
+            List<SalesTM> filteredList = salesDAO.getSalesByDateRange(fromDate, toDate);
             tblSalesHistory.setItems(FXCollections.observableArrayList(filteredList));
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error filtering data: " + e.getMessage()).show();

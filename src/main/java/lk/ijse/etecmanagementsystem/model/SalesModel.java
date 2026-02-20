@@ -1,6 +1,8 @@
 package lk.ijse.etecmanagementsystem.model;
 
 import javafx.scene.control.Alert;
+import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
@@ -368,6 +370,9 @@ public class SalesModel {
 
 // --- OPTIMIZED TRANSACTION METHOD ---
 public boolean placeOrder(SalesDTO salesDTO, List<ItemCartTM> cartItems) throws SQLException {
+    ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+    ProductDAOImpl productDAO = new ProductDAOImpl();
+
     Connection con = null;
     try {
         con = DBConnection.getInstance().getConnection();
@@ -389,11 +394,21 @@ public boolean placeOrder(SalesDTO salesDTO, List<ItemCartTM> cartItems) throws 
             for (ItemCartTM item : cartItems) {
                 if (item.getQuantity() > 1) {
                     // A. Get Stock ID
-                    int stockId = -1;
-                    psGetStock.setInt(1, item.getItemId());
-                    try (ResultSet rs = psGetStock.executeQuery()) {
-                        if (rs.next()) stockId = rs.getInt("stock_id");
-                        else throw new SQLException("Item ID not found: " + item.getItemId());
+//                    int stockId = -1;
+//                    psGetStock.setInt(1, item.getItemId());
+//                    try (ResultSet rs = psGetStock.executeQuery()) {
+//                        if (rs.next()) stockId = rs.getInt("stock_id");
+//                        else throw new SQLException("Item ID not found: " + item.getItemId());
+//                    }
+                    int stockId = productItemDAO.getProductItem(item.getItemId()).getStockId();
+                    if (stockId <= 0) {
+                        throw new SQLException("Item ID not found in database: " + item.getItemId());
+                    }
+
+                    int placeHoldersCount = productItemDAO.getPlaceHolderItems(stockId).size();
+                    if (placeHoldersCount < item.getQuantity()) {
+                        System.out.println("not enough placeholder count to add item within qty");
+                        throw new SQLException("Not enough placeholder count to add item within qty");
                     }
 
                     // B. Find Pending Items to split

@@ -33,6 +33,7 @@ lk\ijse\etecmanagementsystem\controller\ProductController.class
 lk\ijse\etecmanagementsystem\controller\SuppliersController.class
 lk\ijse\etecmanagementsystem\util\FieldsValidation.class
 lk\ijse\etecmanagementsystem\controller\InventoryController$1.class
+lk\ijse\etecmanagementsystem\dao\SalesItemDAOImpl.class
 lk\ijse\etecmanagementsystem\controller\DashboardController.class
 lk\ijse\etecmanagementsystem\dto\tm\ManualTransactionResult.class
 lk\ijse\etecmanagementsystem\server\BarcodeServer$ScanHandler.class
@@ -68,6 +69,7 @@ lk\ijse\etecmanagementsystem\dto\tm\PendingRepairTM.class
 lk\ijse\etecmanagementsystem\controller\SalesCheckoutController.class
 lk\ijse\etecmanagementsystem\dto\UserDTO.class
 lk\ijse\etecmanagementsystem\App.class
+lk\ijse\etecmanagementsystem\dao\SalesDAOImpl.class
 lk\ijse\etecmanagementsystem\util\Category.class
 lk\ijse\etecmanagementsystem\dto\tm\DashboardTM.class
 lk\ijse\etecmanagementsystem\controller\LayoutController.class

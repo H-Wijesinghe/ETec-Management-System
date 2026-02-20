@@ -298,7 +298,7 @@ public class SalesController implements Initializable {
 
             try {
                 int productId = productDAO.getIdByName(itemName);
-                int placeholderCount = salesModel.getPendingItemCount(productId);
+                int placeholderCount = productItemDAO.getPlaceHolderItems(productId).size();
                 if (qty > placeholderCount) {
                     ETecAlerts.showAlert(Alert.AlertType.WARNING, "Not enough Quantity", "Insufficient Quantity");
                     return;
@@ -764,7 +764,7 @@ public class SalesController implements Initializable {
     private void loadProductItems() {
         try {
             inventoryItemsList.clear();
-            inventoryItemsList.addAll(salesModel.getAllAvailableItems());
+            inventoryItemsList.addAll(productItemDAO.getAllAvailableItems());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Failed to load inventory: " + e.getMessage());
         }

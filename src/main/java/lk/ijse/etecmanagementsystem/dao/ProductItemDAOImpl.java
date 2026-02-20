@@ -1,9 +1,11 @@
 package lk.ijse.etecmanagementsystem.dao;
 
 import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -102,6 +104,31 @@ public class ProductItemDAOImpl {
         return placeholderItems;
     }
 
+    public List<InventoryItemDTO> getAllAvailableItems() throws SQLException {
+        List<InventoryItemDTO> itemList = new ArrayList<>();
+
+        String sql = "SELECT pi.item_id, p.name AS product_name, pi.serial_number, " +
+                "p.warranty_months, p.sell_price, p.p_condition " +
+                "FROM ProductItem pi " +
+                "JOIN Product p ON pi.stock_id = p.stock_id " +
+                "WHERE pi.status = 'AVAILABLE' AND pi.serial_number NOT LIKE 'PENDING-%' ";
+
+        ResultSet rs = CrudUtil.execute(sql);
+
+        while (rs.next()) {
+            InventoryItemDTO item = new InventoryItemDTO(
+                    rs.getInt("item_id"),
+                    rs.getString("product_name"),
+                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
+                    rs.getInt("warranty_months"), // Default warranty from Product definition
+                    rs.getDouble("sell_price"),
+                    ProductCondition.fromString(rs.getString("p_condition"))
+            );
+            itemList.add(item);
+        }
+        return itemList;
+    }
+
     public boolean updateItem(ProductItemDTO item) throws SQLException {
         String updateSql = "UPDATE ProductItem SET serial_number = ?, supplier_id = ?, " +
                 "supplier_warranty_mo = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
@@ -147,6 +174,38 @@ public class ProductItemDAOImpl {
         } else {
             return 0;
         }
+    }
+
+    public ProductItemDTO getProductItem(int itemId)throws  SQLException {
+        String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
+                "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
+                "FROM ProductItem pi " +
+                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
+                "JOIN Product p ON pi.stock_id = p.stock_id " +
+                "WHERE pi.item_id = ?";
+
+        ResultSet rs = CrudUtil.execute(sql, itemId);
+        ProductItemDTO productItemDTO = null;
+
+        if (rs.next()) {
+
+            productItemDTO = new ProductItemDTO(
+                    rs.getInt("item_id"),
+                    rs.getInt("stock_id"),
+                    rs.getInt("supplier_id"),
+                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
+                    rs.getString("product_name"),
+                    rs.getString("supplier_name"),
+                    rs.getInt("supplier_warranty_mo"),
+                    rs.getInt("customer_warranty_mo"),
+                    rs.getString("status"),
+                    rs.getDate("added_date"),
+                    rs.getDate("sold_date")
+            );
+        }
+
+        rs.close();
+        return productItemDTO;
     }
 
     public int getAvailableItemCount(int stockId) throws SQLException {
