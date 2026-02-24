@@ -31,20 +31,25 @@ public class TransactionBOImpl {
             transaction.setRepair_id(type.equals("REPAIR") ? id : 0);
 
             boolean transactionSaved = transactionDAO.settleTransaction(transaction, type);
-            if(!transactionSaved){
+            if (!transactionSaved) {
                 conn.rollback();
                 return false;
             }
 
-            boolean isFullySettled;
+            double currentPaidAmount;
+            boolean isSettled;
 
             if (type.equals("SALE")) {
-                isFullySettled = salesDAO.updateSalePayment(id, amount, newPaymentStatus);
+                currentPaidAmount = salesDAO.getSaleById(id).getPaidAmount();
+                isSettled = salesDAO.updateSalePayment(id, currentPaidAmount + amount, newPaymentStatus);
             } else {
-                isFullySettled = repairDAO.updateRepairPayment(amount, newPaymentStatus, id);
+                currentPaidAmount = repairDAO.getRepairJobById(id).getPaidAmount();
+                double totalAmount = repairDAO.getRepairJobById(id).getTotalAmount();
+                double discount = repairDAO.getRepairJobById(id).getDiscount();
+                isSettled = repairDAO.updateRepairPayment(currentPaidAmount + amount, totalAmount, discount, newPaymentStatus, id);
             }
 
-            if (!isFullySettled){
+            if (!isSettled) {
                 conn.rollback();
                 return false;
             }

@@ -2,6 +2,7 @@ package lk.ijse.etecmanagementsystem.dto;
 
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class SalesDTO {
@@ -45,6 +46,19 @@ public class SalesDTO {
         this.paidAmount = paidAmount;
         this.customerWarrantyMonths = customerWarrantyMonths;
         this.paymentStatus = paymentStatus;
+        this.description = description;
+    }
+
+    public SalesDTO(int saleId, int customerId, int userId, Timestamp saleDate, double subTotal, double discount, double grandTotal, double paidAmount, String paymentStatus, String description) {
+        this.saleId = saleId;
+        this.customerId = customerId;
+        this.userId = userId;
+        this.saleDate = saleDate;
+        this.subtotal = subTotal;
+        this.discount = discount;
+        this.grandTotal = grandTotal;
+        this.paidAmount = paidAmount;
+        this.paymentStatus = PaymentStatus.valueOf(paymentStatus);
         this.description = description;
     }
 

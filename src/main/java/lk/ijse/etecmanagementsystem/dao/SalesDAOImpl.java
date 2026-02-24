@@ -43,6 +43,27 @@ public class SalesDAOImpl {
         return salesList;
     }
 
+    public SalesDTO getSaleById(int saleId) throws SQLException {
+        String sql = "SELECT * FROM Sales WHERE sale_id = ?";
+        ResultSet rs = CrudUtil.execute(sql, saleId);
+        if (rs.next()) {
+            return new SalesDTO(
+                    rs.getInt("sale_id"),
+                    rs.getInt("customer_id"),
+                    rs.getInt("user_id"),
+                    rs.getTimestamp("sale_date"),
+                    rs.getDouble("sub_total"),
+                    rs.getDouble("discount"),
+                    rs.getDouble("grand_total"),
+                    rs.getDouble("paid_amount"),
+                    rs.getString("payment_status"),
+                    rs.getString("description")
+            );
+
+        }
+        return null; // Sale not found
+    }
+
     public List<SalesTM> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException {
         List<SalesTM> salesList = new ArrayList<>();
 

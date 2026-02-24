@@ -17,12 +17,17 @@ public class TransactionRecordDAOImpl {
     public boolean insertTransactionRecord(TransactionRecord entity) throws SQLException {
         String sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
+        if(entity.getTransaction_type().equals("SALE_PAYMENT") || entity.getSale_id() == 0) {
+            sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        }else{
+            sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, repair_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        }
         return CrudUtil.execute(sqlTrans,
                 entity.getTransaction_type(),
                 entity.getTransaction_method(),
                 entity.getAmount(),
                 entity.getFlow(),
-                entity.getSale_id(),
+                entity.getSale_id() == 0 ? entity.getRepair_id() : entity.getSale_id(),
                 entity.getUser_id(),
                 entity.getCustomer_id() == 0 ? null : entity.getCustomer_id(),
                 entity.getReference_note()

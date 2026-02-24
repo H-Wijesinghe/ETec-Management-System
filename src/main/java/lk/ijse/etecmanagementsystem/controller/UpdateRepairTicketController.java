@@ -11,12 +11,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dao.CustomerDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.RepairJobDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
-import lk.ijse.etecmanagementsystem.model.RepairJobModel; // Model Import
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -54,8 +54,8 @@ public class UpdateRepairTicketController {
     private int selectedCustomerId = -1;
 
     private final CustomerDAOImpl customerDAO = new CustomerDAOImpl();
-    private final RepairJobModel repairJobModel = new RepairJobModel();
     RepairJobDAOImpl repairJobDAO = new RepairJobDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
 
     @FXML
     public void initialize() {
@@ -243,7 +243,7 @@ public class UpdateRepairTicketController {
         alert.setContentText("This action cannot be undone.");
 
         try {
-            List<RepairPartTM> associatedParts = repairJobModel.getUsedParts(currentJob.getRepairId());
+            List<RepairPartTM> associatedParts = queryDAO.getUsedParts(currentJob.getRepairId());
 
             if (associatedParts != null && !associatedParts.isEmpty()) {
                 StringBuilder partsList = new StringBuilder("The following parts are associated with this job:\n");
@@ -268,7 +268,7 @@ public class UpdateRepairTicketController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                boolean success = repairJobModel.deleteRepairJob(currentJob.getRepairId());
+                boolean success = repairJobDAO.deleteRepairJob(currentJob.getRepairId());
 
                 if (success) {
                     mainController.refreshList();

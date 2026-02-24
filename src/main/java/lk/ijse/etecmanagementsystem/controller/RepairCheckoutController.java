@@ -5,11 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.RepairsBOimpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
-import lk.ijse.etecmanagementsystem.model.RepairJobModel;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
 import net.sf.jasperreports.engine.JRException;
@@ -57,7 +57,7 @@ public class RepairCheckoutController {
     // --- DATA ---
     private RepairJobTM jobTM;
     private RepairDashboardController mainController;
-    private final RepairJobModel repairModel = new RepairJobModel();
+    RepairsBOimpl repairsBOimpl = new RepairsBOimpl();
 
     private double subTotal = 0.0;
     private double grandTotal = 0.0;
@@ -189,7 +189,7 @@ public class RepairCheckoutController {
             double partsTotal = jobTM.getOriginalDto().getPartsCost();
 
             // CALL MODEL TRANSACTION
-            boolean success = repairModel.completeCheckout(
+            boolean success = repairsBOimpl.completeCheckout(
                     jobTM.getRepairId(),
                     cusId,
                     userId,

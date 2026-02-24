@@ -1,6 +1,7 @@
 package lk.ijse.etecmanagementsystem.dto;
 
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
+import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 import java.util.Date;
 
@@ -43,6 +44,17 @@ public class RepairJobDTO {
         this.paidAmount = paidAmount;
         this.paymentStatus = paymentStatus;
     }
+
+    public RepairJobDTO(int repairId, String intake, String diagnosis, String resolution, double laborCost, double partsCost, double totalAmount) {
+        this.repairId = repairId;
+        this.problemDesc = intake;
+        this.diagnosisDesc = diagnosis;
+        this.repairResults = resolution;
+        this.laborCost = laborCost;
+        this.partsCost = partsCost;
+        this.totalAmount = totalAmount;
+    }
+
 
     // Getters and Setters
     public int getRepairId() { return repairId; }

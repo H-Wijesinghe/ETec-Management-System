@@ -50,6 +50,38 @@ public class RepairJobDAOImpl {
         return list;
     }
 
+    public RepairJobDTO getRepairJobById(int repair_id) throws SQLException {
+        String sql = "SELECT * FROM RepairJob WHERE repair_id = ?";
+        ResultSet resultSet = CrudUtil.execute(sql, repair_id);
+
+        if (resultSet.next()) {
+            RepairJobDTO dto = new RepairJobDTO(
+                    resultSet.getInt("repair_id"),
+                    resultSet.getInt("cus_id"),
+                    resultSet.getInt("user_id"),
+                    resultSet.getString("device_name"),
+                    resultSet.getString("device_sn"),
+                    resultSet.getString("problem_desc"),
+                    resultSet.getString("diagnosis_desc"),
+                    resultSet.getString("repair_results"),
+                    RepairStatus.valueOf(resultSet.getString("status")),
+                    resultSet.getTimestamp("date_in"),
+                    resultSet.getTimestamp("date_out"),
+                    resultSet.getDouble("labor_cost"),
+                    resultSet.getDouble("parts_cost"),
+                    resultSet.getDouble("total_amount"),
+                    resultSet.getDouble("paid_amount"),
+                    resultSet.getDouble("discount"),
+                    PaymentStatus.valueOf(resultSet.getString("payment_status"))
+            );
+            resultSet.close();
+            return dto;
+        } else {
+            resultSet.close();
+            return null; // Not found
+        }
+    }
+
     public boolean saveRepairJob(RepairJobDTO dto) throws SQLException {
         String sql = "INSERT INTO RepairJob " +
                 "(cus_id, user_id, device_name, device_sn, problem_desc, status, date_in, payment_status) " +
@@ -99,8 +131,42 @@ public class RepairJobDAOImpl {
     }
 
 
-    public boolean updateRepairPayment(double amount, String paymentStatus, int repairId) throws SQLException {
-        String updateSql = "UPDATE RepairJob SET paid_amount = paid_amount + ?, payment_status = ? WHERE repair_id = ?";
-        return CrudUtil.execute(updateSql, amount, paymentStatus, repairId);
+    public boolean updateRepairPayment(double amount, double totalAmount, double discount, String paymentStatus, int repairId) throws SQLException {
+        String updateSql = "UPDATE RepairJob SET paid_amount = paid_amount + ?, total_amount = ?, discount = ?, payment_status = ? " +
+                "WHERE repair_id = ?";
+        return CrudUtil.execute(updateSql, amount,totalAmount, discount, paymentStatus, repairId);
+    }
+
+    public boolean updateRepairCosts(RepairJobDTO dto) throws SQLException {
+        String sqlJob = "UPDATE RepairJob SET problem_desc=?, diagnosis_desc=?, repair_results=?, " +
+                "labor_cost=?, parts_cost=?, total_amount=? WHERE repair_id=?";
+
+        return CrudUtil.execute(
+                sqlJob,
+                dto.getProblemDesc(),
+                dto.getDiagnosisDesc(),
+                dto.getRepairResults(),
+                dto.getLaborCost(),
+                dto.getPartsCost(),
+                dto.getTotalAmount(),
+                dto.getRepairId()
+        );
+    }
+
+    public boolean updateStatus(int repairId, RepairStatus newStatus) throws SQLException {
+        String sql = "UPDATE RepairJob SET status = ? WHERE repair_id = ?";
+
+        return CrudUtil.execute(sql, newStatus.name(), repairId);
+    }
+
+    public boolean updateDateOut(String paymentStatus, int repairId) throws SQLException {
+        String sqlUpdateJob = "UPDATE RepairJob SET status='DELIVERED', date_out=NOW(), payment_status=? WHERE repair_id=?";
+        return  CrudUtil.execute(sqlUpdateJob, paymentStatus, repairId);
+    }
+
+    public boolean deleteRepairJob(int repairId) throws SQLException {
+        String sql = "DELETE FROM RepairJob WHERE repair_id=?";
+
+        return CrudUtil.execute(sql, repairId);
     }
 }

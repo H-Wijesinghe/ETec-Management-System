@@ -12,7 +12,6 @@ module lk.ijse.etecmanagementsystem {
     requires jdk.httpserver;
     requires net.sf.jasperreports.core;
     requires java.mail;
-    requires lk.ijse.etecmanagementsystem;
 
 
     exports lk.ijse.etecmanagementsystem;

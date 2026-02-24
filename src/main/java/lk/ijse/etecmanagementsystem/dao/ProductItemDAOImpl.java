@@ -156,6 +156,11 @@ public class ProductItemDAOImpl {
         return CrudUtil.execute(sql, status, status, serialNumber);
     }
 
+    public boolean updateItemAvailability(int itemId) throws SQLException {
+        String sqlRestock = "UPDATE ProductItem SET status='AVAILABLE', sold_date = null  WHERE item_id=?";
+        return CrudUtil.execute(sqlRestock, itemId);
+    }
+
     public boolean updateCustomerWarranty(int customerWarranty, int stockId) throws SQLException {
         String sqlItem = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
         return CrudUtil.execute(sqlItem, customerWarranty, stockId);
@@ -165,6 +170,25 @@ public class ProductItemDAOImpl {
         String sqlUpdItem = "UPDATE ProductItem SET status = 'SOLD', sold_date = NOW(), customer_warranty_mo = ?, serial_number = ? WHERE item_id = ? AND status = 'AVAILABLE'";
 
         return CrudUtil.execute(sqlUpdItem, item.getCustomerWarranty(), item.getSerialNumber(), item.getItemId());
+    }
+
+    public boolean updateItemForRepair(int itemId) throws SQLException {
+        String sqlMarkSold = "UPDATE ProductItem SET status='IN_REPAIR_USE' WHERE item_id=?";
+        return  CrudUtil.execute(sqlMarkSold, itemId);
+    }
+
+    public boolean fixSerialForRepair(int itemId) throws SQLException {
+        String sqlFixPlaceholders = "UPDATE ProductItem " +
+                "SET serial_number = CONCAT('REPAIR-', SUBSTRING(serial_number, 9)) " +
+                "WHERE item_id=? AND serial_number LIKE 'PENDING-%'";
+        return CrudUtil.execute(sqlFixPlaceholders, itemId);
+    }
+
+    public boolean replaceSerialForReturned(int itemId) throws SQLException {
+        String sqlReplacePlaceholders = "UPDATE ProductItem " +
+                "SET serial_number = CONCAT('PENDING-', SUBSTRING(serial_number, 8)) " +
+                "WHERE item_id=? AND serial_number LIKE 'REPAIR-%'";
+        return CrudUtil.execute(sqlReplacePlaceholders, itemId);
     }
 
     public int getRealItemCount(int stockId) throws SQLException {

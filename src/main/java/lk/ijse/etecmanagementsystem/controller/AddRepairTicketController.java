@@ -15,7 +15,6 @@ import lk.ijse.etecmanagementsystem.dao.RepairJobDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
-import lk.ijse.etecmanagementsystem.model.RepairJobModel; // NEW IMPORT
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 import net.sf.jasperreports.engine.JRException;
@@ -62,7 +61,6 @@ public class AddRepairTicketController {
     private RepairDashboardController mainController;
 
     private final CustomerDAOImpl customerDAO = new CustomerDAOImpl();
-    private final RepairJobModel repairJobModel = new RepairJobModel();
     RepairJobDAOImpl repairJobDAO = new RepairJobDAOImpl();
 
     public void setMainController(RepairDashboardController mainController) {

@@ -1,6 +1,8 @@
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\App.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\InventoryBOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\RepairsBOimpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\SalesBOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\TransactionBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\DebtListCell.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\ProductCard.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\SkeletonCard.java
@@ -35,6 +37,10 @@ E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\entity\
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\entity\TransactionRecord.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\ProductDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\ProductItemDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\QueryDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\RepairItemDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\RepairJobDAOImpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\RepairSalesDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\SalesDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\SalesItemDAOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dao\SupplierDAOImpl.java
@@ -48,6 +54,7 @@ E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\Invento
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\ItemCartDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\ProductDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\ProductItemDTO.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\RepairItemDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\RepairJobDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\SalesDTO.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\SupplierDTO.java

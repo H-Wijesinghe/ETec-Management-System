@@ -42,6 +42,17 @@ public class TransactionRecord {
         this.reference_note = reference_note;
     }
 
+    public TransactionRecord(String repairPayment, String paymentMethod, double paidAmount, String in, int saleId, int userId, int customerId, String referenceNote) {
+        this.transaction_type = repairPayment;
+        this.transaction_method = paymentMethod;
+        this.amount = paidAmount;
+        this.flow = in;
+        this.sale_id = saleId;
+        this.user_id = userId;
+        this.customer_id = customerId;
+        this.reference_note = referenceNote;
+    }
+
     public int getTransaction_id() {
         return transaction_id;
     }

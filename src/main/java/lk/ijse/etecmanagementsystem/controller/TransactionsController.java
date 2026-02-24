@@ -19,7 +19,6 @@ import lk.ijse.etecmanagementsystem.dao.TransactionRecordDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
-import lk.ijse.etecmanagementsystem.model.TransactionsModel;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
 
 import java.io.IOException;
@@ -74,7 +73,6 @@ public class TransactionsController {
     private TableColumn<PendingRepairTM, Void> colRepairAction;
 
     // --- Model Instance ---
-    private final TransactionsModel transactionsModel = new TransactionsModel();
     TransactionRecordDAOImpl transactionRecordDAO = new TransactionRecordDAOImpl();
     SalesDAOImpl salesDAO = new SalesDAOImpl();
     QueryDAOImpl queryDAO = new QueryDAOImpl();

@@ -16,11 +16,12 @@ import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.bo.RepairsBOimpl;
 import lk.ijse.etecmanagementsystem.dao.CustomerDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.QueryDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.RepairJobDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
-import lk.ijse.etecmanagementsystem.model.RepairJobModel;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 
 import java.io.IOException;
@@ -109,9 +110,10 @@ public class RepairDashboardController {
     private final ObservableList<RepairPartTM> usedPartsList = FXCollections.observableArrayList(); // Visible in Table
     private final List<RepairPartTM> partsToReturnList = new ArrayList<>(); // Hidden list for removed items (Restocking)
 
-    private final RepairJobModel repairModel = new RepairJobModel();
     RepairsBOimpl repairsBOimpl = new RepairsBOimpl();
     CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+    RepairJobDAOImpl repairJobDAO = new RepairJobDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
 
     @FXML
     public void initialize() {
@@ -240,7 +242,7 @@ public class RepairDashboardController {
 
             double totalAmount = laborCost + partsCost;
 
-            boolean isSuccess = repairModel.updateRepairJobDetails(
+            boolean isSuccess = repairsBOimpl.updateRepairJobDetails(
                     repairId,
                     intake,
                     diagnosis,
@@ -403,7 +405,7 @@ public class RepairDashboardController {
             usedPartsList.clear();
             partsToReturnList.clear();
 
-            List<RepairPartTM> dbParts = repairModel.getUsedParts(job.getRepairId());
+            List<RepairPartTM> dbParts = queryDAO.getUsedParts(job.getRepairId());
             usedPartsList.addAll(dbParts);
 
         } catch (SQLException e) {
@@ -499,7 +501,7 @@ public class RepairDashboardController {
 
     private void updateStatus(RepairStatus newStatus) {
         try {
-            boolean isUpdated = repairModel.updateStatus(currentSelection.getRepairId(), newStatus);
+            boolean isUpdated = repairJobDAO.updateStatus(currentSelection.getRepairId(), newStatus);
             if (isUpdated) {
                 currentSelection.setStatus(newStatus);
 
