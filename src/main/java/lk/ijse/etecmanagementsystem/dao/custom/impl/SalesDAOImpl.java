@@ -1,7 +1,8 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lk.ijse.etecmanagementsystem.dao.custom.SalesDAO;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SalesDAOImpl {
+public class SalesDAOImpl implements SalesDAO {
     public List<SalesTM> getAllSales() throws SQLException {
         List<SalesTM> salesList = new ArrayList<>();
 

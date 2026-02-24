@@ -1,8 +1,8 @@
 //package lk.ijse.etecmanagementsystem.model;
 //
 //
-//import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
-//import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
+//import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
+//import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;

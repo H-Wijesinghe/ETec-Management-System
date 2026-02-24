@@ -1,8 +1,8 @@
 package lk.ijse.etecmanagementsystem.bo;
 
-import lk.ijse.etecmanagementsystem.dao.RepairJobDAOImpl;
-import lk.ijse.etecmanagementsystem.dao.SalesDAOImpl;
-import lk.ijse.etecmanagementsystem.dao.TransactionRecordDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.RepairJobDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.TransactionRecordDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 

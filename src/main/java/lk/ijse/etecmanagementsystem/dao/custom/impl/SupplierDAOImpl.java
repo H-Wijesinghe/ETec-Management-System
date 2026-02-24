@@ -1,5 +1,6 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.SupplierDAO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
@@ -8,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SupplierDAOImpl {
+public class SupplierDAOImpl implements SupplierDAO {
     public List<SupplierDTO> getAllSuppliers() throws SQLException {
         String sql = "SELECT * FROM Supplier";
         List<SupplierDTO> suppliers = new ArrayList<>();

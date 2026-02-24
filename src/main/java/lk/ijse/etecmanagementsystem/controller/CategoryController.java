@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import lk.ijse.etecmanagementsystem.dao.CategoryDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.CategoryDAOImpl;
 import lk.ijse.etecmanagementsystem.util.Category;
 
 import java.util.List;

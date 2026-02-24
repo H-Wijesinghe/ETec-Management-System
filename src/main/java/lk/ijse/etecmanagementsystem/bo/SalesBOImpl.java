@@ -1,20 +1,15 @@
 package lk.ijse.etecmanagementsystem.bo;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-import lk.ijse.etecmanagementsystem.dao.*;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
 import lk.ijse.etecmanagementsystem.dao.entity.SalesItem;
 import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
-import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;

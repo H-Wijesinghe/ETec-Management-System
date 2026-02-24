@@ -1,21 +1,19 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
-import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
-import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductItemDAOImpl {
+public class ProductItemDAOImpl implements ProductItemDAO {
 
+    @Override
     public List<ProductItemDTO> getAllProductItems() throws SQLException {
         List<ProductItemDTO> itemList = new ArrayList<>();
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, " +
@@ -49,6 +47,7 @@ public class ProductItemDAOImpl {
         return itemList;
     }
 
+    @Override
     public boolean addPlaceHolderItem(int stockId, int limit) throws SQLException {
         String insertSql = "INSERT INTO ProductItem (stock_id, serial_number, status, added_date) VALUES (?, ?, 'AVAILABLE', NOW())";
         for (int i = 0; i < limit; i++) {
@@ -80,6 +79,7 @@ public class ProductItemDAOImpl {
 
     }
 
+    @Override
     public ArrayList<ProductItemDTO> getPlaceHolderItems(int stockId) throws SQLException {
         ArrayList<ProductItemDTO> placeholderItems = new ArrayList<>();
         String sql = "SELECT item_id, stock_id, serial_number FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE'";
@@ -104,6 +104,7 @@ public class ProductItemDAOImpl {
         return placeholderItems;
     }
 
+    @Override
     public List<InventoryItemDTO> getAllAvailableItems() throws SQLException {
         List<InventoryItemDTO> itemList = new ArrayList<>();
 
@@ -129,6 +130,7 @@ public class ProductItemDAOImpl {
         return itemList;
     }
 
+    @Override
     public boolean updateItem(ProductItemDTO item) throws SQLException {
         String updateSql = "UPDATE ProductItem SET serial_number = ?, supplier_id = ?, " +
                 "supplier_warranty_mo = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
@@ -146,37 +148,44 @@ public class ProductItemDAOImpl {
         }
     }
 
+    @Override
     public boolean updateSerialNumber(int itemId, String serialNumber) throws SQLException {
         String sql = "UPDATE ProductItem SET serial_number = ? WHERE item_id = ?";
         return CrudUtil.execute(sql, serialNumber, itemId);
     }
 
+    @Override
     public boolean updateStatus(String serialNumber, String status) throws SQLException {
         String sql = "UPDATE ProductItem SET status = ?, sold_date = CASE WHEN ? = 'SOLD' THEN NOW() ELSE sold_date END WHERE serial_number = ?";
         return CrudUtil.execute(sql, status, status, serialNumber);
     }
 
+    @Override
     public boolean updateItemAvailability(int itemId) throws SQLException {
         String sqlRestock = "UPDATE ProductItem SET status='AVAILABLE', sold_date = null  WHERE item_id=?";
         return CrudUtil.execute(sqlRestock, itemId);
     }
 
+    @Override
     public boolean updateCustomerWarranty(int customerWarranty, int stockId) throws SQLException {
         String sqlItem = "UPDATE ProductItem SET customer_warranty_mo = ? WHERE stock_id = ? AND status = 'AVAILABLE'";
         return CrudUtil.execute(sqlItem, customerWarranty, stockId);
     }
 
+    @Override
     public boolean updateItemForSale(ProductItemDTO item) throws SQLException {
         String sqlUpdItem = "UPDATE ProductItem SET status = 'SOLD', sold_date = NOW(), customer_warranty_mo = ?, serial_number = ? WHERE item_id = ? AND status = 'AVAILABLE'";
 
         return CrudUtil.execute(sqlUpdItem, item.getCustomerWarranty(), item.getSerialNumber(), item.getItemId());
     }
 
+    @Override
     public boolean updateItemForRepair(int itemId) throws SQLException {
         String sqlMarkSold = "UPDATE ProductItem SET status='IN_REPAIR_USE' WHERE item_id=?";
         return  CrudUtil.execute(sqlMarkSold, itemId);
     }
 
+    @Override
     public boolean fixSerialForRepair(int itemId) throws SQLException {
         String sqlFixPlaceholders = "UPDATE ProductItem " +
                 "SET serial_number = CONCAT('REPAIR-', SUBSTRING(serial_number, 9)) " +
@@ -184,6 +193,7 @@ public class ProductItemDAOImpl {
         return CrudUtil.execute(sqlFixPlaceholders, itemId);
     }
 
+    @Override
     public boolean replaceSerialForReturned(int itemId) throws SQLException {
         String sqlReplacePlaceholders = "UPDATE ProductItem " +
                 "SET serial_number = CONCAT('PENDING-', SUBSTRING(serial_number, 8)) " +
@@ -191,6 +201,7 @@ public class ProductItemDAOImpl {
         return CrudUtil.execute(sqlReplacePlaceholders, itemId);
     }
 
+    @Override
     public int getRealItemCount(int stockId) throws SQLException {
         System.out.println("DEBUG: Querying Real Item Count for Stock ID: " + stockId);
 
@@ -206,6 +217,7 @@ public class ProductItemDAOImpl {
         }
     }
 
+    @Override
     public ProductItemDTO getProductItem(int itemId)throws  SQLException {
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
@@ -238,6 +250,7 @@ public class ProductItemDAOImpl {
         return productItemDTO;
     }
 
+    @Override
     public int getAvailableItemCount(int stockId) throws SQLException {
         String countSql = "SELECT COUNT(*) AS count FROM ProductItem WHERE stock_id = ? AND status = 'AVAILABLE'";
         ResultSet rs = CrudUtil.execute(countSql, stockId);
@@ -248,6 +261,7 @@ public class ProductItemDAOImpl {
         }
     }
 
+    @Override
     public List<ProductItemDTO> getUnitsByStockId(int stockId, String productName) throws SQLException {
         List<ProductItemDTO> list = new ArrayList<>();
         String sql = "SELECT pi.item_id, pi.supplier_id, pi.serial_number, pi.supplier_warranty_mo, pi.customer_warranty_mo, " +
@@ -279,6 +293,7 @@ public class ProductItemDAOImpl {
         return list;
     }
 
+    @Override
     public ProductItemDTO getItemBySerial(String serial) throws SQLException {
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
@@ -311,16 +326,19 @@ public class ProductItemDAOImpl {
         return productItemDTO;
     }
 
+    @Override
     public boolean deletePlaceHolderItems(int stockId, int removeCount) throws SQLException {
         String deleteSql = "DELETE FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE' LIMIT ?";
         return CrudUtil.execute(deleteSql, stockId, removeCount);
     }
 
+    @Override
     public boolean delete(int stockId) throws SQLException {
         String deleteItemsSql = "DELETE FROM ProductItem WHERE stock_id = ?";
         return CrudUtil.execute(deleteItemsSql, stockId);
     }
 
+    @Override
     public boolean checkSerialExists(String serial) throws SQLException {
         String sql = "SELECT 1 FROM ProductItem WHERE serial_number = ?";
         ResultSet rs = CrudUtil.execute(sql, serial);
@@ -329,6 +347,7 @@ public class ProductItemDAOImpl {
         return exists;
     }
 
+    @Override
     public int getRestrictedRealItemCount(int stockId) throws SQLException {
         String sql = "SELECT COUNT(*) AS count FROM ProductItem WHERE stock_id = ? AND serial_number NOT LIKE 'PENDING-%' AND status != 'AVAILABLE'";
         ResultSet rs = CrudUtil.execute(sql, stockId);

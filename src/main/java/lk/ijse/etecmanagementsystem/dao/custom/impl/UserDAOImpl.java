@@ -1,5 +1,6 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.UserDAO;
 import lk.ijse.etecmanagementsystem.dto.UserDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
@@ -8,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDAOImpl {
+public class UserDAOImpl implements UserDAO {
     public List<UserDTO> getAllUsers() throws SQLException {
         String sql = "SELECT * FROM User";
         List<UserDTO> users = new ArrayList<>();

@@ -1,22 +1,19 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import lk.ijse.etecmanagementsystem.db.DBConnection;
-import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
+import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryDAOImpl {
+public class QueryDAOImpl implements QueryDAO {
     public ObservableList<PendingRepairTM> getPendingRepairs() throws SQLException {
         String repairSql = "SELECT r.repair_id, r.device_name, c.name, r.total_amount, r.paid_amount FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status IN ('PENDING','PARTIAL') AND r.status IN ('DELIVERED')";
 

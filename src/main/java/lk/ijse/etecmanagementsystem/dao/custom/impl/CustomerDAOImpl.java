@@ -1,5 +1,6 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.CustomerDAO;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
@@ -8,7 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomerDAOImpl {
+public class CustomerDAOImpl implements CustomerDAO {
 
     public List<CustomerDTO> getAllCustomers() throws SQLException {
         String sql = "SELECT * FROM Customer";

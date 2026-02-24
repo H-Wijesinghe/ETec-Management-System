@@ -1,5 +1,6 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.ProductDAO;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
@@ -9,7 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductDAOImpl {
+public class ProductDAOImpl implements ProductDAO {
     public boolean save(ProductDTO p) throws SQLException {
         String sql = "INSERT INTO Product (name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path) " +
                 "VALUES (?,?,?,?,?,?,?,?,?)";

@@ -1,9 +1,9 @@
 //package lk.ijse.etecmanagementsystem.model;
 //
 //import javafx.scene.control.Alert;
-//import lk.ijse.etecmanagementsystem.dao.ProductDAOImpl;
-//import lk.ijse.etecmanagementsystem.dao.ProductItemDAOImpl;
-//import lk.ijse.etecmanagementsystem.dao.SupplierDAOImpl;
+//import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
+//import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
+//import lk.ijse.etecmanagementsystem.dao.custom.impl.SupplierDAOImpl;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;

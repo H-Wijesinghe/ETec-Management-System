@@ -1,11 +1,10 @@
 package lk.ijse.etecmanagementsystem.bo;
 
-import lk.ijse.etecmanagementsystem.dao.*;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
 import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
-import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
 

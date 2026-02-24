@@ -1,12 +1,13 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.CategoryDAO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryDAOImpl {
+public class CategoryDAOImpl implements CategoryDAO {
     public List<String> getAllCategories() throws Exception {
         String sql = "SELECT * FROM Category";
 

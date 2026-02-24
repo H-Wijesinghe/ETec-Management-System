@@ -7,7 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import lk.ijse.etecmanagementsystem.dao.SupplierDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.SupplierDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 
 import java.sql.SQLException;

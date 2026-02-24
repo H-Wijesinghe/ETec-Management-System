@@ -5,7 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import lk.ijse.etecmanagementsystem.dao.UserDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.UserDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.UserDTO;
 import lk.ijse.etecmanagementsystem.util.FieldsValidation;
 

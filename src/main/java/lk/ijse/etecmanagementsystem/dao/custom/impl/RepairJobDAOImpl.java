@@ -1,8 +1,7 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
-import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dao.custom.RepairJobDAO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
-import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class RepairJobDAOImpl {
+public class RepairJobDAOImpl implements RepairJobDAO {
 
     public List<RepairJobDTO> getAllRepairJobs() throws SQLException {
         List<RepairJobDTO> list = new ArrayList<>();

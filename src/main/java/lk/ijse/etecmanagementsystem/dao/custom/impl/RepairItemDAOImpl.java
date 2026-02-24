@@ -1,12 +1,13 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import lk.ijse.etecmanagementsystem.dao.custom.RepairItemDAO;
 import lk.ijse.etecmanagementsystem.dto.RepairItemDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class RepairItemDAOImpl {
+public class RepairItemDAOImpl implements RepairItemDAO {
 
     public int getRepairItemId(int repairId, int itemId) throws SQLException {
         String sqlCheck = "SELECT id FROM RepairItem WHERE repair_id=? AND item_id=?";

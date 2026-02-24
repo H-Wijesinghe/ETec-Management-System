@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import lk.ijse.etecmanagementsystem.App;
-import lk.ijse.etecmanagementsystem.dao.UserDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.UserDAOImpl;
 import lk.ijse.etecmanagementsystem.util.ETecAlerts;
 import lk.ijse.etecmanagementsystem.util.EmailService;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;

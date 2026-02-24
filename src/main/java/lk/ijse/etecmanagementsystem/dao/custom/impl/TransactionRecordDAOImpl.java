@@ -1,19 +1,16 @@
-package lk.ijse.etecmanagementsystem.dao;
+package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import lk.ijse.etecmanagementsystem.dao.custom.TransactionRecordDAO;
 import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
-import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class TransactionRecordDAOImpl {
+public class TransactionRecordDAOImpl implements TransactionRecordDAO {
     public boolean insertTransactionRecord(TransactionRecord entity) throws SQLException {
         String sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
