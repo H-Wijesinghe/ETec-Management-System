@@ -8,7 +8,7 @@
 //import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //import lk.ijse.etecmanagementsystem.util.ProductCondition;
 //
 //

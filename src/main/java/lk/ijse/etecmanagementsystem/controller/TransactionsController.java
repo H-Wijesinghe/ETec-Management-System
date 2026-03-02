@@ -11,7 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
-import lk.ijse.etecmanagementsystem.bo.TransactionBOImpl;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.TransactionBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.TransactionRecordDAOImpl;
@@ -179,7 +179,7 @@ public class TransactionsController {
 
     public void loadPendingSettlements() {
         try {
-            tblPendingSales.setItems(salesDAO.getPendingSales());
+            tblPendingSales.setItems(queryDAO.getPendingSales());
             tblPendingRepairs.setItems(queryDAO.getPendingRepairs());
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error loading pending items: " + e.getMessage()).show();

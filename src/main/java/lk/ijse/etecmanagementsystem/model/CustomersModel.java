@@ -3,7 +3,7 @@
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 //import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //
 //import java.sql.*;
 //import java.util.ArrayList;

@@ -11,7 +11,7 @@ import lk.ijse.etecmanagementsystem.App;
 
 import java.io.IOException;
 
-public class Category {
+public class CategoryScene {
 
     private static final ObservableList<String> categories;
 
@@ -23,7 +23,7 @@ public class Category {
     public static void setCategoryStage(ComboBox<String> cmbCategory) {
         Stage newStage = new Stage();
         newStage.initModality(Modality.APPLICATION_MODAL);
-        newStage.setTitle("Category");
+        newStage.setTitle("CategoryScene");
         try {
             newStage.setScene(new Scene(App.loadFXML("category"), 400, 200));
             newStage.showAndWait();
@@ -32,7 +32,7 @@ public class Category {
             ObservableList<String> updatedCategories = FXCollections.observableArrayList(categories);
             cmbCategory.setItems(updatedCategories);
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open CategoryScene window: " + e.getMessage());
             alert.showAndWait();
         }
     }

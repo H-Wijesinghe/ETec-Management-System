@@ -4,28 +4,14 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import lk.ijse.etecmanagementsystem.App;
-import lk.ijse.etecmanagementsystem.bo.RepairsBOimpl;
-import lk.ijse.etecmanagementsystem.db.DBConnection;
-import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.RepairsBOimpl;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.view.JasperViewer;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RepairCheckoutController {
 

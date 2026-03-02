@@ -14,17 +14,15 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.CategoryBOImpl;
 import lk.ijse.etecmanagementsystem.component.ProductCard;
 import lk.ijse.etecmanagementsystem.component.SkeletonCard;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.CategoryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
-import lk.ijse.etecmanagementsystem.util.InventoryUtil;
-import lk.ijse.etecmanagementsystem.util.ThreadService;
-import lk.ijse.etecmanagementsystem.util.Category;
-import lk.ijse.etecmanagementsystem.util.ProductCondition;
+import lk.ijse.etecmanagementsystem.util.*;
+import lk.ijse.etecmanagementsystem.util.CategoryScene;
 import javafx.scene.input.MouseEvent;
-import lk.ijse.etecmanagementsystem.util.Stock;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +77,8 @@ public class InventoryController {
 
 
     private final ProductDAOImpl productDAO = new ProductDAOImpl();
+    CategoryBOImpl categoryBO = new CategoryBOImpl();
+
 
 
     @FXML
@@ -164,7 +164,7 @@ public class InventoryController {
     @FXML
     private void categoryManagement() {
 
-        System.out.println("Category Management button clicked.");
+        System.out.println("CategoryScene Management button clicked.");
         setCategoryStage();
     }
 
@@ -320,14 +320,14 @@ public class InventoryController {
         try {
             Stage newStage = new Stage();
             newStage.initModality(Modality.APPLICATION_MODAL);
-            newStage.setTitle("Category");
+            newStage.setTitle("CategoryScene");
 
             newStage.setScene(new Scene(App.loadFXML("category"), 400, 200));
             newStage.setResizable(false);
             newStage.showAndWait();
 
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open CategoryScene window: " + e.getMessage());
             alert.showAndWait();
         }
     }
@@ -390,12 +390,11 @@ public class InventoryController {
 
     private void loadCategories() {
 
-        CategoryDAOImpl categoryDAO = new CategoryDAOImpl();
-        Category.getCategories().clear();
+        CategoryScene.getCategories().clear();
         try {
-            List<String> list = categoryDAO.getAllCategories();
+            List<String> list = categoryBO.getAllCategories();
             if (!list.isEmpty()) {
-                Category.getCategories().setAll(list);
+                CategoryScene.getCategories().setAll(list);
 
                 System.out.println("Categories loaded from DB: ");
             } else {
@@ -408,7 +407,7 @@ public class InventoryController {
     }
 
     private void setupCategoryComboBox() {
-        List<String> dbCategories = Category.getCategories();
+        List<String> dbCategories = CategoryScene.getCategories();
 
         ObservableList<String> listData = FXCollections.observableArrayList();
 

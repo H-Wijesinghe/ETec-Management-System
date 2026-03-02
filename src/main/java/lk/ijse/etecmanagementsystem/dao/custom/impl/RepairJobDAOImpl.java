@@ -3,7 +3,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.RepairJobDAO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;

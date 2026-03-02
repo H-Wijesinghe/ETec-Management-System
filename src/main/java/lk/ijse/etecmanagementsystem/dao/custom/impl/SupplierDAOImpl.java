@@ -2,7 +2,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.SupplierDAO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.ResultSet;

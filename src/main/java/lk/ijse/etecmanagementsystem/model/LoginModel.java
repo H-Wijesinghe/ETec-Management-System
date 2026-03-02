@@ -1,7 +1,7 @@
 //package lk.ijse.etecmanagementsystem.model;
 //
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //
 //import java.sql.Connection;
 //import java.sql.PreparedStatement;

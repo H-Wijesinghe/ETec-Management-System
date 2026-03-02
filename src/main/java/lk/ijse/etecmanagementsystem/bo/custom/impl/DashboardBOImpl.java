@@ -1,4 +1,4 @@
-package lk.ijse.etecmanagementsystem.bo;
+package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;

@@ -1,7 +1,7 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.RepairSalesDAO;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 
 public class RepairSalesDAOImpl implements RepairSalesDAO {
     public  boolean saveRepairSale(int repairId, int saleId) throws Exception {

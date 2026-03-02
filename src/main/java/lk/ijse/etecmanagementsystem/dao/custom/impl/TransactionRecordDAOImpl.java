@@ -1,9 +1,9 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.TransactionRecordDAO;
-import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.Date;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class TransactionRecordDAOImpl implements TransactionRecordDAO {
     public boolean insertTransactionRecord(TransactionRecord entity) throws SQLException {
-        String sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sqlTrans = "";
 
         if(entity.getTransaction_type().equals("SALE_PAYMENT") || entity.getSale_id() == 0) {
             sqlTrans = "INSERT INTO TransactionRecord (transaction_type, payment_method, amount, flow, sale_id, user_id, customer_id, reference_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

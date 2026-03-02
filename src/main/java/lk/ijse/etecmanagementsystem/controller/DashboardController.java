@@ -9,7 +9,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import lk.ijse.etecmanagementsystem.bo.DashboardBOImpl;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.DashboardBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.tm.DashboardTM;
 import lk.ijse.etecmanagementsystem.dto.tm.DebtTM;

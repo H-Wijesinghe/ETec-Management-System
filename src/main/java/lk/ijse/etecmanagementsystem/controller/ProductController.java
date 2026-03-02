@@ -13,11 +13,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import lk.ijse.etecmanagementsystem.bo.InventoryBOImpl;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.CategoryBOImpl;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.InventoryBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.CategoryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
-import lk.ijse.etecmanagementsystem.util.Category;
+import lk.ijse.etecmanagementsystem.util.CategoryScene;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.FieldsValidation;
@@ -96,6 +97,8 @@ public class ProductController implements Initializable {
     private final ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     InventoryBOImpl inventoryBO = new InventoryBOImpl();
+    CategoryBOImpl categoryBO = new CategoryBOImpl();
+
 
     private final String NAME_REGEX = "^[ -~]{3,30}$"; // Alphanumeric and special characters, 3-50 chars
 
@@ -150,7 +153,7 @@ public class ProductController implements Initializable {
     private void initComboBoxes() {
 
         cmbCondition.getItems().setAll(ProductCondition.values());
-        cmbCategory.setItems(Category.getCategories());
+        cmbCategory.setItems(CategoryScene.getCategories());
 
     }
 
@@ -160,11 +163,11 @@ public class ProductController implements Initializable {
         btnDelete.setOnAction(event -> deleteProduct());
         btnClear.setOnAction(event -> clearForm());
 
-        // Logic for the "+" button next to Category
+        // Logic for the "+" button next to CategoryScene
         btnNewCategory.setOnAction(event -> {
             setCategoryStage();
             loadCategories();
-            cmbCategory.setItems(Category.getCategories());
+            cmbCategory.setItems(CategoryScene.getCategories());
 
         });
 
@@ -174,12 +177,11 @@ public class ProductController implements Initializable {
 
     private void loadCategories() {
 
-        CategoryDAOImpl categoryDAO = new CategoryDAOImpl();
-        Category.getCategories().clear();
+        CategoryScene.getCategories().clear();
         try {
-            List<String> list = categoryDAO.getAllCategories();
+            List<String> list = categoryBO.getAllCategories();
             if (!list.isEmpty()) {
-                Category.getCategories().setAll(list);
+                CategoryScene.getCategories().setAll(list);
 
                 System.out.println("Categories loaded from DB: " + list);
             } else {
@@ -496,7 +498,7 @@ public class ProductController implements Initializable {
             return true;
         }
         if (cmbCategory.getValue() == null) {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select a Category.");
+            showAlert(Alert.AlertType.ERROR, "Validation Error", "Please select a CategoryScene.");
             return true;
         }
         if (cmbCondition.getValue() == null) {
@@ -575,7 +577,7 @@ public class ProductController implements Initializable {
         try {
             Stage newStage = new Stage();
             newStage.initModality(Modality.APPLICATION_MODAL);
-            newStage.setTitle("Category");
+            newStage.setTitle("CategoryScene");
 
             newStage.setScene(new Scene(App.loadFXML("category"), 400, 200));
             newStage.setResizable(false);
@@ -583,7 +585,7 @@ public class ProductController implements Initializable {
 
 
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open Category window: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open CategoryScene window: " + e.getMessage());
             alert.showAndWait();
         }
     }

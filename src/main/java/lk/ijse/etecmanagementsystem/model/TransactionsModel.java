@@ -5,13 +5,13 @@
 //import lk.ijse.etecmanagementsystem.dao.custom.impl.RepairJobDAOImpl;
 //import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
 //import lk.ijse.etecmanagementsystem.dao.custom.impl.TransactionRecordDAOImpl;
-//import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+//import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.TransactionDTO;
 //import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 //import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
 //import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //
 //import java.sql.*;
 //import java.time.LocalDate;

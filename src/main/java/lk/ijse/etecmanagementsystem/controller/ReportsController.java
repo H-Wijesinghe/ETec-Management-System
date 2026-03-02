@@ -6,7 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import lk.ijse.etecmanagementsystem.bo.ReportBOImpl;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.ReportBOImpl;
 import lk.ijse.etecmanagementsystem.util.ETecAlerts;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 

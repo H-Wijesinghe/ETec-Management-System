@@ -2,7 +2,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.ProductDAO;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
@@ -108,7 +108,6 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     public List<ProductDTO> getAll() throws SQLException {
-//        String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product ORDER BY name";
         String sql = "SELECT * FROM Product";
         List<ProductDTO> products = new ArrayList<>();
 

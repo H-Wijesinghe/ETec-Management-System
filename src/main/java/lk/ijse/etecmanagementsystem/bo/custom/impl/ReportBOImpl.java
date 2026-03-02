@@ -1,7 +1,6 @@
-package lk.ijse.etecmanagementsystem.bo;
+package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
-import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 
 import java.sql.SQLException;
 import java.time.LocalDate;

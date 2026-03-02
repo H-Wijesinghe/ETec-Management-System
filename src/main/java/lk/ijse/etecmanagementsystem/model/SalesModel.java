@@ -2,15 +2,15 @@
 //
 //import javafx.scene.control.Alert;
 //import lk.ijse.etecmanagementsystem.dao.*;
-//import lk.ijse.etecmanagementsystem.dao.entity.SalesItem;
-//import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+//import lk.ijse.etecmanagementsystem.entity.SalesItem;
+//import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.SalesDTO;
 //import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
 //import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //import lk.ijse.etecmanagementsystem.util.ProductCondition;
 //import lk.ijse.etecmanagementsystem.util.TransactionFlow;
 //

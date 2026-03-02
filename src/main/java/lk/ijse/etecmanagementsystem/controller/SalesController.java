@@ -20,6 +20,7 @@ import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.*;
 import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
@@ -150,6 +151,7 @@ public class SalesController implements Initializable {
     private final CustomerDAOImpl customerDAO = new CustomerDAOImpl();
     private final ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
 
 
     @FXML
@@ -763,7 +765,7 @@ public class SalesController implements Initializable {
     private void loadProductItems() {
         try {
             inventoryItemsList.clear();
-            inventoryItemsList.addAll(productItemDAO.getAllAvailableRealItems());
+            inventoryItemsList.addAll(queryDAO.getAllAvailableRealItems());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Failed to load inventory: " + e.getMessage());
         }

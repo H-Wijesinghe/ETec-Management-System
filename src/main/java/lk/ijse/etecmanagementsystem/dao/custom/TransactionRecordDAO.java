@@ -1,6 +1,6 @@
 package lk.ijse.etecmanagementsystem.dao.custom;
 
-import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
 
 import java.sql.Date;

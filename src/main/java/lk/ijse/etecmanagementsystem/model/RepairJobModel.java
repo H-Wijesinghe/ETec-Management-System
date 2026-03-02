@@ -2,7 +2,7 @@
 //
 //
 //import lk.ijse.etecmanagementsystem.dao.*;
-//import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+//import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 //import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;

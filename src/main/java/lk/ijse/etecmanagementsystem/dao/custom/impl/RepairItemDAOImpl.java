@@ -2,7 +2,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.RepairItemDAO;
 import lk.ijse.etecmanagementsystem.dto.RepairItemDTO;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,13 +1,12 @@
 package lk.ijse.etecmanagementsystem.dao.custom;
 
-import java.util.List;
+import lk.ijse.etecmanagementsystem.dao.CrudDAO;
+import lk.ijse.etecmanagementsystem.entity.Category;
 
-public interface CategoryDAO {
-    List<String> getAllCategories() throws Exception;
+import java.sql.SQLException;
 
-    boolean saveCategory(String category) throws Exception;
+public interface CategoryDAO extends CrudDAO<Category> {
+ boolean updateCategoryName(String newName, String oldName) throws SQLException ;
+ boolean deleteCategory(String categoryName) throws SQLException ;
 
-    boolean updateCategory(String newName, String oldName) throws Exception;
-
-    boolean deleteCategory(String categoryName) throws Exception;
 }

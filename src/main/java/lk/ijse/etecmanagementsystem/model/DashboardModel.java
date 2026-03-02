@@ -3,7 +3,7 @@
 //import javafx.collections.FXCollections;
 //import javafx.collections.ObservableList;
 //import javafx.scene.chart.XYChart;
-//import lk.ijse.etecmanagementsystem.bo.SalesBOImpl;
+//import lk.ijse.etecmanagementsystem.bo.custom.impl.SalesBOImpl;
 //import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.tm.DashboardTM;

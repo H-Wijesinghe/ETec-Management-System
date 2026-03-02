@@ -1,7 +1,7 @@
 //package lk.ijse.etecmanagementsystem.model;
 //
 //import lk.ijse.etecmanagementsystem.dto.UserDTO;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //
 //import java.sql.ResultSet;
 //import java.sql.SQLException;

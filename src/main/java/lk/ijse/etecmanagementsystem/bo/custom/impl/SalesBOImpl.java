@@ -1,9 +1,9 @@
-package lk.ijse.etecmanagementsystem.bo;
+package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import javafx.scene.control.Alert;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
-import lk.ijse.etecmanagementsystem.dao.entity.SalesItem;
-import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+import lk.ijse.etecmanagementsystem.entity.SalesItem;
+import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
@@ -20,6 +20,7 @@ public class SalesBOImpl {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     SalesItemDAOImpl salesItemDAO = new SalesItemDAOImpl();
     TransactionRecordDAOImpl transactionRecordDAO = new TransactionRecordDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
 
     public boolean placeOrder(SalesDTO salesDTO, List<ItemCartTM> cartItems) throws SQLException {
         Connection con = null;
@@ -34,7 +35,7 @@ public class SalesBOImpl {
                 if (item.getQuantity() > 1) {
 
                     // A. Get Stock ID
-                    int stockId = productItemDAO.getProductItem(item.getItemId()).getStockId();
+                    int stockId = queryDAO.getProductItem(item.getItemId()).getStockId();
                     if (stockId <= 0) {
                         throw new SQLException("Product ID not found in database: " + stockId);
                     }
@@ -118,7 +119,7 @@ public class SalesBOImpl {
 
 
                 // Batch 3: Reduce Global Qty
-                int stockId = productItemDAO.getProductItem(item.getItemId()).getStockId();
+                int stockId = queryDAO.getProductItem(item.getItemId()).getStockId();
                 if (stockId <= 0) {
                     con.rollback();
                     new Alert(Alert.AlertType.ERROR, "Product ID not found in database").show();

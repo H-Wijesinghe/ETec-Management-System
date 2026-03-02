@@ -6,7 +6,7 @@
 //import lk.ijse.etecmanagementsystem.db.DBConnection;
 //import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 //import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
-//import lk.ijse.etecmanagementsystem.util.CrudUtil;
+//import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 //import lk.ijse.etecmanagementsystem.util.ProductCondition;
 //
 //import java.sql.Connection;

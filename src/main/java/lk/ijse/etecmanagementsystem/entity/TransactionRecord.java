@@ -1,4 +1,4 @@
-package lk.ijse.etecmanagementsystem.dao.entity;
+package lk.ijse.etecmanagementsystem.entity;
 
 public class TransactionRecord {
     int transaction_id;

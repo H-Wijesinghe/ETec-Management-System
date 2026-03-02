@@ -1,7 +1,7 @@
-package lk.ijse.etecmanagementsystem.bo;
+package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
-import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
+import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
@@ -31,6 +31,7 @@ public class RepairsBOimpl {
         RepairItemDAOImpl repairItemDAO = new RepairItemDAOImpl();
         ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
         ProductDAOImpl productDAO = new ProductDAOImpl();
+        QueryDAOImpl queryDAO = new QueryDAOImpl();
 
         Connection connection = null;
         try {
@@ -73,7 +74,7 @@ public class RepairsBOimpl {
 //                        return false;
 //                    }
 
-                    int stockId = productItemDAO.getProductItem(part.getItemId()).getStockId();
+                    int stockId = queryDAO.getProductItem(part.getItemId()).getStockId();
                     if (stockId <= 0) {
                         connection.rollback();
                         System.out.println("Failed to update repair job details 5");
@@ -119,7 +120,7 @@ public class RepairsBOimpl {
                     return false;
                 }
 
-                int stockId = productItemDAO.getProductItem(part.getItemId()).getStockId();
+                int stockId = queryDAO.getProductItem(part.getItemId()).getStockId();
                 if (stockId <= 0) {
                     connection.rollback();
                     System.out.println("Failed to update repair job details 10");
@@ -186,7 +187,7 @@ public class RepairsBOimpl {
             if (hasParts) {
                 List<RepairPartTM> partsToMark = queryDAO.getUsedParts(repairId);
                 for (RepairPartTM repairPart : partsToMark) {
-                    String sn = productItemDAO.getProductItem(repairPart.getItemId()).getSerialNumber();
+                    String sn = queryDAO.getProductItem(repairPart.getItemId()).getSerialNumber();
                     boolean marked = productItemDAO.updateStatus(sn, "SOLD");
                     if (!marked) {
                         connection.rollback();

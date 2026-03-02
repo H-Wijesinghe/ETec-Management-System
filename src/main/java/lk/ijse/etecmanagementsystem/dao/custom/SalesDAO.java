@@ -10,13 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface SalesDAO {
-    List<SalesTM> getAllSales() throws SQLException;
 
     SalesDTO getSaleById(int saleId) throws SQLException;
-
-    List<SalesTM> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException;
-
-    ObservableList<PendingSaleTM> getPendingSales() throws SQLException;
 
     boolean saveSale(SalesDTO salesDTO) throws SQLException;
 

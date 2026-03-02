@@ -1,7 +1,8 @@
-package lk.ijse.etecmanagementsystem.bo;
+package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SupplierDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
@@ -19,6 +20,7 @@ public class InventoryBOImpl {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
 
     public int saveProductAndGetId(ProductDTO p) throws SQLException {
         Connection connection = null;
@@ -241,7 +243,7 @@ public class InventoryBOImpl {
     public Map<Integer, String> getAllProductMap() throws SQLException {
 
         Map<Integer, String> map = new HashMap<>();
-        List<ProductItemDTO> items = productItemDAO.getAllProductItems();
+        List<ProductItemDTO> items = queryDAO.getAllProductItems();
         for (ProductItemDTO item : items) {
             map.put(item.getStockId(), item.getProductName());
         }
@@ -267,7 +269,7 @@ public class InventoryBOImpl {
             con.setAutoCommit(false);
 
 
-            ProductItemDTO oldItem = productItemDAO.getItemBySerial(oldSerial);
+            ProductItemDTO oldItem = queryDAO.getItemBySerial(oldSerial);
             if (oldItem == null) return false;
             int oldStockId = oldItem.getStockId();
 
@@ -312,7 +314,7 @@ public class InventoryBOImpl {
 
     public boolean updateItemStatus(String serial, String newStatus) throws SQLException {
 
-        ProductItemDTO item = productItemDAO.getItemBySerial(serial);
+        ProductItemDTO item = queryDAO.getItemBySerial(serial);
         if (item == null) {
             throw new SQLException("Item with serial number " + serial + " does not exist.");
         }

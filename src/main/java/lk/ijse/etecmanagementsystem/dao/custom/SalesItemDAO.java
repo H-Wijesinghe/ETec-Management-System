@@ -1,6 +1,6 @@
 package lk.ijse.etecmanagementsystem.dao.custom;
 
-import lk.ijse.etecmanagementsystem.dao.entity.SalesItem;
+import lk.ijse.etecmanagementsystem.entity.SalesItem;
 
 import java.sql.SQLException;
 

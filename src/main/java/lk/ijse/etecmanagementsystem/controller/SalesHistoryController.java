@@ -6,7 +6,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.CustomerDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.UserDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
+import lk.ijse.etecmanagementsystem.dto.SalesDTO;
+import lk.ijse.etecmanagementsystem.dto.UserDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
 
 import java.sql.SQLException;
@@ -49,6 +55,9 @@ public class SalesHistoryController {
     private TableColumn<SalesTM, Double> colPaid;
 
     SalesDAOImpl salesDAO = new SalesDAOImpl();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
+    CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+    UserDAOImpl userDAO = new UserDAOImpl();
 
     @FXML
     public void initialize() {
@@ -69,9 +78,25 @@ public class SalesHistoryController {
 
     private void loadAllSales() {
         try {
-            List<SalesTM> salesList = salesDAO.getAllSales();
-            ObservableList<SalesTM> obList = FXCollections.observableArrayList(salesList);
-            tblSalesHistory.setItems(obList);
+            ObservableList<SalesTM> sales = FXCollections.observableArrayList();
+            List<SalesDTO> salesList = salesDAO.getAllSale();
+            for(SalesDTO sale : salesList) {
+                CustomerDTO customer = customerDAO.getCustomerById(sale.getCustomerId());
+                UserDTO user = userDAO.getUserById(sale.getUserId());
+                sales.add(new SalesTM(
+                        sale.getSaleId(),
+                        customer != null ? customer.getName() : "Walk-in",
+                        user != null ? user.getUserName() : "Unknown",
+                        sale.getDescription(),
+                        sale.getSubtotal(),
+                        sale.getDiscount(),
+                        sale.getGrandTotal(),
+                        sale.getPaidAmount()
+                ));
+            }
+//            ObservableList<SalesTM> obList = FXCollections.observableArrayList(salesList);
+
+            tblSalesHistory.setItems(sales);
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "SQL Error: " + e.getMessage()).show();
         }
@@ -93,7 +118,7 @@ public class SalesHistoryController {
         }
 
         try {
-            List<SalesTM> filteredList = salesDAO.getSalesByDateRange(fromDate, toDate);
+            List<SalesTM> filteredList = queryDAO.getSalesByDateRange(fromDate, toDate);
             tblSalesHistory.setItems(FXCollections.observableArrayList(filteredList));
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error filtering data: " + e.getMessage()).show();

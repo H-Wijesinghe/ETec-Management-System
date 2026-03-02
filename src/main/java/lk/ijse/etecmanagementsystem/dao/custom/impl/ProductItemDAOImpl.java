@@ -1,15 +1,11 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
-import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
-import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -42,39 +38,6 @@ public class ProductItemDAOImpl implements ProductItemDAO {
         return list;
     }
 
-    @Override
-    public List<ProductItemDTO> getAllProductItems() throws SQLException {
-        List<ProductItemDTO> itemList = new ArrayList<>();
-        String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, " +
-                "p.name AS product_name, COALESCE(s.supplier_name, 'No Supplier') AS supplier_name, " +
-                "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
-                "FROM ProductItem pi " +
-                "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
-                "ORDER BY pi.item_id DESC";
-
-        ResultSet rs = CrudUtil.execute(sql);
-
-        while (rs.next()) {
-            ProductItemDTO item = new ProductItemDTO(
-                    rs.getInt("item_id"),
-                    rs.getInt("stock_id"),
-                    rs.getInt("supplier_id"),
-                    rs.getString("serial_number"),
-                    rs.getString("product_name"),
-                    rs.getString("supplier_name"),
-                    rs.getInt("supplier_warranty_mo"),
-                    rs.getInt("customer_warranty_mo"),
-                    rs.getString("status"),
-                    rs.getDate("added_date"),
-                    rs.getDate("sold_date")
-
-            );
-            itemList.add(item);
-        }
-        rs.close();
-        return itemList;
-    }
 
     @Override
     public boolean addPlaceHolderItem(int stockId, int limit) throws SQLException {
@@ -133,31 +96,6 @@ public class ProductItemDAOImpl implements ProductItemDAO {
         return placeholderItems;
     }
 
-    @Override
-    public List<InventoryItemDTO> getAllAvailableRealItems() throws SQLException {
-        List<InventoryItemDTO> itemList = new ArrayList<>();
-
-        String sql = "SELECT pi.item_id, p.name AS product_name, pi.serial_number, " +
-                "p.warranty_months, p.sell_price, p.p_condition " +
-                "FROM ProductItem pi " +
-                "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "WHERE pi.status = 'AVAILABLE' AND pi.serial_number NOT LIKE 'PENDING-%' ";
-
-        ResultSet rs = CrudUtil.execute(sql);
-
-        while (rs.next()) {
-            InventoryItemDTO item = new InventoryItemDTO(
-                    rs.getInt("item_id"),
-                    rs.getString("product_name"),
-                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
-                    rs.getInt("warranty_months"), // Default warranty from Product definition
-                    rs.getDouble("sell_price"),
-                    ProductCondition.fromString(rs.getString("p_condition"))
-            );
-            itemList.add(item);
-        }
-        return itemList;
-    }
 
     @Override
     public boolean updateItem(ProductItemDTO item) throws SQLException {
@@ -246,38 +184,7 @@ public class ProductItemDAOImpl implements ProductItemDAO {
         }
     }
 
-    @Override
-    public ProductItemDTO getProductItem(int itemId)throws  SQLException {
-        String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
-                "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
-                "FROM ProductItem pi " +
-                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
-                "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "WHERE pi.item_id = ?";
 
-        ResultSet rs = CrudUtil.execute(sql, itemId);
-        ProductItemDTO productItemDTO = null;
-
-        if (rs.next()) {
-
-            productItemDTO = new ProductItemDTO(
-                    rs.getInt("item_id"),
-                    rs.getInt("stock_id"),
-                    rs.getInt("supplier_id"),
-                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
-                    rs.getString("product_name"),
-                    rs.getString("supplier_name"),
-                    rs.getInt("supplier_warranty_mo"),
-                    rs.getInt("customer_warranty_mo"),
-                    rs.getString("status"),
-                    rs.getDate("added_date"),
-                    rs.getDate("sold_date")
-            );
-        }
-
-        rs.close();
-        return productItemDTO;
-    }
 
     @Override
     public int getAvailableItemCount(int stockId) throws SQLException {
@@ -288,71 +195,6 @@ public class ProductItemDAOImpl implements ProductItemDAO {
         } else {
             return 0;
         }
-    }
-
-    @Override
-    public List<ProductItemDTO> getUnitsByStockId(int stockId, String productName) throws SQLException {
-        List<ProductItemDTO> list = new ArrayList<>();
-        String sql = "SELECT pi.item_id, pi.supplier_id, pi.serial_number, pi.supplier_warranty_mo, pi.customer_warranty_mo, " +
-                "pi.status, pi.added_date, pi.sold_date, s.supplier_name " +
-                "FROM ProductItem pi " +
-                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
-                "WHERE pi.stock_id = ? ORDER BY pi.item_id DESC";
-
-        ResultSet rs = CrudUtil.execute(sql, stockId);
-        while (rs.next()) {
-            String supName = rs.getString("supplier_name");
-            if (supName == null) supName = "No Supplier";
-
-            list.add(new ProductItemDTO(
-                    rs.getInt("item_id"),
-                    stockId,
-                    rs.getInt("supplier_id"),
-                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
-                    productName,
-                    supName,
-                    rs.getInt("supplier_warranty_mo"),
-                    rs.getInt("customer_warranty_mo"),
-                    rs.getString("status"),
-                    rs.getDate("added_date"),
-                    rs.getDate("sold_date")
-            ));
-        }
-        rs.close();
-        return list;
-    }
-
-    @Override
-    public ProductItemDTO getItemBySerial(String serial) throws SQLException {
-        String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
-                "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
-                "FROM ProductItem pi " +
-                "LEFT JOIN Supplier s ON pi.supplier_id = s.supplier_id " +
-                "JOIN Product p ON pi.stock_id = p.stock_id " +
-                "WHERE pi.serial_number = ?";
-
-        ResultSet rs = CrudUtil.execute(sql, serial);
-        ProductItemDTO productItemDTO = null;
-
-        if (rs.next()) {
-
-            productItemDTO = new ProductItemDTO(
-                    rs.getInt("item_id"),
-                    rs.getInt("stock_id"),
-                    rs.getInt("supplier_id"),
-                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
-                    rs.getString("product_name"),
-                    rs.getString("supplier_name"),
-                    rs.getInt("supplier_warranty_mo"),
-                    rs.getInt("customer_warranty_mo"),
-                    rs.getString("status"),
-                    rs.getDate("added_date"),
-                    rs.getDate("sold_date")
-            );
-        }
-
-        rs.close();
-        return productItemDTO;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.SalesItemDAO;
-import lk.ijse.etecmanagementsystem.dao.entity.SalesItem;
-import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.entity.SalesItem;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 
 import java.sql.SQLException;
 
