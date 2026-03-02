@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.*;
@@ -64,8 +65,8 @@ public class QueryDAOImpl implements QueryDAO {
 
     }
 
-    public ObservableList<UrgentRepairTM> getUrgentRepairs() throws SQLException {
-        ObservableList<UrgentRepairTM> list = FXCollections.observableArrayList();
+    public List<CustomDTO> getUrgentRepairs() throws SQLException {
+        List<CustomDTO> list = new ArrayList<>();
         String sql = "SELECT repair_id, device_name, status, DATE(date_in) as d_in FROM RepairJob " +
                 "WHERE status IN ('PENDING', 'DIAGNOSIS', 'WAITING_PARTS') " +
                 "ORDER BY date_in ASC LIMIT 15";
@@ -73,7 +74,7 @@ public class QueryDAOImpl implements QueryDAO {
 
         ResultSet rs = CrudUtil.execute(sql);
         while (rs.next()) {
-            list.add(new UrgentRepairTM(
+            list.add(new CustomDTO(
                     rs.getInt("repair_id"),
                     rs.getString("device_name"),
                     rs.getString("status"),
@@ -84,8 +85,8 @@ public class QueryDAOImpl implements QueryDAO {
         return list;
     }
 
-    public ObservableList<DebtTM> getUnpaidDebts() throws SQLException {
-        ObservableList<DebtTM> list = FXCollections.observableArrayList();
+    public List<CustomDTO> getUnpaidDebts() throws SQLException {
+        List<CustomDTO> list = new ArrayList<>();
 
         String sql = "SELECT 'SALE' as type, s.sale_id as ref_id, c.name, (s.grand_total - s.paid_amount) as due " +
                 "FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
@@ -98,32 +99,15 @@ public class QueryDAOImpl implements QueryDAO {
 
         ResultSet rs = CrudUtil.execute(sql);
         while (rs.next()) {
-            list.add(new DebtTM(
-                    rs.getInt("ref_id"), // The ID (Sale ID or Repair ID)
-                    rs.getString("type"),
+            list.add(new CustomDTO(
+                    rs.getInt("ref_id"),
                     rs.getString("name"),
+                    rs.getString("type"),
                     rs.getDouble("due")
             ));
         }
         rs.close();
         return list;
-    }
-
-    public XYChart.Series<String, Number> getSalesChartData() throws SQLException {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Revenue");
-
-        String sql = "SELECT DATE(transaction_date) as d, SUM(amount) as total FROM TransactionRecord " +
-                "WHERE flow='IN' AND transaction_date >= DATE(NOW()) - INTERVAL 7 DAY " +
-                "GROUP BY DATE(transaction_date) ORDER BY DATE(transaction_date)";
-
-
-        ResultSet rs = CrudUtil.execute(sql);
-        while (rs.next()) {
-            series.getData().add(new XYChart.Data<>(rs.getString("d"), rs.getDouble("total")));
-        }
-        rs.close();
-        return series;
     }
 
     public double getDebts() throws SQLException {
@@ -306,25 +290,20 @@ public class QueryDAOImpl implements QueryDAO {
                 "WHERE DATE(s.sale_date) BETWEEN ? AND ? " +
                 "ORDER BY s.sale_date DESC";
 
-        Connection connection = DBConnection.getInstance().getConnection();
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setDate(1, java.sql.Date.valueOf(from));
-            pstm.setDate(2, java.sql.Date.valueOf(to));
-
-            ResultSet resultSet = pstm.executeQuery();
-            while (resultSet.next()) {
+            ResultSet rs = CrudUtil.execute(sql, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
+            while (rs.next()) {
                 salesList.add(new SalesTM(
-                        resultSet.getInt("sale_id"),
-                        resultSet.getString("customer_name") != null ? resultSet.getString("customer_name") : "Walk-in", // Handle null customers
-                        resultSet.getString("user_name"),
-                        resultSet.getString("description"),
-                        resultSet.getDouble("sub_total"),
-                        resultSet.getDouble("discount"),
-                        resultSet.getDouble("grand_total"),
-                        resultSet.getDouble("paid_amount")
+                        rs.getInt("sale_id"),
+                        rs.getString("customer_name") != null ? rs.getString("customer_name") : "Walk-in", // Handle null customers
+                        rs.getString("user_name"),
+                        rs.getString("description"),
+                        rs.getDouble("sub_total"),
+                        rs.getDouble("discount"),
+                        rs.getDouble("grand_total"),
+                        rs.getDouble("paid_amount")
                 ));
             }
-        }
+            rs.close();
         return salesList;
     }
 

@@ -385,7 +385,7 @@ public class UnitManagementController {
             // Update Label to show ID side-by-side
             if (lblProductId != null) lblProductId.setText("ID: " + stockId);
 
-            ProductDTO productDTO = productDAO.findById(String.valueOf(stockId));
+            ProductDTO productDTO = inventoryBO.findById(String.valueOf(stockId));
 
             if (productDTO != null) {
                 selectedStockId = stockId;

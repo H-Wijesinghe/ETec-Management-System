@@ -14,6 +14,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.BOFactory;
+import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
@@ -49,6 +51,7 @@ public class SelectRepairPartController {
     // Model Instance
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     ProductDAOImpl productDAO = new ProductDAOImpl();
+    InventoryBO inventoryBO = (InventoryBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.INVENTORY);
 
     public void setMainController(RepairDashboardController mainController) {
         this.mainController = mainController;
@@ -87,7 +90,7 @@ public class SelectRepairPartController {
             List<ProductItemDTO> dbItems = productItemDAO.getAllAvailableItems();
             List<RepairPartTM> partList = new ArrayList<>();
             for (ProductItemDTO item : dbItems) {
-                ProductDTO product = productDAO.findById(String.valueOf(item.getStockId()));
+                ProductDTO product = inventoryBO.findById(String.valueOf(item.getStockId()));
                 partList.add(new RepairPartTM(
                         item.getItemId(),
                         product.getName(),

@@ -19,6 +19,7 @@ import javafx.util.StringConverter;
 import lk.ijse.etecmanagementsystem.App;
 import lk.ijse.etecmanagementsystem.bo.BOFactory;
 import lk.ijse.etecmanagementsystem.bo.custom.CustomerBO;
+import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
@@ -155,6 +156,7 @@ public class SalesController implements Initializable {
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     QueryDAOImpl queryDAO = new QueryDAOImpl();
     CustomerBO customerBO = (CustomerBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.CUSTOMER);
+    InventoryBO inventoryBO = (InventoryBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.INVENTORY);
 
 
     @FXML
@@ -301,7 +303,7 @@ public class SalesController implements Initializable {
         if (serialNumber.isEmpty() && qty > 1) {
 
             try {
-                int productId = productDAO.getIdByName(itemName);
+                int productId = inventoryBO.getIdByName(itemName);
                 int placeholderCount = productItemDAO.getPlaceHolderItems(productId).size();
                 if (qty > placeholderCount) {
                     ETecAlerts.showAlert(Alert.AlertType.WARNING, "Not enough Quantity", "Insufficient Quantity");
@@ -434,7 +436,7 @@ public class SalesController implements Initializable {
 
         int ProductId = 0;
         try {
-            ProductId = productDAO.getIdByName(cartItem.getItemName());
+            ProductId = inventoryBO.getIdByName(cartItem.getItemName());
 
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Failed to retrieve product ID: ");
@@ -750,7 +752,7 @@ public class SalesController implements Initializable {
     private void loadProducts() {
         try {
             productsList.clear();
-            productsList.addAll(productDAO.getAll());
+            productsList.addAll(inventoryBO.getAllProduct());
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Failed to load products: " + e.getMessage());
         }

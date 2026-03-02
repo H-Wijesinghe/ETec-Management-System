@@ -1,5 +1,7 @@
 package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
+import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
+import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
@@ -8,15 +10,18 @@ import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
+import lk.ijse.etecmanagementsystem.entity.Product;
+import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InventoryBOImpl {
+public class InventoryBOImpl implements InventoryBO {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
     SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
@@ -29,7 +34,20 @@ public class InventoryBOImpl {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false); // Start Transaction
 
-            boolean isSaved = productDAO.save(p);
+
+            boolean isSaved = productDAO.save(new Product(
+                    0,
+                    p.getName(),
+                    p.getDescription(),
+                    p.getCategory(),
+                    p.getCondition().getLabel(),
+                    p.getQty(),
+                    p.getWarrantyMonth(),
+                    p.getImagePath(),
+                    p.getBuyPrice(),
+                    p.getSellPrice()
+            ));
+
             if (!isSaved) {
                 connection.rollback();
                 throw new SQLException("Failed to save product.");
@@ -58,6 +76,31 @@ public class InventoryBOImpl {
         }
     }
 
+
+    @Override
+    public List<ProductDTO> getAllProduct() throws SQLException {
+        List<ProductDTO> products = new ArrayList<>();
+        List<Product> productEntities = productDAO.getAll();
+        for (Product entity : productEntities) {
+
+            products.add(new ProductDTO(
+                    String.valueOf(entity.getStock_id()),
+                    entity.getName(),
+                    entity.getDescription(),
+                    entity.getSell_price(),
+                    entity.getCategory(),
+                    fromConditionString(entity.getP_condition()),
+                    entity.getBuy_price(),
+                    entity.getWarranty_months(),
+                    entity.getQty(),
+                    entity.getImage_path()
+            ));
+        }
+        return products;
+
+    }
+
+    @Override
     public boolean update(ProductDTO p) throws SQLException {
 
         Connection connection = null;
@@ -66,7 +109,20 @@ public class InventoryBOImpl {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false);
 
-            boolean isUpdated = productDAO.update(p);
+
+            boolean isUpdated = productDAO.update(new Product(
+                    Integer.parseInt(p.getId()),
+                    p.getName(),
+                    p.getDescription(),
+                    p.getCategory(),
+                    p.getCondition().getLabel(),
+                    p.getQty(),
+                    p.getWarrantyMonth(),
+                    p.getImagePath(),
+                    p.getBuyPrice(),
+                    p.getSellPrice()
+            ));
+
             if (!isUpdated) {
                 connection.rollback();
                 return false;
@@ -96,7 +152,19 @@ public class InventoryBOImpl {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false); // Start Transaction
 
-            boolean isUpdated = productDAO.update(p);
+            boolean isUpdated = productDAO.update(new Product(
+                    Integer.parseInt(p.getId()),
+                    p.getName(),
+                    p.getDescription(),
+                    p.getCategory(),
+                    p.getCondition().getLabel(),
+                    p.getQty(),
+                    p.getWarrantyMonth(),
+                    p.getImagePath(),
+                    p.getBuyPrice(),
+                    p.getSellPrice()
+            ));
+
             if (!isUpdated) {
                 connection.rollback();
                 return false;
@@ -151,14 +219,13 @@ public class InventoryBOImpl {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false);
 
-            boolean isItemDeleted = new ProductItemDAOImpl().delete(Integer.parseInt(stockId));
+            boolean isItemDeleted = productItemDAO.delete(Integer.parseInt(stockId));
             if (!isItemDeleted) {
                 connection.rollback();
                 System.out.println("DEBUG: Failed to delete product items for Stock ID " + stockId);
                 return false;
             }
 
-            ProductDAOImpl productDAO = new ProductDAOImpl();
             boolean isDeleted = productDAO.delete(Integer.parseInt(stockId));
             if (!isDeleted) {
                 connection.rollback();
@@ -178,6 +245,11 @@ public class InventoryBOImpl {
         } finally {
             if (connection != null) connection.setAutoCommit(true);
         }
+    }
+
+    @Override
+    public int getIdByName(String name) throws SQLException {
+        return productDAO.getIdByName(name);
     }
 
     public ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException {
@@ -238,6 +310,23 @@ public class InventoryBOImpl {
         } finally {
             if (conn != null) conn.setAutoCommit(true);
         }
+    }
+
+    public ProductDTO findById(String id) throws SQLException {
+        Product entity = productDAO.search(Integer.parseInt(id));
+        return new ProductDTO(
+                String.valueOf(entity.getStock_id()),
+                entity.getName(),
+                entity.getDescription(),
+                entity.getSell_price(),
+                entity.getCategory(),
+                fromConditionString(entity.getP_condition()),
+                entity.getBuy_price(),
+                entity.getWarranty_months(),
+                entity.getQty(),
+                entity.getImage_path()
+        );
+
     }
 
     public Map<Integer, String> getAllProductMap() throws SQLException {
@@ -357,6 +446,20 @@ public class InventoryBOImpl {
             throw e;
         } finally {
             if (con != null) con.setAutoCommit(true);
+        }
+    }
+
+    private ProductCondition fromConditionString(String s) {
+        if (s == null) return null;
+        try {
+            if (s.equals("USED")) {
+                return ProductCondition.USED;
+            } else if (s.equals("BRAND NEW")) {
+                return ProductCondition.BRAND_NEW;
+            }
+            return ProductCondition.BOTH;
+        } catch (IllegalArgumentException ex) {
+            return ProductCondition.BOTH; // unknown condition value
         }
     }
 

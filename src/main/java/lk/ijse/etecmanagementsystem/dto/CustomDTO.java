@@ -20,10 +20,18 @@ public class CustomDTO {
     private String customerAddress;
 
     // DashboardDTO
-    private String dashboardTitle;
-    private String dashboardValue;
-    private String dashboardSubtitle;
-    private double dashboardGrowthPercentage;
+    private double todayIncome;
+    private int activeRepairs;
+    private int lowStock;
+    private double pendingPayments;
+    private int refId;
+    private String type;
+    private double due;
+
+    private int urgentRepairId;
+    private String urgentRepairDeviceName;
+    private String urgentRepairStatus;
+    private String urgentRepairDateIn;
 
     // InventoryItemDTO
     private int inventoryItemId;
@@ -146,6 +154,27 @@ public class CustomDTO {
     public CustomDTO() {
     }
 
+    public CustomDTO(double todayIncome, int activeRepairs, int lowStock, double pendingPayments) {
+        this.todayIncome = todayIncome;
+        this.activeRepairs = activeRepairs;
+        this.lowStock = lowStock;
+        this.pendingPayments = pendingPayments;
+    }
+
+    public CustomDTO(int refId, String customerName, String type, double due) {
+        this.refId = refId;
+        this.customerName = customerName;
+        this.type = type;
+        this.due = due;
+    }
+
+    public CustomDTO(int urgentRepairId, String urgentRepairDeviceName, String urgentRepairStatus, String dateIn) {
+        this.urgentRepairId = urgentRepairId;
+        this.urgentRepairDeviceName = urgentRepairDeviceName;
+        this.urgentRepairStatus = urgentRepairStatus;
+        this.urgentRepairDateIn = dateIn;
+    }
+
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
     public String getCategoryDescription() { return categoryDescription; }
@@ -160,14 +189,72 @@ public class CustomDTO {
     public void setCustomerEmailAddress(String customerEmailAddress) { this.customerEmailAddress = customerEmailAddress; }
     public String getCustomerAddress() { return customerAddress; }
     public void setCustomerAddress(String customerAddress) { this.customerAddress = customerAddress; }
-    public String getDashboardTitle() { return dashboardTitle; }
-    public void setDashboardTitle(String dashboardTitle) { this.dashboardTitle = dashboardTitle; }
-    public String getDashboardValue() { return dashboardValue; }
-    public void setDashboardValue(String dashboardValue) { this.dashboardValue = dashboardValue; }
-    public String getDashboardSubtitle() { return dashboardSubtitle; }
-    public void setDashboardSubtitle(String dashboardSubtitle) { this.dashboardSubtitle = dashboardSubtitle; }
-    public double getDashboardGrowthPercentage() { return dashboardGrowthPercentage; }
-    public void setDashboardGrowthPercentage(double dashboardGrowthPercentage) { this.dashboardGrowthPercentage = dashboardGrowthPercentage; }
+
+    public double getTodayIncome() { return todayIncome; }
+    public void setTodayIncome(double todayIncome) { this.todayIncome = todayIncome; }
+    public int getActiveRepairs() { return activeRepairs; }
+    public void setActiveRepairs(int activeRepairs) { this.activeRepairs = activeRepairs; }
+    public int getLowStock() { return lowStock; }
+    public void setLowStock(int lowStock) { this.lowStock = lowStock; }
+    public double getPendingPayments() { return pendingPayments; }
+    public void setPendingPayments(double pendingPayments) { this.pendingPayments = pendingPayments; }
+
+    public int getRefId() {
+        return refId;
+    }
+
+    public void setRefId(int refId) {
+        this.refId = refId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public double getDue() {
+        return due;
+    }
+
+    public void setDue(double due) {
+        this.due = due;
+    }
+
+    public int getUrgentRepairId() {
+        return urgentRepairId;
+    }
+
+    public void setUrgentRepairId(int urgentRepairId) {
+        this.urgentRepairId = urgentRepairId;
+    }
+
+    public String getUrgentRepairDeviceName() {
+        return urgentRepairDeviceName;
+    }
+
+    public void setUrgentRepairDeviceName(String urgentRepairDeviceName) {
+        this.urgentRepairDeviceName = urgentRepairDeviceName;
+    }
+
+    public String getUrgentRepairStatus() {
+        return urgentRepairStatus;
+    }
+
+    public void setUrgentRepairStatus(String urgentRepairStatus) {
+        this.urgentRepairStatus = urgentRepairStatus;
+    }
+
+    public String getUrgentRepairDateIn() {
+        return urgentRepairDateIn;
+    }
+
+    public void setUrgentRepairDateIn(String urgentRepairDateIn) {
+        this.urgentRepairDateIn = urgentRepairDateIn;
+    }
+
     public int getInventoryItemId() { return inventoryItemId; }
     public void setInventoryItemId(int inventoryItemId) { this.inventoryItemId = inventoryItemId; }
     public String getInventoryItemName() { return inventoryItemName; }

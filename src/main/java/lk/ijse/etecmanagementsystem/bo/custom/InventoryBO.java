@@ -1,15 +1,20 @@
 package lk.ijse.etecmanagementsystem.bo.custom;
 
+import lk.ijse.etecmanagementsystem.bo.SuperBO;
+import lk.ijse.etecmanagementsystem.bo.custom.impl.InventoryBOImpl;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public interface InventoryBO {
+public interface InventoryBO extends SuperBO {
     int saveProductAndGetId(ProductDTO p) throws SQLException;
+
+    List<ProductDTO> getAllProduct() throws SQLException;
 
     boolean update(ProductDTO p) throws SQLException;
 
@@ -17,7 +22,9 @@ public interface InventoryBO {
 
     boolean deleteById(String stockId) throws SQLException;
 
-    ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException;
+    public ProductDTO findById(String id) throws SQLException;
+
+    InventoryBOImpl.ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException;
 
     boolean addNewSerialNo(ArrayList<ProductItemDTO> itemDTOS) throws SQLException;
 
@@ -29,14 +36,7 @@ public interface InventoryBO {
 
     boolean updateItemStatus(String serial, String newStatus) throws SQLException;
 
-    class ItemDeleteStatus {
-        public final int realAvailableCount;
-        public final int restrictedCount;
+    int getIdByName(String name) throws SQLException;
 
-        public ItemDeleteStatus(int real, int restricted) {
-            this.realAvailableCount = real;
-            this.restrictedCount = restricted;
-        }
-    }
 }
 

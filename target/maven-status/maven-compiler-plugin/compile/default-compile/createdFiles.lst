@@ -25,6 +25,7 @@ lk\ijse\etecmanagementsystem\controller\TransactionsController$1.class
 lk\ijse\etecmanagementsystem\dto\SalesDTO.class
 lk\ijse\etecmanagementsystem\server\BarcodeServer.class
 lk\ijse\etecmanagementsystem\util\EmailService.class
+lk\ijse\etecmanagementsystem\entity\Product.class
 lk\ijse\etecmanagementsystem\controller\SelectRepairPartController.class
 lk\ijse\etecmanagementsystem\dao\custom\TransactionRecordDAO.class
 lk\ijse\etecmanagementsystem\util\BackupUtil.class
@@ -72,7 +73,6 @@ lk\ijse\etecmanagementsystem\dao\SuperDAO.class
 lk\ijse\etecmanagementsystem\util\MenuBar.class
 lk\ijse\etecmanagementsystem\bo\custom\ReportBO.class
 lk\ijse\etecmanagementsystem\dto\CustomDTO.class
-lk\ijse\etecmanagementsystem\bo\custom\InventoryBO$ItemDeleteStatus.class
 lk\ijse\etecmanagementsystem\dao\custom\SupplierDAO.class
 lk\ijse\etecmanagementsystem\bo\custom\CategoryBO.class
 lk\ijse\etecmanagementsystem\dto\TopProductDTO.class

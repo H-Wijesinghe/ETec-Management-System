@@ -1,6 +1,7 @@
 package lk.ijse.etecmanagementsystem.controller;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -9,8 +10,9 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import lk.ijse.etecmanagementsystem.bo.custom.impl.DashboardBOImpl;
-import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
+import lk.ijse.etecmanagementsystem.bo.BOFactory;
+import lk.ijse.etecmanagementsystem.bo.custom.DashboardBO;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.DashboardTM;
 import lk.ijse.etecmanagementsystem.dto.tm.DebtTM;
 import lk.ijse.etecmanagementsystem.dto.tm.UrgentRepairTM;
@@ -43,8 +45,7 @@ public class DashboardController {
     private LineChart<String, Number> chartTraffic;
 
 
-    QueryDAOImpl queryDAO = new QueryDAOImpl();
-    DashboardBOImpl dashboardBO = new DashboardBOImpl();
+    DashboardBO dashboardBO = (DashboardBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.DASHBOARD);
 
 
     private final String[] barColors = {"#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#1abc9c", "#e74c3c"};
@@ -67,7 +68,13 @@ public class DashboardController {
     private void loadAllData() {
         try {
 
-            DashboardTM stats = dashboardBO.getDashboardStats();
+            CustomDTO statsDTO = dashboardBO.getDashboardStats();
+            DashboardTM stats = new DashboardTM(
+                    statsDTO.getTodayIncome(),
+                    statsDTO.getActiveRepairs(),
+                    statsDTO.getLowStock(),
+                    statsDTO.getPendingPayments()
+            );
 
             lblTodayIncome.setText(String.format("%.2f", stats.getTodayIncome()));
             lblPendingPayment.setText(String.format("%.2f", stats.getPendingPayments()));
@@ -77,8 +84,30 @@ public class DashboardController {
             lblLowStock.setText(String.valueOf(stats.getLowStock()));
 
 
-            listUrgentRepairs.setItems(queryDAO.getUrgentRepairs());
-            listUnpaid.setItems(queryDAO.getUnpaidDebts());
+            List<CustomDTO> urgentRepairs = dashboardBO.getUrgentRepairs();
+            ObservableList<UrgentRepairTM> urgentRepairItems = FXCollections.observableArrayList();
+            for (CustomDTO dto : urgentRepairs) {
+                urgentRepairItems.add(new UrgentRepairTM(
+                        dto.getUrgentRepairId(),
+                        dto.getUrgentRepairDeviceName(),
+                        dto.getUrgentRepairStatus(),
+                        dto.getUrgentRepairDateIn()
+                ));
+            }
+            listUrgentRepairs.setItems(urgentRepairItems);
+
+
+            List<CustomDTO> unpaidDebts = dashboardBO.getUnpaidDebts();
+            ObservableList<DebtTM> debts = FXCollections.observableArrayList();
+            for (CustomDTO dto : unpaidDebts) {
+                debts.add(new DebtTM(
+                        dto.getRefId(),
+                        dto.getType(),
+                        dto.getCustomerName(),
+                        dto.getDue()
+                ));
+            }
+            listUnpaid.setItems(debts);
 
 
         } catch (SQLException e) {
@@ -91,7 +120,7 @@ public class DashboardController {
         try {
             chartSales.getData().clear();
             chartSales.setLegendVisible(false);
-            XYChart.Series<String, Number> revenueSeries = queryDAO.getSalesChartData();
+            XYChart.Series<String, Number> revenueSeries = dashboardBO.getSalesChartData();
             chartSales.getData().add(revenueSeries);
 
             int i = 0;

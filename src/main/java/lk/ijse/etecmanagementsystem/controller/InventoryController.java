@@ -14,6 +14,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.BOFactory;
+import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.bo.custom.impl.CategoryBOImpl;
 import lk.ijse.etecmanagementsystem.component.ProductCard;
 import lk.ijse.etecmanagementsystem.component.SkeletonCard;
@@ -77,6 +79,7 @@ public class InventoryController {
 
     private final ProductDAOImpl productDAO = new ProductDAOImpl();
     CategoryBOImpl categoryBO = new CategoryBOImpl();
+    InventoryBO inventoryBO = (InventoryBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.INVENTORY);
 
 
 
@@ -101,7 +104,7 @@ public class InventoryController {
     private void loadProducts() {
         try {
 
-            List<ProductDTO> rawData = productDAO.getAll();
+            List<ProductDTO> rawData = inventoryBO.getAllProduct();
             if (rawData != null) {
 //                ProductUtil.productCache.setAll(rawData);
                 productDataList.clear();

@@ -391,7 +391,7 @@ public class ProductController implements Initializable {
                 }
 
 //                ResultSet product = productModel.findById(id);
-                ProductDTO p = productDAO.findById(id);
+                ProductDTO p = inventoryBO.findById(id);
 
 
                 if (p != null) {
@@ -421,7 +421,7 @@ public class ProductController implements Initializable {
     private void loadProducts() {
         try {
 
-            List<ProductDTO> rawData = productDAO.getAll();
+            List<ProductDTO> rawData = inventoryBO.getAllProduct();
             if (rawData != null) {
 //                ProductUtil.productCache.setAll(rawData);
                 productList.setAll(rawData);
@@ -510,7 +510,7 @@ public class ProductController implements Initializable {
     private boolean isProductIdExist() {
         String id = txtId.getText();
         try {
-            ProductDTO product = productDAO.findById(id);
+            ProductDTO product = inventoryBO.findById(id);
 //            if (!product.next()) {
 //                showAlert(Alert.AlertType.ERROR, "Error", "Product with ID " + id + " does not exist.");
 //                return false;
