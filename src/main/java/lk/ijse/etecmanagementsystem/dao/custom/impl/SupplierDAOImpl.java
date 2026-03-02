@@ -3,6 +3,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 import lk.ijse.etecmanagementsystem.dao.custom.SupplierDAO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -88,5 +89,10 @@ public class SupplierDAOImpl implements SupplierDAO {
     public boolean deleteSuppliers(int id) throws SQLException {
         String sql = "DELETE FROM Supplier WHERE supplier_id=?";
         return CrudUtil.execute(sql, id);
+    }
+
+    public int getSupplierCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Supplier";
+        return GenerateReports.getTotalCount(sql);
     }
 }

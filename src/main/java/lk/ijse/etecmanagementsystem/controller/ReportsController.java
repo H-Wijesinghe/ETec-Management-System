@@ -6,7 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import lk.ijse.etecmanagementsystem.model.ReportsModel;
+import lk.ijse.etecmanagementsystem.bo.ReportBOImpl;
 import lk.ijse.etecmanagementsystem.util.ETecAlerts;
 import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
@@ -97,7 +97,8 @@ public class ReportsController {
     @FXML
     private TextField txtSalesId;
 
-    private final ReportsModel reportsModel = new ReportsModel();
+    private final ReportBOImpl reportBO = new ReportBOImpl();
+
 
     @FXML
     public void initialize() {
@@ -190,7 +191,7 @@ public class ReportsController {
         System.out.println("From Date: " + dpFromDate.getValue());
         System.out.println("To Date: " + dpToDate.getValue());
         try {
-            int count = reportsModel.getSalesCount(dpFromDate.getValue(), dpToDate.getValue());
+            int count = reportBO.getSalesCount(dpFromDate.getValue(), dpToDate.getValue());
             System.out.println(dpFromDate.getValue());
             System.out.println(dpToDate.getValue());
             lblRecordCountSales.setText(String.valueOf(count));
@@ -203,7 +204,7 @@ public class ReportsController {
     @FXML
     void btnLoadRepairOnAction(ActionEvent event) {
         try {
-            int count = reportsModel.getRepairCount(dpFromDate.getValue(), dpToDate.getValue());
+            int count = reportBO.getRepairCount(dpFromDate.getValue(), dpToDate.getValue());
             lblRecordCountRepair.setText(String.valueOf(count));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -214,7 +215,7 @@ public class ReportsController {
     @FXML
     void btnLoadTransactionOnAction(ActionEvent event) {
         try {
-            int count = reportsModel.getTransactionCount(dpFromDate.getValue(), dpToDate.getValue());
+            int count = reportBO.getTransactionCount(dpFromDate.getValue(), dpToDate.getValue());
             lblRecordCountTransf.setText(String.valueOf(count));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -225,7 +226,7 @@ public class ReportsController {
     @FXML
     void btnLoadInventoryOnAction(ActionEvent event) {
         try {
-            int count = reportsModel.getInventoryCount();
+            int count = reportBO.getInventoryCount();
             lblRecordCountInven.setText(String.valueOf(count));
             txtRLimitInven.setText(String.valueOf(count));
         } catch (SQLException e) {
@@ -237,7 +238,7 @@ public class ReportsController {
     @FXML
     void btnLoadSupplierOnAction(ActionEvent event) {
         try {
-            int count = reportsModel.getSupplierCount();
+            int count = reportBO.getSupplierCount();
             lblRecordCountSup.setText(String.valueOf(count));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -248,7 +249,7 @@ public class ReportsController {
     @FXML
     void btnLoadCustomerOnAction(ActionEvent event) {
         try {
-            int count = reportsModel.getCustomerCount();
+            int count = reportBO.getCustomerCount();
             lblRecordCountCus.setText(String.valueOf(count));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -272,7 +273,7 @@ public class ReportsController {
         }
 
         try {
-            if (reportsModel.isSaleExist(id)) {
+            if (reportBO.isSaleExist(id)) {
                 lblSalesExist.setText("Invoice Found!");
                 lblSalesExist.setStyle("-fx-text-fill: green;");
                 btnGenerateSalesInvoice.setDisable(false);
@@ -309,7 +310,7 @@ public class ReportsController {
         }
 
         try {
-            if (reportsModel.isRepairExist(id)) {
+            if (reportBO.isRepairExist(id)) {
                 lblRepairExists.setText("Job Found!");
                 lblRepairExists.setStyle("-fx-text-fill: green;");
                 btnGenerateRepairInvoice.setDisable(false);

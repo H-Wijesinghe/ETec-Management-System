@@ -1,12 +1,15 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
+import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.RepairJobDAO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.PaymentStatus;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -167,5 +170,40 @@ public class RepairJobDAOImpl implements RepairJobDAO {
         String sql = "DELETE FROM RepairJob WHERE repair_id=?";
 
         return CrudUtil.execute(sql, repairId);
+    }
+
+    public int getRepairCount(LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM RepairJob WHERE date_in BETWEEN ? AND ?";
+        return GenerateReports.getCountByDateRange(sql, from, to);
+    }
+
+    public boolean isRepairExist(String repairId) throws SQLException {
+        String sql = "SELECT repair_id FROM RepairJob WHERE repair_id = ?";
+        return GenerateReports.checkIdExists(sql, repairId);
+    }
+
+    public XYChart.Series<String, Number> getRepairChartData() throws SQLException {
+        String sqlRepairs = "SELECT DATE(date_in) as d, COUNT(*) as c FROM RepairJob " +
+                "WHERE date_in >= DATE(NOW()) - INTERVAL 7 DAY AND status = 'DELIVERED'" +
+                "GROUP BY DATE(date_in) ORDER BY DATE(date_in)";
+
+        XYChart.Series<String, Number> seriesRepairs = new XYChart.Series<>();
+        seriesRepairs.setName("Repairs");
+
+        ResultSet rs2 = CrudUtil.execute(sqlRepairs);
+
+        while (rs2.next()) {
+            seriesRepairs.getData().add(new XYChart.Data<>(rs2.getString("d"), rs2.getInt("c")));
+        }
+        return seriesRepairs;
+    }
+
+    public int getActiveRepairCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM RepairJob WHERE status NOT IN ('COMPLETED', 'DELIVERED', 'CANCELLED')";
+        int repairs = 0;
+        ResultSet rs = CrudUtil.execute(sql);
+        if (rs.next()) repairs = rs.getInt(1);
+        rs.close();
+        return repairs;
     }
 }

@@ -2,12 +2,17 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.tm.DebtTM;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
+import lk.ijse.etecmanagementsystem.dto.tm.UrgentRepairTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,8 +29,6 @@ public class QueryDAOImpl implements QueryDAO {
         while (rs.next()) {
             double balanceDue = rs.getDouble("total_amount") - rs.getDouble("paid_amount");
 
-
-//            (int repairId, String device, String customerName, double balanceDue)
             pendingRepairsList.add(new PendingRepairTM(rs.getInt("repair_id"),
                     rs.getString("device_name"),
                     rs.getString("name"),
@@ -45,7 +48,6 @@ public class QueryDAOImpl implements QueryDAO {
                 "WHERE ri.repair_id = ?";
 
         ResultSet rs = CrudUtil.execute(sql, repairId);
-//        List<RepairJobDTO> usedPartsList = new ArrayList<>();
 
         while (rs.next()) {
             list.add(new RepairPartTM(
@@ -61,6 +63,82 @@ public class QueryDAOImpl implements QueryDAO {
 
     }
 
+    public ObservableList<UrgentRepairTM> getUrgentRepairs() throws SQLException {
+        ObservableList<UrgentRepairTM> list = FXCollections.observableArrayList();
+        String sql = "SELECT repair_id, device_name, status, DATE(date_in) as d_in FROM RepairJob " +
+                "WHERE status IN ('PENDING', 'DIAGNOSIS', 'WAITING_PARTS') " +
+                "ORDER BY date_in ASC LIMIT 15";
+
+
+        ResultSet rs = CrudUtil.execute(sql);
+        while (rs.next()) {
+            list.add(new UrgentRepairTM(
+                    rs.getInt("repair_id"),
+                    rs.getString("device_name"),
+                    rs.getString("status"),
+                    rs.getString("d_in")
+            ));
+        }
+        rs.close();
+        return list;
+    }
+
+    public ObservableList<DebtTM> getUnpaidDebts() throws SQLException {
+        ObservableList<DebtTM> list = FXCollections.observableArrayList();
+
+        String sql = "SELECT 'SALE' as type, s.sale_id as ref_id, c.name, (s.grand_total - s.paid_amount) as due " +
+                "FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
+                "WHERE s.payment_status != 'PAID' AND s.description LIKE 'Point of Sale Transaction'" +
+                "UNION ALL " +
+                "SELECT 'REPAIR' as type, r.repair_id as ref_id, c.name, (r.total_amount - r.paid_amount) as due " +
+                "FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id " +
+                "WHERE r.payment_status != 'PAID' AND r.status = 'DELIVERED'";
+
+
+        ResultSet rs = CrudUtil.execute(sql);
+        while (rs.next()) {
+            list.add(new DebtTM(
+                    rs.getInt("ref_id"), // The ID (Sale ID or Repair ID)
+                    rs.getString("type"),
+                    rs.getString("name"),
+                    rs.getDouble("due")
+            ));
+        }
+        rs.close();
+        return list;
+    }
+
+    public XYChart.Series<String, Number> getSalesChartData() throws SQLException {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Revenue");
+
+        String sql = "SELECT DATE(transaction_date) as d, SUM(amount) as total FROM TransactionRecord " +
+                "WHERE flow='IN' AND transaction_date >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(transaction_date) ORDER BY DATE(transaction_date)";
+
+
+        ResultSet rs = CrudUtil.execute(sql);
+        while (rs.next()) {
+            series.getData().add(new XYChart.Data<>(rs.getString("d"), rs.getDouble("total")));
+        }
+        rs.close();
+        return series;
+    }
+
+    public double getDebts() throws SQLException {
+        String sqlDebts = "SELECT " +
+                "(SELECT COALESCE(SUM(grand_total - paid_amount),0) FROM Sales WHERE payment_status != 'PAID') + " +
+                "(SELECT COALESCE(SUM(total_amount - paid_amount),0) FROM RepairJob WHERE payment_status != 'PAID' AND status != 'CANCELLED')";
+        double debts = 0.0;
+        ResultSet rs4 = CrudUtil.execute(sqlDebts);
+        if (rs4.next()){
+            debts = rs4.getDouble(1);
+        }
+        System.out.println("Total Debts: " + debts);
+        rs4.close();
+        return debts;
+    }
+
     private ProductCondition fromConditionString(String s) {
         if (s == null) return ProductCondition.BOTH;
         try {
@@ -74,5 +152,7 @@ public class QueryDAOImpl implements QueryDAO {
             return ProductCondition.BOTH; // unknown condition value
         }
     }
+
+
 
 }

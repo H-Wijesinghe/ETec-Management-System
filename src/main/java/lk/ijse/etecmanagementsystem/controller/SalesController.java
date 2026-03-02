@@ -763,7 +763,7 @@ public class SalesController implements Initializable {
     private void loadProductItems() {
         try {
             inventoryItemsList.clear();
-            inventoryItemsList.addAll(productItemDAO.getAllAvailableItems());
+            inventoryItemsList.addAll(productItemDAO.getAllAvailableRealItems());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Failed to load inventory: " + e.getMessage());
         }

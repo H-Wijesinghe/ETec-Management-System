@@ -14,11 +14,15 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.ProductDTO;
+import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
-import lk.ijse.etecmanagementsystem.model.RepairPartsModel; // Import Model
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +47,8 @@ public class SelectRepairPartController {
     private final ObservableList<RepairPartTM> stockList = FXCollections.observableArrayList();
 
     // Model Instance
-    private final RepairPartsModel repairPartsModel = new RepairPartsModel();
+    ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+    ProductDAOImpl productDAO = new ProductDAOImpl();
 
     public void setMainController(RepairDashboardController mainController) {
         this.mainController = mainController;
@@ -78,8 +83,23 @@ public class SelectRepairPartController {
     private void loadAvailableStock() {
         try {
             stockList.clear();
-            List<RepairPartTM> dbList = repairPartsModel.getAllAvailableParts();
-            stockList.addAll(dbList);
+
+            List<ProductItemDTO> dbItems = productItemDAO.getAllAvailableItems();
+            List<RepairPartTM> partList = new ArrayList<>();
+            for (ProductItemDTO item : dbItems) {
+                ProductDTO product = productDAO.findById(String.valueOf(item.getStockId()));
+                partList.add(new RepairPartTM(
+                        item.getItemId(),
+                        product.getName(),
+                        item.getSerialNumber(),
+                        product.getCondition(),
+                        product.getSellPrice()
+                ));
+                System.out.println("Loaded Item: " + product.getName() + " (Serial: " + item.getSerialNumber() + ")"+" - Price: " + product.getSellPrice()
+                + " - Condition: " + product.getCondition());
+            }
+
+            stockList.addAll(partList);
 
         } catch (SQLException e) {
             e.printStackTrace();

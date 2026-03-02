@@ -9,10 +9,11 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import lk.ijse.etecmanagementsystem.bo.DashboardBOImpl;
+import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.tm.DashboardTM;
 import lk.ijse.etecmanagementsystem.dto.tm.DebtTM;
 import lk.ijse.etecmanagementsystem.dto.tm.UrgentRepairTM;
-import lk.ijse.etecmanagementsystem.model.DashboardModel;
 import lk.ijse.etecmanagementsystem.component.DebtListCell;
 import lk.ijse.etecmanagementsystem.component.UrgentRepairListCell;
 
@@ -42,7 +43,8 @@ public class DashboardController {
     private LineChart<String, Number> chartTraffic;
 
 
-    private final DashboardModel dashboardModel = new DashboardModel();
+    QueryDAOImpl queryDAO = new QueryDAOImpl();
+    DashboardBOImpl dashboardBO = new DashboardBOImpl();
 
 
     private final String[] barColors = {"#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#1abc9c", "#e74c3c"};
@@ -65,7 +67,7 @@ public class DashboardController {
     private void loadAllData() {
         try {
 
-            DashboardTM stats = dashboardModel.getDashboardStats();
+            DashboardTM stats = dashboardBO.getDashboardStats();
 
             lblTodayIncome.setText(String.format("%.2f", stats.getTodayIncome()));
             lblPendingPayment.setText(String.format("%.2f", stats.getPendingPayments()));
@@ -75,8 +77,8 @@ public class DashboardController {
             lblLowStock.setText(String.valueOf(stats.getLowStock()));
 
 
-            listUrgentRepairs.setItems(dashboardModel.getUrgentRepairs());
-            listUnpaid.setItems(dashboardModel.getUnpaidDebts());
+            listUrgentRepairs.setItems(queryDAO.getUrgentRepairs());
+            listUnpaid.setItems(queryDAO.getUnpaidDebts());
 
 
         } catch (SQLException e) {
@@ -89,7 +91,7 @@ public class DashboardController {
         try {
             chartSales.getData().clear();
             chartSales.setLegendVisible(false);
-            XYChart.Series<String, Number> revenueSeries = dashboardModel.getSalesChartData();
+            XYChart.Series<String, Number> revenueSeries = queryDAO.getSalesChartData();
             chartSales.getData().add(revenueSeries);
 
             int i = 0;
@@ -99,7 +101,7 @@ public class DashboardController {
             }
 
             chartTraffic.getData().clear();
-            List<XYChart.Series<String, Number>> trafficSeries = dashboardModel.getTrafficChartData();
+            List<XYChart.Series<String, Number>> trafficSeries = dashboardBO.getTrafficChartData();
 
             chartTraffic.getData().addAll(trafficSeries);
 

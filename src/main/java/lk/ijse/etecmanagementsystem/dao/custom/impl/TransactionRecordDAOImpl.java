@@ -4,10 +4,12 @@ import lk.ijse.etecmanagementsystem.dao.custom.TransactionRecordDAO;
 import lk.ijse.etecmanagementsystem.dao.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 public class TransactionRecordDAOImpl implements TransactionRecordDAO {
@@ -94,5 +96,19 @@ public class TransactionRecordDAOImpl implements TransactionRecordDAO {
                         entity.getUser_id()
                 );
             }
+    }
+
+    public int getTransactionCount(LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM TransactionRecord WHERE transaction_date BETWEEN ? AND ?";
+        return GenerateReports.getCountByDateRange(sql, from, to);
+    }
+
+    public double getTodayIncome(LocalDate today) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM TransactionRecord WHERE flow='IN' AND DATE(transaction_date) = ?";
+        ResultSet rs1 = CrudUtil.execute(sql, today);
+        double income = 0;
+        if (rs1.next()) income = rs1.getDouble(1);
+        rs1.close();
+        return income;
     }
 }

@@ -4,6 +4,7 @@ import lk.ijse.etecmanagementsystem.dao.custom.CustomerDAO;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -104,5 +105,10 @@ public class CustomerDAOImpl implements CustomerDAO {
     public boolean deleteCustomer(int id) throws SQLException {
         String sql = "DELETE FROM Customer WHERE cus_id=?";
         return CrudUtil.execute(sql, id);
+    }
+
+    public int getCustomerCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Customer";
+        return GenerateReports.getTotalCount(sql);
     }
 }

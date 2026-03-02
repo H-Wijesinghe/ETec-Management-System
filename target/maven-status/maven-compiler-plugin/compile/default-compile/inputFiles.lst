@@ -1,6 +1,8 @@
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\App.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\DashboardBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\InventoryBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\RepairsBOimpl.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\ReportBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\SalesBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\bo\TransactionBOImpl.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\component\DebtListCell.java

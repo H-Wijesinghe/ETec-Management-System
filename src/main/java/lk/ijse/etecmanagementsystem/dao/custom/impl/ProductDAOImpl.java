@@ -3,6 +3,7 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 import lk.ijse.etecmanagementsystem.dao.custom.ProductDAO;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.ResultSet;
@@ -72,7 +73,7 @@ public class ProductDAOImpl implements ProductDAO {
         return CrudUtil.execute(deleteProductSql, id);
     }
 
-    public ProductDTO findById(String id) throws Exception {
+    public ProductDTO findById(String id) throws SQLException {
         String sql = "SELECT stock_id, name, description, sell_price, category, p_condition, buy_price, warranty_months, qty, image_path FROM Product WHERE stock_id=?";
 
         ProductDTO product = null;
@@ -132,12 +133,26 @@ public class ProductDAOImpl implements ProductDAO {
         return products;
     }
 
+    public int getInventoryCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Product ";
+        return GenerateReports.getTotalCount(sql);
+    }
+
+    public int getLowStockCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Product WHERE qty < 5";
+        int stock = 0;
+        ResultSet rs = CrudUtil.execute(sql);
+        if (rs.next()) stock = rs.getInt(1);
+        rs.close();
+        return stock;
+    }
+
     private ProductCondition fromConditionString(String s) {
         if (s == null) return null;
         try {
-            if (s.equals("Used")) {
+            if (s.equals("USED")) {
                 return ProductCondition.USED;
-            } else if (s.equals("Brand New")) {
+            } else if (s.equals("BRAND NEW")) {
                 return ProductCondition.BRAND_NEW;
             }
             return ProductCondition.BOTH;

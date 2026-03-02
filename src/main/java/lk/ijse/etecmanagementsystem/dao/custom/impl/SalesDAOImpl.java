@@ -2,17 +2,21 @@ package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.dao.custom.SalesDAO;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
 import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
+import lk.ijse.etecmanagementsystem.util.GenerateReports;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class SalesDAOImpl implements SalesDAO {
     public List<SalesTM> getAllSales() throws SQLException {
@@ -153,5 +157,29 @@ public class SalesDAOImpl implements SalesDAO {
     public boolean updateSalePayment(int saleId, double newPaidAmount, String newPaymentStatus) throws SQLException {
         String updateSql = "UPDATE Sales SET paid_amount = paid_amount + ?, payment_status = ? WHERE sale_id = ?";
         return CrudUtil.execute(updateSql, newPaidAmount, newPaymentStatus, saleId);
+    }
+
+    public int getSalesCount(LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Sales WHERE sale_date BETWEEN ? AND ?";
+        return GenerateReports.getCountByDateRange(sql, from, to);
+    }
+
+    public boolean isSaleExist(String saleId) throws SQLException {
+        String sql = "SELECT sale_id FROM Sales WHERE sale_id = ?";
+        return GenerateReports.checkIdExists(sql, saleId);
+    }
+
+    public XYChart.Series<String, Number> getSalesChartData() throws SQLException {
+        String sqlSales = "SELECT DATE(sale_date) as d, COUNT(*) as c FROM Sales " +
+                "WHERE sale_date >= DATE(NOW()) - INTERVAL 7 DAY " +
+                "GROUP BY DATE(sale_date) ORDER BY DATE(sale_date)";
+        XYChart.Series<String, Number> seriesSales = new XYChart.Series<>();
+        seriesSales.setName("Sales");
+
+        ResultSet rs1 = CrudUtil.execute(sqlSales);
+        while (rs1.next()) {
+            seriesSales.getData().add(new XYChart.Data<>(rs1.getString("d"), rs1.getInt("c")));
+        }
+        return seriesSales;
     }
 }

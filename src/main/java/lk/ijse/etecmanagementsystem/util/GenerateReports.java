@@ -11,8 +11,7 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.view.JasperViewer;
 
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.Date;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,5 +120,41 @@ public class GenerateReports {
         jasperReport = (JasperReport) JRLoader.loadObject(reportStream);
         return jasperReport;
 
+    }
+
+    public static int getCountByDateRange(String sql, LocalDate from, LocalDate to) throws SQLException {
+        Connection connection = DBConnection.getInstance().getConnection();
+        PreparedStatement pstm = connection.prepareStatement(sql);
+
+
+        // Start of the 'From' day (00:00:00)
+        pstm.setString(1, from.toString() + " 00:00:00");
+
+        // End of the 'To' day (23:59:59)
+        pstm.setString(2, to.toString() + " 23:59:59");
+
+        ResultSet resultSet = pstm.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        }
+        return 0;
+    }
+
+    public static int getTotalCount(String sql) throws SQLException {
+        Connection connection = DBConnection.getInstance().getConnection();
+        PreparedStatement pstm = connection.prepareStatement(sql);
+        ResultSet resultSet = pstm.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        }
+        return 0;
+    }
+
+    public static boolean checkIdExists(String sql, String id) throws SQLException {
+        Connection connection = DBConnection.getInstance().getConnection();
+        PreparedStatement pstm = connection.prepareStatement(sql);
+        pstm.setString(1, id);
+        ResultSet resultSet = pstm.executeQuery();
+        return resultSet.next();
     }
 }

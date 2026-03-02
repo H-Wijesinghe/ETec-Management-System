@@ -16,7 +16,7 @@ public interface ProductItemDAO {
 
     ArrayList<ProductItemDTO> getPlaceHolderItems(int stockId) throws SQLException;
 
-    List<InventoryItemDTO> getAllAvailableItems() throws SQLException;
+    List<InventoryItemDTO> getAllAvailableRealItems() throws SQLException;
 
     boolean updateItem(ProductItemDTO item) throws SQLException;
 

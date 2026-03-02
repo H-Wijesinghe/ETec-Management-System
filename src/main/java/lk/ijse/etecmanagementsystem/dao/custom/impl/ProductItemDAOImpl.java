@@ -1,17 +1,46 @@
 package lk.ijse.etecmanagementsystem.dao.custom.impl;
 
 import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
+import lk.ijse.etecmanagementsystem.db.DBConnection;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
+import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
 import lk.ijse.etecmanagementsystem.util.CrudUtil;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductItemDAOImpl implements ProductItemDAO {
+
+    public List<ProductItemDTO> getAllAvailableItems() throws SQLException {
+        List<ProductItemDTO> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM ProductItem WHERE status = 'AVAILABLE'";
+         ResultSet rs = CrudUtil.execute(sql);
+         while (rs.next()) {
+                ProductItemDTO item = new ProductItemDTO(
+                        rs.getInt("item_id"),
+                        rs.getInt("stock_id"),
+                        rs.getInt("supplier_id"),
+                        rs.getString("serial_number"),
+                        null,
+                        null,
+                        rs.getInt("supplier_warranty_mo"),
+                        rs.getInt("customer_warranty_mo"),
+                        rs.getString("status"),
+                        rs.getDate("added_date"),
+                        rs.getDate("sold_date")
+                );
+                list.add(item);
+         }
+        rs.close();
+        return list;
+    }
 
     @Override
     public List<ProductItemDTO> getAllProductItems() throws SQLException {
@@ -105,7 +134,7 @@ public class ProductItemDAOImpl implements ProductItemDAO {
     }
 
     @Override
-    public List<InventoryItemDTO> getAllAvailableItems() throws SQLException {
+    public List<InventoryItemDTO> getAllAvailableRealItems() throws SQLException {
         List<InventoryItemDTO> itemList = new ArrayList<>();
 
         String sql = "SELECT pi.item_id, p.name AS product_name, pi.serial_number, " +

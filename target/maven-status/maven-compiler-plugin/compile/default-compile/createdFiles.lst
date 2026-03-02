@@ -9,6 +9,7 @@ lk\ijse\etecmanagementsystem\dao\custom\CategoryDAO.class
 lk\ijse\etecmanagementsystem\dao\entity\SalesItem.class
 lk\ijse\etecmanagementsystem\controller\ReportsController.class
 module-info.class
+lk\ijse\etecmanagementsystem\bo\ReportBOImpl.class
 lk\ijse\etecmanagementsystem\component\UrgentRepairListCell.class
 lk\ijse\etecmanagementsystem\dao\custom\impl\SalesItemDAOImpl.class
 lk\ijse\etecmanagementsystem\controller\ProductController.class
@@ -40,7 +41,6 @@ lk\ijse\etecmanagementsystem\controller\RepairDashboardController.class
 lk\ijse\etecmanagementsystem\dto\tm\TransactionTM.class
 lk\ijse\etecmanagementsystem\dto\RepairJobDTO.class
 lk\ijse\etecmanagementsystem\dao\custom\RepairSalesDAO.class
-lk\ijse\etecmanagementsystem\model\RepairPartsModel.class
 lk\ijse\etecmanagementsystem\dto\tm\UrgentRepairTM.class
 lk\ijse\etecmanagementsystem\dao\custom\ProductItemDAO.class
 lk\ijse\etecmanagementsystem\util\RepairStatus.class
@@ -48,7 +48,6 @@ lk\ijse\etecmanagementsystem\util\InventoryUtil.class
 lk\ijse\etecmanagementsystem\controller\SalesHistoryController.class
 lk\ijse\etecmanagementsystem\dao\entity\TransactionRecord.class
 lk\ijse\etecmanagementsystem\dao\custom\impl\QueryDAOImpl.class
-lk\ijse\etecmanagementsystem\model\DashboardModel.class
 lk\ijse\etecmanagementsystem\controller\ManualTransactionController.class
 lk\ijse\etecmanagementsystem\dao\custom\CustomerDAO.class
 lk\ijse\etecmanagementsystem\dao\custom\SalesItemDAO.class
@@ -77,8 +76,8 @@ lk\ijse\etecmanagementsystem\dao\custom\RepairItemDAO.class
 lk\ijse\etecmanagementsystem\dto\TransactionDTO.class
 lk\ijse\etecmanagementsystem\dao\custom\impl\RepairSalesDAOImpl.class
 lk\ijse\etecmanagementsystem\dao\custom\impl\SalesDAOImpl.class
-lk\ijse\etecmanagementsystem\model\ReportsModel.class
 lk\ijse\etecmanagementsystem\controller\ImagePopupController.class
+lk\ijse\etecmanagementsystem\bo\DashboardBOImpl.class
 lk\ijse\etecmanagementsystem\controller\SuppliersController.class
 lk\ijse\etecmanagementsystem\bo\RepairsBOimpl.class
 lk\ijse\etecmanagementsystem\controller\InventoryController$1.class
