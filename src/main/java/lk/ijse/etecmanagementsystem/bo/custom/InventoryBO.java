@@ -16,13 +16,11 @@ public interface InventoryBO extends SuperBO {
 
     List<ProductDTO> getAllProduct() throws SQLException;
 
-    boolean update(ProductDTO p) throws SQLException;
-
     boolean updateProductWithQtySync(ProductDTO p) throws SQLException;
 
     boolean deleteById(String stockId) throws SQLException;
 
-    public ProductDTO findById(String id) throws SQLException;
+    ProductDTO findById(String id) throws SQLException;
 
     InventoryBOImpl.ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException;
 
@@ -38,5 +36,20 @@ public interface InventoryBO extends SuperBO {
 
     int getIdByName(String name) throws SQLException;
 
+    ArrayList<ProductItemDTO> getPlaceHolderItems(int stockId) throws SQLException;
+
+    List<ProductItemDTO> getAllAvailableItems() throws SQLException;
+
+    boolean checkSerialExists(String serial) throws SQLException;
+
+    List<ProductItemDTO> getAllProductItems() throws SQLException;
+
+    boolean updateCustomerWarranty(int customerWarranty, int stockId) throws SQLException;
+
+    int getRealItemCount(int stockId) throws SQLException;
+
+    boolean delete(int stockId) throws SQLException;
+
+    int getRestrictedRealItemCount(int stockId) throws SQLException;
 }
 

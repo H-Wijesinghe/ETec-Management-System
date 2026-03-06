@@ -63,6 +63,20 @@ public class CustomDTO {
     private int productQty;
     private String productImagePath;
 
+    public CustomDTO(int productItemId, int productItemStockId, int productItemSupplierId, String productItemSerialNumber, String productItemProductName, String productItemSupplierName, int productItemSupplierWarranty, int productItemCustomerWarranty, String productItemStatus, Date productItemAddedDate, Date productItemSoldDate) {
+        this.productItemId = productItemId;
+        this.productItemStockId = productItemStockId;
+        this.productItemSupplierId = productItemSupplierId;
+        this.productItemSerialNumber = productItemSerialNumber;
+        this.productItemProductName = productItemProductName;
+        this.productItemSupplierName = productItemSupplierName;
+        this.productItemSupplierWarranty = productItemSupplierWarranty;
+        this.productItemCustomerWarranty = productItemCustomerWarranty;
+        this.productItemStatus = productItemStatus;
+        this.productItemAddedDate = productItemAddedDate;
+        this.productItemSoldDate = productItemSoldDate;
+    }
+
     // ProductItemDTO
     private int productItemId;
     private int productItemStockId;

@@ -87,7 +87,7 @@ public class SelectRepairPartController {
         try {
             stockList.clear();
 
-            List<ProductItemDTO> dbItems = productItemDAO.getAllAvailableItems();
+            List<ProductItemDTO> dbItems = inventoryBO.getAllAvailableItems();
             List<RepairPartTM> partList = new ArrayList<>();
             for (ProductItemDTO item : dbItems) {
                 ProductDTO product = inventoryBO.findById(String.valueOf(item.getStockId()));

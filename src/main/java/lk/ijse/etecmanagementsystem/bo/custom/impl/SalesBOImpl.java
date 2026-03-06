@@ -2,6 +2,7 @@ package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import javafx.scene.control.Alert;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
+import lk.ijse.etecmanagementsystem.entity.ProductItem;
 import lk.ijse.etecmanagementsystem.entity.SalesItem;
 import lk.ijse.etecmanagementsystem.entity.TransactionRecord;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
@@ -40,8 +41,26 @@ public class SalesBOImpl {
                         throw new SQLException("Product ID not found in database: " + stockId);
                     }
 
-                    ArrayList<ProductItemDTO> productItems = productItemDAO.getPlaceHolderItems(stockId);
-                    if (productItems == null || productItems.isEmpty()) {
+//                    ArrayList<ProductItemDTO> productItems = productItemDAO.getPlaceHolderItems(stockId);
+                    ArrayList<ProductItem> entity = productItemDAO.getPlaceHolderItems(stockId);
+                    ArrayList<ProductItemDTO> productItems = new ArrayList<>();
+                    for (ProductItem productItem : entity) {
+                        productItems.add(new ProductItemDTO(
+                                productItem.getItem_id(),
+                                productItem.getStock_id(),
+                                0,
+                                productItem.getSerial_number(),
+                                null,
+                                null,
+                                0,
+                                0,
+                                productItem.getStatus(),
+                                null,
+                                null
+                        ));
+                    }
+
+                    if (productItems.isEmpty()) {
                         System.out.println("No placeholder items found for stock ID: " + stockId);
                         throw new SQLException("No placeholder items found for stock ID: " + stockId);
                     }

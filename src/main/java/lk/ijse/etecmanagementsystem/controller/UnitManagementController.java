@@ -15,6 +15,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.BOFactory;
+import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.bo.custom.impl.InventoryBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
@@ -117,16 +119,13 @@ public class UnitManagementController {
     private final Map<Integer, String> idToProductDisplayMap = new HashMap<>();
     private final Map<Integer, String> idToSupplierDisplayMap = new HashMap<>();
 
-    private final InventoryBOImpl inventoryBO = new InventoryBOImpl();
+    InventoryBO inventoryBO = (InventoryBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.INVENTORY);
 
     private final ObservableList<String> stagingList = FXCollections.observableArrayList();
     private final ObservableList<ProductItemDTO> historyList = FXCollections.observableArrayList();
     private final ObservableList<ProductItemDTO> viewList = FXCollections.observableArrayList();
     private final ObservableList<ProductItemDTO> productItemList = FXCollections.observableArrayList();
 
-    ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
-    SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
-    ProductDAOImpl productDAO = new ProductDAOImpl();
     QueryDAOImpl queryDAO = new QueryDAOImpl();
 
     public void initialize() {
@@ -299,7 +298,7 @@ public class UnitManagementController {
 
     private void loadAllItemsToViewTable() {
         try {
-            List<ProductItemDTO> allProductItems = queryDAO.getAllProductItems();
+            List<ProductItemDTO> allProductItems = inventoryBO.getAllProductItems();
             productItemList.setAll(allProductItems);
 
             viewList.clear();

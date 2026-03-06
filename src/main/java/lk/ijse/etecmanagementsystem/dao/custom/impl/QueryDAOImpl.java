@@ -116,7 +116,7 @@ public class QueryDAOImpl implements QueryDAO {
                 "(SELECT COALESCE(SUM(total_amount - paid_amount),0) FROM RepairJob WHERE payment_status != 'PAID' AND status != 'CANCELLED')";
         double debts = 0.0;
         ResultSet rs4 = CrudUtil.execute(sqlDebts);
-        if (rs4.next()){
+        if (rs4.next()) {
             debts = rs4.getDouble(1);
         }
         System.out.println("Total Debts: " + debts);
@@ -124,8 +124,8 @@ public class QueryDAOImpl implements QueryDAO {
         return debts;
     }
 
-    public List<ProductItemDTO> getAllProductItems() throws SQLException {
-        List<ProductItemDTO> itemList = new ArrayList<>();
+    public List<CustomDTO> getAllProductItems() throws SQLException {
+        List<CustomDTO> itemList = new ArrayList<>();
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, " +
                 "p.name AS product_name, COALESCE(s.supplier_name, 'No Supplier') AS supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
@@ -137,11 +137,12 @@ public class QueryDAOImpl implements QueryDAO {
         ResultSet rs = CrudUtil.execute(sql);
 
         while (rs.next()) {
-            ProductItemDTO item = new ProductItemDTO(
+
+            CustomDTO item = new CustomDTO(
                     rs.getInt("item_id"),
                     rs.getInt("stock_id"),
                     rs.getInt("supplier_id"),
-                    rs.getString("serial_number"),
+                    rs.getString("serial_number") == null ? "" : rs.getString("serial_number"),
                     rs.getString("product_name"),
                     rs.getString("supplier_name"),
                     rs.getInt("supplier_warranty_mo"),
@@ -149,8 +150,7 @@ public class QueryDAOImpl implements QueryDAO {
                     rs.getString("status"),
                     rs.getDate("added_date"),
                     rs.getDate("sold_date")
-
-            );
+                    );
             itemList.add(item);
         }
         rs.close();
@@ -182,7 +182,7 @@ public class QueryDAOImpl implements QueryDAO {
         return itemList;
     }
 
-    public ProductItemDTO getProductItem(int itemId)throws  SQLException {
+    public ProductItemDTO getProductItem(int itemId) throws SQLException {
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
                 "FROM ProductItem pi " +
@@ -290,20 +290,20 @@ public class QueryDAOImpl implements QueryDAO {
                 "WHERE DATE(s.sale_date) BETWEEN ? AND ? " +
                 "ORDER BY s.sale_date DESC";
 
-            ResultSet rs = CrudUtil.execute(sql, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
-            while (rs.next()) {
-                salesList.add(new SalesTM(
-                        rs.getInt("sale_id"),
-                        rs.getString("customer_name") != null ? rs.getString("customer_name") : "Walk-in", // Handle null customers
-                        rs.getString("user_name"),
-                        rs.getString("description"),
-                        rs.getDouble("sub_total"),
-                        rs.getDouble("discount"),
-                        rs.getDouble("grand_total"),
-                        rs.getDouble("paid_amount")
-                ));
-            }
-            rs.close();
+        ResultSet rs = CrudUtil.execute(sql, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
+        while (rs.next()) {
+            salesList.add(new SalesTM(
+                    rs.getInt("sale_id"),
+                    rs.getString("customer_name") != null ? rs.getString("customer_name") : "Walk-in", // Handle null customers
+                    rs.getString("user_name"),
+                    rs.getString("description"),
+                    rs.getDouble("sub_total"),
+                    rs.getDouble("discount"),
+                    rs.getDouble("grand_total"),
+                    rs.getDouble("paid_amount")
+            ));
+        }
+        rs.close();
         return salesList;
     }
 
@@ -337,7 +337,6 @@ public class QueryDAOImpl implements QueryDAO {
             return ProductCondition.BOTH; // unknown condition value
         }
     }
-
 
 
 }

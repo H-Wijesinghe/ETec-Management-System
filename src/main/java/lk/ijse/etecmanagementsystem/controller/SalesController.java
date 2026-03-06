@@ -26,6 +26,7 @@ import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dto.*;
 import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
+import lk.ijse.etecmanagementsystem.entity.ProductItem;
 import lk.ijse.etecmanagementsystem.server.BarcodeServer;
 import lk.ijse.etecmanagementsystem.util.*;
 
@@ -304,7 +305,7 @@ public class SalesController implements Initializable {
 
             try {
                 int productId = inventoryBO.getIdByName(itemName);
-                int placeholderCount = productItemDAO.getPlaceHolderItems(productId).size();
+                int placeholderCount = inventoryBO.getPlaceHolderItems(productId).size();
                 if (qty > placeholderCount) {
                     ETecAlerts.showAlert(Alert.AlertType.WARNING, "Not enough Quantity", "Insufficient Quantity");
                     return;
@@ -457,7 +458,8 @@ public class SalesController implements Initializable {
 
         ArrayList<ProductItemDTO> pendingSlot = new ArrayList<>();
         try {
-            pendingSlot = productItemDAO.getPlaceHolderItems(ProductId);
+            pendingSlot = inventoryBO.getPlaceHolderItems(ProductId);
+//
             if (!pendingSlot.isEmpty()) {
                 for(ItemCartTM item : cartItemList){
 
@@ -479,7 +481,7 @@ public class SalesController implements Initializable {
                 cartItem.setSerialNo(null);
             }
 
-            boolean isDuplicated = productItemDAO.checkSerialExists(cartItem.getSerialNo());
+            boolean isDuplicated = inventoryBO.checkSerialExists(cartItem.getSerialNo());
             if(isDuplicated){
                 new Alert(Alert.AlertType.WARNING, "The new serial number already exists. Please use a different serial number.").showAndWait();
                 return;

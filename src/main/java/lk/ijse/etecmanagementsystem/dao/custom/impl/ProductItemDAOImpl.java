@@ -4,6 +4,8 @@ import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
 import lk.ijse.etecmanagementsystem.dto.InventoryItemDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dao.CrudUtil;
+import lk.ijse.etecmanagementsystem.entity.Product;
+import lk.ijse.etecmanagementsystem.entity.ProductItem;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.ResultSet;
@@ -13,29 +15,30 @@ import java.util.List;
 
 public class ProductItemDAOImpl implements ProductItemDAO {
 
-    public List<ProductItemDTO> getAllAvailableItems() throws SQLException {
-        List<ProductItemDTO> list = new ArrayList<>();
+    public List<ProductItem> getAllAvailableItems() throws SQLException {
 
         String sql = "SELECT * FROM ProductItem WHERE status = 'AVAILABLE'";
          ResultSet rs = CrudUtil.execute(sql);
-         while (rs.next()) {
-                ProductItemDTO item = new ProductItemDTO(
+
+        List<ProductItem> items = new ArrayList<>();
+            while (rs.next()) {
+
+
+                ProductItem item = new ProductItem(
                         rs.getInt("item_id"),
                         rs.getInt("stock_id"),
                         rs.getInt("supplier_id"),
                         rs.getString("serial_number"),
-                        null,
-                        null,
-                        rs.getInt("supplier_warranty_mo"),
-                        rs.getInt("customer_warranty_mo"),
                         rs.getString("status"),
                         rs.getDate("added_date"),
-                        rs.getDate("sold_date")
+                        rs.getInt("supplier_warranty_mo"),
+                        rs.getDate("added_date"),
+                        rs.getInt("customer_warranty_mo")
                 );
-                list.add(item);
-         }
+                items.add(item);
+            }
         rs.close();
-        return list;
+        return items;
     }
 
 
@@ -53,44 +56,42 @@ public class ProductItemDAOImpl implements ProductItemDAO {
         return true;
     }
 
-    public boolean addProductItem(ProductItemDTO item) throws SQLException {
+    public boolean addProductItem(ProductItem entity) throws SQLException {
         String insertSql = "INSERT INTO ProductItem (stock_id, supplier_id, serial_number, supplier_warranty_mo, " +
                 "customer_warranty_mo, status, added_date) VALUES (?, ?, ?, ?, ?, 'AVAILABLE', NOW())";
 
-        System.out.println("DEBUG: Adding Product Item with Stock ID: " + item.getStockId() + ", Serial Number: " + item.getSerialNumber() +
-                ", Supplier ID: " + item.getSupplierId() + ", Supplier Warranty: " + item.getSupplierWarranty() +
-                ", Customer Warranty: " + item.getCustomerWarranty());
-
-        if (item.getSupplierId() > 0) {
-            return CrudUtil.execute(insertSql, item.getStockId(), item.getSupplierId(), item.getSerialNumber(),
-                    item.getSupplierWarranty(), item.getCustomerWarranty());
+        if (entity.getSupplier_id() > 0) {
+            return CrudUtil.execute(insertSql, entity.getStock_id(), entity.getSupplier_id(), entity.getSerial_number(),
+                    entity.getSupplier_warranty_mo(), entity.getCustomer_warranty_mo());
         } else {
-            return CrudUtil.execute(insertSql, item.getStockId(), null, item.getSerialNumber(),
-                    item.getSupplierWarranty(), item.getCustomerWarranty());
+            return CrudUtil.execute(insertSql, entity.getStock_id(), null, entity.getSerial_number(),
+                    entity.getSupplier_warranty_mo(), entity.getCustomer_warranty_mo());
         }
 
     }
 
     @Override
-    public ArrayList<ProductItemDTO> getPlaceHolderItems(int stockId) throws SQLException {
-        ArrayList<ProductItemDTO> placeholderItems = new ArrayList<>();
+    public ArrayList<ProductItem> getPlaceHolderItems(int stockId) throws SQLException {
+//        ArrayList<ProductItemDTO> placeholderItems = new ArrayList<>();
+        ArrayList<ProductItem> placeholderItems = new ArrayList<>();
         String sql = "SELECT item_id, stock_id, serial_number FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE'";
         ResultSet rs = CrudUtil.execute(sql, stockId);
+
         while (rs.next()) {
-            ProductItemDTO item = new ProductItemDTO(
+
+            ProductItem item = new ProductItem(
                     rs.getInt("item_id"),
                     rs.getInt("stock_id"),
                     0,
                     rs.getString("serial_number"),
-                    null,
-                    null,
-                    0,
-                    0,
                     "AVAILABLE",
                     null,
-                    null
+                    0,
+                    null,
+                    0
             );
             placeholderItems.add(item);
+
         }
         rs.close();
         return placeholderItems;
@@ -98,20 +99,19 @@ public class ProductItemDAOImpl implements ProductItemDAO {
 
 
     @Override
-    public boolean updateItem(ProductItemDTO item) throws SQLException {
+    public boolean updateItem(ProductItem entity) throws SQLException {
         String updateSql = "UPDATE ProductItem SET serial_number = ?, supplier_id = ?, " +
                 "supplier_warranty_mo = ?, customer_warranty_mo = ?, status = 'AVAILABLE', added_date = NOW() WHERE item_id = ?";
 
-        System.out.println("DEBUG: Updating Item ID " + item.getItemId() + " with Serial Number: " + item.getSerialNumber() +
-                ", Supplier ID: " + item.getSupplierId() + ", Supplier Warranty: " + item.getSupplierWarranty() +
-                ", Customer Warranty: " + item.getCustomerWarranty());
 
-        if (item.getSupplierId() > 0) {
-            return CrudUtil.execute(updateSql, item.getSerialNumber(), item.getSupplierId(),
-                    item.getSupplierWarranty(), item.getCustomerWarranty(), item.getItemId());
+
+
+        if (entity.getSupplier_id() > 0) {
+            return CrudUtil.execute(updateSql, entity.getSerial_number(), entity.getSupplier_id(),
+                    entity.getSupplier_warranty_mo(), entity.getCustomer_warranty_mo(), entity.getItem_id());
         } else {
-            return CrudUtil.execute(updateSql, item.getSerialNumber(), null,
-                    item.getSupplierWarranty(), item.getCustomerWarranty(), item.getItemId());
+            return CrudUtil.execute(updateSql, entity.getSerial_number(), null,
+                    entity.getSupplier_warranty_mo(), entity.getCustomer_warranty_mo(), entity.getItem_id());
         }
     }
 

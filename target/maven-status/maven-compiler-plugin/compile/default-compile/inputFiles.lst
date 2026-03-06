@@ -111,6 +111,7 @@ E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\dto\UserDTO
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\Category.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\Customer.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\Product.java
+E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\ProductItem.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\SalesItem.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\entity\TransactionRecord.java
 E:\ETec-Management-System\src\main\java\lk\ijse\etecmanagementsystem\server\BarcodeServer.java

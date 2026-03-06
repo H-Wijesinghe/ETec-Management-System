@@ -2,15 +2,18 @@ package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.dao.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SupplierDAOImpl;
 import lk.ijse.etecmanagementsystem.db.DBConnection;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.SupplierDTO;
 import lk.ijse.etecmanagementsystem.entity.Product;
+import lk.ijse.etecmanagementsystem.entity.ProductItem;
 import lk.ijse.etecmanagementsystem.util.ProductCondition;
 
 import java.sql.Connection;
@@ -23,10 +26,11 @@ import java.util.Map;
 
 public class InventoryBOImpl implements InventoryBO {
     ProductDAOImpl productDAO = new ProductDAOImpl();
-    ProductItemDAOImpl productItemDAO = new ProductItemDAOImpl();
+    ProductItemDAO productItemDAO = new ProductItemDAOImpl();
     SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
     QueryDAOImpl queryDAO = new QueryDAOImpl();
 
+    @Override
     public int saveProductAndGetId(ProductDTO p) throws SQLException {
         Connection connection = null;
 
@@ -54,7 +58,7 @@ public class InventoryBOImpl implements InventoryBO {
             }
 
             int newStockId = productDAO.getLastInsertedProductId();
-            if(newStockId <= 0) {
+            if (newStockId <= 0) {
                 connection.rollback();
                 throw new SQLException("Failed to save product and retrieve ID.");
             }
@@ -75,7 +79,6 @@ public class InventoryBOImpl implements InventoryBO {
             if (connection != null) connection.setAutoCommit(true);
         }
     }
-
 
     @Override
     public List<ProductDTO> getAllProduct() throws SQLException {
@@ -101,50 +104,6 @@ public class InventoryBOImpl implements InventoryBO {
     }
 
     @Override
-    public boolean update(ProductDTO p) throws SQLException {
-
-        Connection connection = null;
-
-        try {
-            connection = DBConnection.getInstance().getConnection();
-            connection.setAutoCommit(false);
-
-
-            boolean isUpdated = productDAO.update(new Product(
-                    Integer.parseInt(p.getId()),
-                    p.getName(),
-                    p.getDescription(),
-                    p.getCategory(),
-                    p.getCondition().getLabel(),
-                    p.getQty(),
-                    p.getWarrantyMonth(),
-                    p.getImagePath(),
-                    p.getBuyPrice(),
-                    p.getSellPrice()
-            ));
-
-            if (!isUpdated) {
-                connection.rollback();
-                return false;
-            }
-
-            boolean isItemUpdated = productItemDAO.updateCustomerWarranty(p.getWarrantyMonth(), Integer.parseInt(p.getId()));
-            if (!isItemUpdated) {
-                connection.rollback();
-                return false;
-            }
-
-            connection.commit(); // Save both changes
-            return true;
-
-        } catch (SQLException e) {
-            if (connection != null) connection.rollback(); // Undo if error
-            throw e;
-        } finally {
-            if (connection != null) connection.setAutoCommit(true);
-        }
-    }
-
     public boolean updateProductWithQtySync(ProductDTO p) throws SQLException {
 
         Connection connection = null;
@@ -170,14 +129,14 @@ public class InventoryBOImpl implements InventoryBO {
                 return false;
             }
 
-            boolean isItemUpdated = productItemDAO.updateCustomerWarranty(p.getWarrantyMonth(), Integer.parseInt(p.getId()));
+            boolean isItemUpdated = updateCustomerWarranty(p.getWarrantyMonth(), Integer.parseInt(p.getId()));
             if (!isItemUpdated) {
                 connection.rollback();
                 return false;
             }
 
             int currentTotalItems = productItemDAO.getAvailableItemCount(Integer.parseInt(p.getId()));
-            if(currentTotalItems <= 0) {
+            if (currentTotalItems <= 0) {
                 connection.rollback();
                 throw new SQLException("Data integrity issue: No available items found for this product. Cannot sync quantity.");
             }
@@ -213,13 +172,14 @@ public class InventoryBOImpl implements InventoryBO {
         }
     }
 
+    @Override
     public boolean deleteById(String stockId) throws SQLException {
         Connection connection = null;
         try {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false);
 
-            boolean isItemDeleted = productItemDAO.delete(Integer.parseInt(stockId));
+            boolean isItemDeleted = delete(Integer.parseInt(stockId));
             if (!isItemDeleted) {
                 connection.rollback();
                 System.out.println("DEBUG: Failed to delete product items for Stock ID " + stockId);
@@ -252,53 +212,72 @@ public class InventoryBOImpl implements InventoryBO {
         return productDAO.getIdByName(name);
     }
 
+    @Override
     public ItemDeleteStatus checkItemStatusForDelete(String stockId) throws SQLException {
 
-        int realAvailableCount = productItemDAO.getRealItemCount(Integer.parseInt(stockId));
+        int realAvailableCount = getRealItemCount(Integer.parseInt(stockId));
         System.out.println("DEBUG: Real Available Item Count for Stock ID " + stockId + " is " + realAvailableCount);
-        int restrictedCount = productItemDAO.getRestrictedRealItemCount(Integer.parseInt(stockId));
+        int restrictedCount = getRestrictedRealItemCount(Integer.parseInt(stockId));
         System.out.println("DEBUG: Restricted Item Count for Stock ID " + stockId + " is " + restrictedCount);
 
         return new ItemDeleteStatus(realAvailableCount, restrictedCount);
     }
 
+    @Override
     public boolean addNewSerialNo(ArrayList<ProductItemDTO> itemDTOS) throws SQLException {
 
         Connection conn = null;
+
+        ArrayList<ProductItem> entities = new ArrayList<>();
+        for (ProductItemDTO productItemDTO : itemDTOS) {
+            entities.add(new ProductItem(
+                    productItemDTO.getItemId(),
+                    productItemDTO.getStockId(),
+                    productItemDTO.getSupplierId(),
+                    productItemDTO.getSerialNumber(),
+                    productItemDTO.getStatus(),
+                    productItemDTO.getAddedDate(),
+                    productItemDTO.getSupplierWarranty(),
+                    productItemDTO.getSoldDate(),
+                    productItemDTO.getCustomerWarranty()
+            ));
+        }
+
         try {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
 
-            ArrayList<ProductItemDTO> placeholders = productItemDAO.getPlaceHolderItems(itemDTOS.get(0).getStockId());
+
+            ArrayList<ProductItemDTO> placeholders = getPlaceHolderItems(itemDTOS.getFirst().getStockId());
+
 
             int i = 0;
-            for(ProductItemDTO dto : itemDTOS){
+            for (ProductItem entity : entities) {
                 int placeholderId = -1;
 
                 if (!placeholders.isEmpty() && i < placeholders.size()) {
                     placeholderId = placeholders.get(i++).getItemId();
-                    System.out.println("DEBUG: Found placeholder with ID " + placeholderId + " for Stock ID " + dto.getStockId());
                 }
                 if (placeholderId != -1) {
 
-                    dto.setItemId(placeholderId);
-                    boolean isUpdated = productItemDAO.updateItem(dto);
+                    entity.setItem_id(placeholderId);
+                    boolean isUpdated = productItemDAO.updateItem(entity);
                     if (!isUpdated) {
                         conn.rollback();
                         throw new SQLException("Failed to update placeholder item with ID " + placeholderId);
                     }
                 } else {
 
-                    boolean isAdded = productItemDAO.addProductItem(dto);
+                    boolean isAdded = productItemDAO.addProductItem(entity);
                     if (!isAdded) {
                         conn.rollback();
-                        throw new SQLException("Failed to add new item for Stock ID " + dto.getStockId());
+                        throw new SQLException("Failed to add new item for Stock ID " + entity.getStock_id());
                     }
 
-                    boolean isQtyUpdated = productDAO.updateQty(dto.getStockId(), 1);
+                    boolean isQtyUpdated = productDAO.updateQty(entity.getStock_id(), 1);
                     if (!isQtyUpdated) {
                         conn.rollback();
-                        throw new SQLException("Failed to update product quantity for Stock ID " + dto.getStockId());
+                        throw new SQLException("Failed to update product quantity for Stock ID " + entity.getStock_id());
                     }
                 }
             }
@@ -312,6 +291,7 @@ public class InventoryBOImpl implements InventoryBO {
         }
     }
 
+    @Override
     public ProductDTO findById(String id) throws SQLException {
         Product entity = productDAO.search(Integer.parseInt(id));
         return new ProductDTO(
@@ -329,16 +309,18 @@ public class InventoryBOImpl implements InventoryBO {
 
     }
 
+    @Override
     public Map<Integer, String> getAllProductMap() throws SQLException {
 
         Map<Integer, String> map = new HashMap<>();
-        List<ProductItemDTO> items = queryDAO.getAllProductItems();
+        List<ProductItemDTO> items = getAllProductItems();
         for (ProductItemDTO item : items) {
             map.put(item.getStockId(), item.getProductName());
         }
         return map;
     }
 
+    @Override
     public Map<Integer, String> getAllSuppliersMap() throws SQLException {
 
         Map<Integer, String> map = new HashMap<>();
@@ -350,6 +332,7 @@ public class InventoryBOImpl implements InventoryBO {
 
     }
 
+    @Override
     public boolean correctItemMistake(String oldSerial, String newSerial, int newStockId, Integer newSupplierId, int newSupWar) throws SQLException {
 
         Connection con = null;
@@ -369,7 +352,18 @@ public class InventoryBOImpl implements InventoryBO {
             else newItem.setSupplierId(newSupplierId);
             newItem.setSupplierWarranty(newSupWar);
 
-            boolean isUpdated = productItemDAO.updateItem(newItem);
+
+            boolean isUpdated = productItemDAO.updateItem(new ProductItem(
+                    oldItem.getItemId(),
+                    newItem.getStockId(),
+                    newItem.getSupplierId(),
+                    newItem.getSerialNumber(),
+                    oldItem.getStatus(),
+                    oldItem.getAddedDate(),
+                    newItem.getSupplierWarranty(),
+                    oldItem.getSoldDate(),
+                    oldItem.getCustomerWarranty()
+            ));
             if (!isUpdated) {
                 con.rollback();
                 throw new SQLException("Failed to update item with serial " + oldSerial);
@@ -401,6 +395,7 @@ public class InventoryBOImpl implements InventoryBO {
         }
     }
 
+    @Override
     public boolean updateItemStatus(String serial, String newStatus) throws SQLException {
 
         ProductItemDTO item = queryDAO.getItemBySerial(serial);
@@ -430,7 +425,7 @@ public class InventoryBOImpl implements InventoryBO {
                     throw new SQLException("Failed to update product quantity for Stock ID " + item.getStockId());
                 }
 
-            }else {
+            } else {
                 boolean isUpdated = productDAO.updateQty(item.getStockId(), -1);
                 if (!isUpdated) {
                     con.rollback();
@@ -448,6 +443,104 @@ public class InventoryBOImpl implements InventoryBO {
             if (con != null) con.setAutoCommit(true);
         }
     }
+
+    @Override
+    public ArrayList<ProductItemDTO> getPlaceHolderItems(int stockId) throws SQLException {
+
+        ArrayList<ProductItem> entity = productItemDAO.getPlaceHolderItems(stockId);
+        ArrayList<ProductItemDTO> placeholderItems = new ArrayList<>();
+
+        for (ProductItem productItem : entity) {
+            placeholderItems.add(new ProductItemDTO(
+                    productItem.getItem_id(),
+                    productItem.getStock_id(),
+                    0,
+                    productItem.getSerial_number(),
+                    null,
+                    null,
+                    0,
+                    0,
+                    productItem.getStatus(),
+                    null,
+                    null
+            ));
+        }
+        return placeholderItems;
+    }
+
+    @Override
+    public List<ProductItemDTO> getAllAvailableItems() throws SQLException {
+
+        List<ProductItem> entity = productItemDAO.getAllAvailableItems();
+        List<ProductItemDTO> productItemDTOS = new ArrayList<>();
+
+        for (ProductItem productItem : entity) {
+            productItemDTOS.add(new ProductItemDTO(
+                    productItem.getItem_id(),
+                    productItem.getStock_id(),
+                    0,
+                    productItem.getSerial_number(),
+                    null,
+                    null,
+                    0,
+                    0,
+                    productItem.getStatus(),
+                    null,
+                    null
+            ));
+        }
+        return productItemDTOS;
+    }
+
+    @Override
+    public boolean updateCustomerWarranty(int customerWarranty, int stockId) throws SQLException {
+        return productItemDAO.updateCustomerWarranty(customerWarranty, stockId);
+    }
+
+    @Override
+    public int getRealItemCount(int stockId) throws SQLException {
+        return productItemDAO.getRealItemCount(stockId);
+    }
+
+    @Override
+    public boolean delete(int stockId) throws SQLException {
+        return productItemDAO.delete(stockId);
+    }
+
+    @Override
+    public boolean checkSerialExists(String serial) throws SQLException {
+        return productItemDAO.checkSerialExists(serial);
+    }
+
+    @Override
+    public int getRestrictedRealItemCount(int stockId) throws SQLException {
+        return productItemDAO.getRestrictedRealItemCount(stockId);
+    }
+
+    @Override
+    public List<ProductItemDTO> getAllProductItems() throws SQLException{
+        List<CustomDTO> entities = queryDAO.getAllProductItems();
+        List<ProductItemDTO> productItemDTOS = new ArrayList<>();
+
+        for (CustomDTO customDTO : entities) {
+            productItemDTOS.add(new ProductItemDTO(
+                    customDTO.getProductItemId(),
+                    customDTO.getProductItemStockId(),
+                    customDTO.getProductItemSupplierId(),
+                    customDTO.getProductItemSerialNumber(),
+                    customDTO.getProductItemProductName(),
+                    customDTO.getProductItemSupplierName(),
+                    customDTO.getProductItemSupplierWarranty(),
+                    customDTO.getProductItemCustomerWarranty(),
+                    customDTO.getProductItemStatus(),
+                    customDTO.getProductItemAddedDate(),
+                    customDTO.getProductItemSoldDate()
+
+            ));
+        }
+        return productItemDTOS;
+    }
+
 
     private ProductCondition fromConditionString(String s) {
         if (s == null) return null;

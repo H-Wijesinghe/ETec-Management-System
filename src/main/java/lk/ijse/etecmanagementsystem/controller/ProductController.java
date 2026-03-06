@@ -250,7 +250,7 @@ public class ProductController implements Initializable {
 
         try {
 
-            int realItemCount = productItemDAO.getRealItemCount(stockId);
+            int realItemCount = inventoryBO.getRealItemCount(stockId);
 
             if (newQty < realItemCount) {
                 showAlert(Alert.AlertType.ERROR, "Quantity Error",
