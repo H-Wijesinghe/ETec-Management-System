@@ -1,5 +1,7 @@
 package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import lk.ijse.etecmanagementsystem.bo.BOFactory;
 import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
@@ -20,6 +22,7 @@ import lk.ijse.etecmanagementsystem.dto.tm.ItemCartTM;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -245,5 +248,14 @@ public class SalesBOImpl implements SalesBO {
             ));
         }
         return salesList;
+    }
+
+    public List<CustomDTO> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException {
+
+        return queryDAO.getSalesByDateRange(from, to);
+    }
+
+    public List<CustomDTO> getPendingSales() throws SQLException {
+        return queryDAO.getPendingSales();
     }
 }

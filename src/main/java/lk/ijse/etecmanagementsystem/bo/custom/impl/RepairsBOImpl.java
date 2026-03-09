@@ -24,6 +24,7 @@ import lk.ijse.etecmanagementsystem.util.RepairStatus;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -368,6 +369,10 @@ public class RepairsBOImpl implements RepairsBO {
 
     public boolean deleteRepairJob(int repairId) throws SQLException {
         return repairJobDAO.delete(repairId);
+    }
+
+    public List<CustomDTO> getPendingRepairs() throws SQLException {
+        return queryDAO.getPendingRepairs();
     }
 
 }

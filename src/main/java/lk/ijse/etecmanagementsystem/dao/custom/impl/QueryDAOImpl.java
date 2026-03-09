@@ -21,22 +21,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QueryDAOImpl implements QueryDAO {
-    public ObservableList<PendingRepairTM> getPendingRepairs() throws SQLException {
-        String repairSql = "SELECT r.repair_id, r.device_name, c.name, r.total_amount, r.paid_amount FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status IN ('PENDING','PARTIAL') AND r.status IN ('DELIVERED')";
+    public List<CustomDTO> getPendingRepairs() throws SQLException {
+        String repairSql = "SELECT r.repair_id, r.device_name, c.name, r.total_amount, r.paid_amount FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status IN ('PENDING','PARTIAL') AND r.status = 'DELIVERED'";
 
 
         ResultSet rs = CrudUtil.execute(repairSql);
-        ObservableList<PendingRepairTM> pendingRepairsList = FXCollections.observableArrayList();
+        List<CustomDTO> pendingRepairsList = new ArrayList<>();
 
         while (rs.next()) {
-            double balanceDue = rs.getDouble("total_amount") - rs.getDouble("paid_amount");
-
-            pendingRepairsList.add(new PendingRepairTM(rs.getInt("repair_id"),
+            pendingRepairsList.add(new CustomDTO(
+                    rs.getInt("repair_id"),
                     rs.getString("device_name"),
                     rs.getString("name"),
-                    balanceDue));
+                    rs.getDouble("total_amount"),
+                    rs.getDouble("paid_amount")
+            ));
         }
         rs.close();
+        System.out.println(pendingRepairsList);
         return pendingRepairsList;
     }
 
@@ -256,8 +258,8 @@ public class QueryDAOImpl implements QueryDAO {
         return customDTO;
     }
 
-    public List<SalesTM> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException {
-        List<SalesTM> salesList = new ArrayList<>();
+    public List<CustomDTO> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException {
+        List<CustomDTO> salesList = new ArrayList<>();
 
         String sql = "SELECT s.sale_id, c.name AS customer_name, u.user_name, s.description, " +
                 "s.sub_total, s.discount, s.grand_total, s.paid_amount " +
@@ -269,7 +271,7 @@ public class QueryDAOImpl implements QueryDAO {
 
         ResultSet rs = CrudUtil.execute(sql, java.sql.Date.valueOf(from), java.sql.Date.valueOf(to));
         while (rs.next()) {
-            salesList.add(new SalesTM(
+            salesList.add(new CustomDTO(
                     rs.getInt("sale_id"),
                     rs.getString("customer_name") != null ? rs.getString("customer_name") : "Walk-in", // Handle null customers
                     rs.getString("user_name"),
@@ -284,18 +286,20 @@ public class QueryDAOImpl implements QueryDAO {
         return salesList;
     }
 
-    public ObservableList<PendingSaleTM> getPendingSales() throws SQLException {
+    public List<CustomDTO> getPendingSales() throws SQLException {
         String saleSql = "SELECT s.sale_id, c.name, s.grand_total, s.paid_amount FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
                 "WHERE s.payment_status IN ('PENDING', 'PARTIAL') AND s.description LIKE 'Point of Sale Transaction'";
 
 
         ResultSet rs = CrudUtil.execute(saleSql);
-        ObservableList<PendingSaleTM> pendingSalesList = FXCollections.observableArrayList();
+        ObservableList<CustomDTO> pendingSalesList = FXCollections.observableArrayList();
 
         while (rs.next()) {
             double total = rs.getDouble("grand_total");
             double paid = rs.getDouble("paid_amount");
-            pendingSalesList.add(new PendingSaleTM(rs.getInt("sale_id"), rs.getString("name"), total, total - paid));
+            pendingSalesList.add(new CustomDTO(rs.getInt("sale_id"),
+                    rs.getString("name"),
+                    total, total - paid));
         }
         rs.close();
         return pendingSalesList;

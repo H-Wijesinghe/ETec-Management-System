@@ -1,7 +1,6 @@
 package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
-import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;

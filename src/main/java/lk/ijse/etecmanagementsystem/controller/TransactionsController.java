@@ -11,12 +11,17 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.etecmanagementsystem.App;
+import lk.ijse.etecmanagementsystem.bo.BOFactory;
+import lk.ijse.etecmanagementsystem.bo.custom.RepairsBO;
+import lk.ijse.etecmanagementsystem.bo.custom.SalesBO;
 import lk.ijse.etecmanagementsystem.bo.custom.impl.TransactionBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.TransactionRecordDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingRepairTM;
 import lk.ijse.etecmanagementsystem.dto.tm.PendingSaleTM;
+import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
 import lk.ijse.etecmanagementsystem.dto.tm.TransactionTM;
 import lk.ijse.etecmanagementsystem.util.LoginUtil;
 
@@ -24,6 +29,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +82,8 @@ public class TransactionsController {
     SalesDAOImpl salesDAO = new SalesDAOImpl();
     QueryDAOImpl queryDAO = new QueryDAOImpl();
     TransactionBOImpl transactionBO = new TransactionBOImpl();
+    SalesBO salesBO = (SalesBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.SALES);
+    RepairsBO repairsBO = (RepairsBO) BOFactory.getInstance().getBO(BOFactory.BOTypes.REPAIRS);
 
     public void initialize() {
         setupTables();
@@ -179,8 +187,35 @@ public class TransactionsController {
 
     public void loadPendingSettlements() {
         try {
-            tblPendingSales.setItems(queryDAO.getPendingSales());
-            tblPendingRepairs.setItems(queryDAO.getPendingRepairs());
+            List<CustomDTO> pendingSales = salesBO.getPendingSales();
+            ObservableList<PendingSaleTM> filteredList = FXCollections.observableArrayList();
+            for(CustomDTO custom : pendingSales) {
+                filteredList.add(new PendingSaleTM(
+                        custom.getSaleId(),
+                        custom.getSaleCustomerName() != null ? custom.getSaleCustomerName() : "Walk-in",
+                        custom.getSaleGrandTotal(),
+                        custom.getSalePaidAmount()
+                ));
+            }
+
+            System.out.println("Debug - Pending sales loaded: " + pendingSales.size());
+
+            tblPendingSales.setItems(filteredList);
+
+            List<CustomDTO> pendingRepairs = repairsBO.getPendingRepairs();
+            ObservableList<PendingRepairTM> filteredPendingRepairs = FXCollections.observableArrayList();
+            for(CustomDTO custom : pendingRepairs) {
+                double balanceDue = custom.getRepairJobTotalAmount() - custom.getRepairJobPaidAmount();
+                filteredPendingRepairs.add(new PendingRepairTM(
+                        custom.getRepairJobId(),
+                        custom.getRepairJobDeviceName(),
+                        custom.getRepairJobCustomerName() != null ? custom.getRepairJobCustomerName() : "Walk-in",
+                        balanceDue
+                ));
+            }
+            System.out.println("Debug - Pending repairs loaded: " + pendingRepairs.size());
+
+            tblPendingRepairs.setItems(filteredPendingRepairs);
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error loading pending items: " + e.getMessage()).show();
         }

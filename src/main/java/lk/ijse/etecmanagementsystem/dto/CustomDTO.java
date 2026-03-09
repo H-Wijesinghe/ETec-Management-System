@@ -119,17 +119,20 @@ public class CustomDTO {
     private java.util.Date repairJobDateOut;
     private double repairJobLaborCost;
     private double repairJobPartsCost;
-    private double repairJobTotalAmount;
-    private double repairJobPaidAmount;
     private double repairJobDiscount;
     private PaymentStatus repairJobPaymentStatus;
+    private String repairJobCustomerName;
+    private double repairJobTotalAmount;
+    private double repairJobPaidAmount;
+
 
     // SalesDTO
     private int saleId;
     private int saleCustomerId;
     private int saleUserId;
+    private String saleCustomerName;
+    private String saleUserName;
     private int saleQty;
-    private java.util.Date saleDate;
     private double saleSubtotal;
     private double saleDiscount;
     private double saleGrandTotal;
@@ -206,6 +209,57 @@ public class CustomDTO {
         this.realAvailableCount = realAvailableCount;
         this.restrictedCount = restrictedCount;
     }
+
+    public CustomDTO(int saleId, String saleCustomerName, String saleUserName, String saleDescription, double saleSubtotal, double saleDiscount, double saleGrandTotal, double salePaidAmount) {
+        this.saleId = saleId;
+        this.saleCustomerName = saleCustomerName;
+        this.saleUserName = saleUserName;
+        this.saleDescription = saleDescription;
+        this.saleSubtotal = saleSubtotal;
+        this.saleDiscount = saleDiscount;
+        this.saleGrandTotal = saleGrandTotal;
+        this.salePaidAmount = salePaidAmount;
+    }
+
+    public CustomDTO(int saleId, String saleCustomerName, double saleGrandTotal, double salePaidAmount) {
+        this.saleId = saleId;
+        this.saleCustomerName = saleCustomerName;
+        this.saleGrandTotal = saleGrandTotal;
+        this.salePaidAmount = salePaidAmount;
+    }
+
+    public CustomDTO (int repairJobId, String repairJobDeviceName, String repairJobCustomerName, double repairJobTotalAmount, double repairJobPaidAmount) {
+        this.repairJobId = repairJobId;
+        this.repairJobDeviceName = repairJobDeviceName;
+        this.repairJobCustomerName = repairJobCustomerName;
+        this.repairJobTotalAmount = repairJobTotalAmount;
+        this.repairJobPaidAmount = repairJobPaidAmount;
+    }
+
+    public String getRepairJobCustomerName() {
+        return repairJobCustomerName;
+    }
+
+    public void setRepairJobCustomerName(String repairJobCustomerName) {
+        this.repairJobCustomerName = repairJobCustomerName;
+    }
+
+    public String getSaleCustomerName() {
+        return saleCustomerName;
+    }
+
+    public void setSaleCustomerName(String saleCustomerName) {
+        this.saleCustomerName = saleCustomerName;
+    }
+
+    public String getSaleUserName() {
+        return saleUserName;
+    }
+
+    public void setSaleUserName(String saleUserName) {
+        this.saleUserName = saleUserName;
+    }
+
 
     public int getRealAvailableCount() {
         return realAvailableCount;
@@ -837,14 +891,6 @@ public class CustomDTO {
 
     public void setSaleQty(int saleQty) {
         this.saleQty = saleQty;
-    }
-
-    public java.util.Date getSaleDate() {
-        return saleDate;
-    }
-
-    public void setSaleDate(java.util.Date saleDate) {
-        this.saleDate = saleDate;
     }
 
     public double getSaleSubtotal() {

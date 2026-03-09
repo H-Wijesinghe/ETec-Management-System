@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface QueryDAO {
-    ObservableList<PendingRepairTM> getPendingRepairs() throws SQLException;
+    List<CustomDTO> getPendingRepairs() throws SQLException;
 
     List<RepairPartTM> getUsedParts(int repairId) throws SQLException;
 

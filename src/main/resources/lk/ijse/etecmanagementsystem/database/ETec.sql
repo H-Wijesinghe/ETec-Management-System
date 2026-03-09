@@ -238,3 +238,6 @@ SELECT COUNT(item_id) AS count  FROM ProductItem WHERE stock_id = ? AND serial_n
 
 SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, p.sell_price FROM ProductItem pi JOIN Product p ON pi.stock_id = p.stock_id WHERE pi.status = 'AVAILABLE';
 SELECT item_id, stock_id, serial_number FROM ProductItem WHERE stock_id = ? AND serial_number LIKE 'PENDING-%' AND status = 'AVAILABLE';
+SELECT r.repair_id, r.device_name, c.name, r.total_amount, r.paid_amount FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status IN ('PENDING','PARTIAL') AND r.status = 'DELIVERED';
+SELECT s.sale_id, c.name, s.grand_total, s.paid_amount FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id
+WHERE s.payment_status IN ('PENDING', 'PARTIAL') AND s.description LIKE 'Point of Sale Transaction';

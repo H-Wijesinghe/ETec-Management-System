@@ -13,6 +13,7 @@ import lk.ijse.etecmanagementsystem.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.SalesDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.UserDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.SalesDTO;
 import lk.ijse.etecmanagementsystem.dto.UserDTO;
@@ -20,6 +21,7 @@ import lk.ijse.etecmanagementsystem.dto.tm.SalesTM;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SalesHistoryController {
@@ -133,7 +135,23 @@ public class SalesHistoryController {
         }
 
         try {
-            List<SalesTM> filteredList = queryDAO.getSalesByDateRange(fromDate, toDate);
+            List<CustomDTO> customSales = salesBO.getSalesByDateRange(fromDate, toDate);
+            List<SalesTM> filteredList = new ArrayList<>();
+            for(CustomDTO custom : customSales) {
+                filteredList.add(new SalesTM(
+                        custom.getSaleId(),
+                        custom.getCustomerName() != null ? custom.getCustomerName() : "Walk-in", // Handle null customers
+                        custom.getSaleUserName(),
+                        custom.getSaleDescription(),
+                        custom.getSaleSubtotal(),
+                        custom.getSaleDiscount(),
+                        custom.getSaleGrandTotal(),
+                        custom.getSalePaidAmount()
+                ));
+            }
+            if(!filteredList.isEmpty()) {
+                throw new SQLException("No sales found for the selected date range.");
+            }
             tblSalesHistory.setItems(FXCollections.observableArrayList(filteredList));
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Error filtering data: " + e.getMessage()).show();

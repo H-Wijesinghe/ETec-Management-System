@@ -1,11 +1,13 @@
 package lk.ijse.etecmanagementsystem.bo.custom;
 
 import lk.ijse.etecmanagementsystem.bo.SuperBO;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.ProductItemDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface RepairsBO extends SuperBO {
     ProductItemDTO getProductItem(int itemId) throws SQLException;
@@ -19,4 +21,6 @@ public interface RepairsBO extends SuperBO {
     boolean updateStatus(int repairId, RepairStatus newStatus) throws SQLException;
 
     boolean deleteRepairJob(int repairId) throws SQLException;
+
+    List<CustomDTO> getPendingRepairs() throws SQLException;
 }
