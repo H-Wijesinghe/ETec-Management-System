@@ -16,6 +16,7 @@ import lk.ijse.etecmanagementsystem.bo.custom.RepairsBO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.RepairJobDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
@@ -26,6 +27,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static lk.ijse.etecmanagementsystem.controller.RepairDashboardController.getRepairPartTMS;
 
 public class UpdateRepairTicketController {
 
@@ -250,9 +253,11 @@ public class UpdateRepairTicketController {
         alert.setContentText("This action cannot be undone.");
 
         try {
-            List<RepairPartTM> associatedParts = queryDAO.getUsedParts(currentJob.getRepairId());
+            List<CustomDTO> dbParts = repairsBO.getUsedParts(currentJob.getRepairId());
+            List<RepairPartTM> associatedParts = getRepairPartTMS(dbParts);
+//            List<RepairPartTM> associatedParts = queryDAO.getUsedParts(currentJob.getRepairId());
 
-            if (associatedParts != null && !associatedParts.isEmpty()) {
+            if (!associatedParts.isEmpty()) {
                 StringBuilder partsList = new StringBuilder("The following parts are associated with this job:\n");
                 for (RepairPartTM part : associatedParts) {
                     partsList.append("- ").append(part.getItemName()).append(" (Qty: ").append(1).append(")\n");

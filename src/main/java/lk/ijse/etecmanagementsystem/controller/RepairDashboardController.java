@@ -19,16 +19,19 @@ import lk.ijse.etecmanagementsystem.bo.custom.CustomerBO;
 import lk.ijse.etecmanagementsystem.bo.custom.impl.RepairsBOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.RepairJobDAOImpl;
+import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 import lk.ijse.etecmanagementsystem.dto.CustomerDTO;
 import lk.ijse.etecmanagementsystem.dto.RepairJobDTO;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairJobTM;
 import lk.ijse.etecmanagementsystem.dto.tm.RepairPartTM;
+import lk.ijse.etecmanagementsystem.util.ProductCondition;
 import lk.ijse.etecmanagementsystem.util.RepairStatus;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class RepairDashboardController {
@@ -407,13 +410,32 @@ public class RepairDashboardController {
             usedPartsList.clear();
             partsToReturnList.clear();
 
-            List<RepairPartTM> dbParts = queryDAO.getUsedParts(job.getRepairId());
-            usedPartsList.addAll(dbParts);
+            List<CustomDTO> dbParts = repairsBOimpl.getUsedParts(job.getRepairId());
+            List<RepairPartTM> partsList = getRepairPartTMS(dbParts);
+
+            usedPartsList.addAll(partsList);
 
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load parts: " + e.getMessage());
         }
+    }
+
+    public static List<RepairPartTM> getRepairPartTMS(List<CustomDTO> dbParts) {
+        List<RepairPartTM> partsList = new ArrayList<>();
+        for (CustomDTO dto : dbParts) {
+            RepairPartTM part = new RepairPartTM(
+                    dto.getRepairItemId(),
+                    dto.getRepairItemName(),
+                    dto.getRepairItemSerialNumber(),
+                    Objects.equals(dto.getRepairItemCondition(), "USED") ?
+                            ProductCondition.USED : Objects.equals(dto.getRepairItemCondition(), "BRAND_NEW") ?
+                                    ProductCondition.BRAND_NEW : ProductCondition.BOTH,
+                    dto.getRepairItemUnitPrice()
+            );
+            partsList.add(part);
+        }
+        return partsList;
     }
 
     @FXML

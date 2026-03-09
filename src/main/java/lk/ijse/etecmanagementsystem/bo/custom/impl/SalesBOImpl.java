@@ -7,6 +7,7 @@ import lk.ijse.etecmanagementsystem.bo.BOFactory;
 import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.bo.custom.SalesBO;
 import lk.ijse.etecmanagementsystem.dao.CrudUtil;
+import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.SalesDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
 import lk.ijse.etecmanagementsystem.dto.CustomDTO;
@@ -32,7 +33,7 @@ public class SalesBOImpl implements SalesBO {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     SalesItemDAOImpl salesItemDAO = new SalesItemDAOImpl();
     TransactionRecordDAOImpl transactionRecordDAO = new TransactionRecordDAOImpl();
-    QueryDAOImpl queryDAO = new QueryDAOImpl();
+    QueryDAO queryDAO = new QueryDAOImpl();
     SalesDAOImpl salesDAO = new SalesDAOImpl();
 
     public boolean placeOrder(SalesDTO salesDTO, List<ItemCartTM> cartItems) throws SQLException {

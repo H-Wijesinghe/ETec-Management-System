@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QueryDAOImpl implements QueryDAO {
+
+    @Override
     public List<CustomDTO> getPendingRepairs() throws SQLException {
         String repairSql = "SELECT r.repair_id, r.device_name, c.name, r.total_amount, r.paid_amount FROM RepairJob r JOIN Customer c ON r.cus_id = c.cus_id WHERE r.payment_status IN ('PENDING','PARTIAL') AND r.status = 'DELIVERED'";
 
@@ -42,8 +44,9 @@ public class QueryDAOImpl implements QueryDAO {
         return pendingRepairsList;
     }
 
-    public List<RepairPartTM> getUsedParts(int repairId) throws SQLException {
-        List<RepairPartTM> list = new ArrayList<>();
+    @Override
+    public List<CustomDTO> getUsedParts(int repairId) throws SQLException {
+        List<CustomDTO> list = new ArrayList<>();
 //
         String sql = "SELECT pi.item_id, p.name, pi.serial_number, p.p_condition, ri.unit_price " +
                 "FROM RepairItem ri " +
@@ -54,11 +57,11 @@ public class QueryDAOImpl implements QueryDAO {
         ResultSet rs = CrudUtil.execute(sql, repairId);
 
         while (rs.next()) {
-            list.add(new RepairPartTM(
+            list.add(new CustomDTO(
                     rs.getInt("item_id"),
                     rs.getString("name"),
                     rs.getString("serial_number"),
-                    fromConditionString(rs.getString("p_condition")),
+                    rs.getString("p_condition"),
                     rs.getDouble("unit_price")
             ));
         }
@@ -67,6 +70,7 @@ public class QueryDAOImpl implements QueryDAO {
 
     }
 
+    @Override
     public List<CustomDTO> getUrgentRepairs() throws SQLException {
         List<CustomDTO> list = new ArrayList<>();
         String sql = "SELECT repair_id, device_name, status, DATE(date_in) as d_in FROM RepairJob " +
@@ -87,6 +91,7 @@ public class QueryDAOImpl implements QueryDAO {
         return list;
     }
 
+    @Override
     public List<CustomDTO> getUnpaidDebts() throws SQLException {
         List<CustomDTO> list = new ArrayList<>();
 
@@ -112,6 +117,7 @@ public class QueryDAOImpl implements QueryDAO {
         return list;
     }
 
+    @Override
     public double getDebts() throws SQLException {
         String sqlDebts = "SELECT " +
                 "(SELECT COALESCE(SUM(grand_total - paid_amount),0) FROM Sales WHERE payment_status != 'PAID') + " +
@@ -126,6 +132,7 @@ public class QueryDAOImpl implements QueryDAO {
         return debts;
     }
 
+    @Override
     public List<CustomDTO> getAllProductItems() throws SQLException {
         List<CustomDTO> itemList = new ArrayList<>();
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, " +
@@ -159,6 +166,7 @@ public class QueryDAOImpl implements QueryDAO {
         return itemList;
     }
 
+    @Override
     public List<CustomDTO> getAllAvailableRealItems() throws SQLException {
         List<CustomDTO> itemList = new ArrayList<>();
 
@@ -185,6 +193,7 @@ public class QueryDAOImpl implements QueryDAO {
         return itemList;
     }
 
+    @Override
     public CustomDTO getProductItem(int itemId) throws SQLException {
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
@@ -205,7 +214,7 @@ public class QueryDAOImpl implements QueryDAO {
         return item;
     }
 
-
+    @Override
     public List<CustomDTO> getUnitsByStockId(int stockId, String productName) throws SQLException {
         List<CustomDTO> list = new ArrayList<>();
         String sql = "SELECT pi.item_id, pi.supplier_id, pi.serial_number, pi.supplier_warranty_mo, pi.customer_warranty_mo, " +
@@ -237,7 +246,7 @@ public class QueryDAOImpl implements QueryDAO {
         return list;
     }
 
-
+    @Override
     public CustomDTO getItemBySerial(String serial) throws SQLException {
         String sql = "SELECT pi.item_id, pi.stock_id, pi.supplier_id, pi.serial_number, p.name as product_name, COALESCE(s.supplier_name, 'No Supplier') as supplier_name, " +
                 "pi.supplier_warranty_mo, pi.customer_warranty_mo, pi.status, pi.added_date, pi.sold_date " +
@@ -258,6 +267,7 @@ public class QueryDAOImpl implements QueryDAO {
         return customDTO;
     }
 
+    @Override
     public List<CustomDTO> getSalesByDateRange(LocalDate from, LocalDate to) throws SQLException {
         List<CustomDTO> salesList = new ArrayList<>();
 
@@ -286,6 +296,7 @@ public class QueryDAOImpl implements QueryDAO {
         return salesList;
     }
 
+    @Override
     public List<CustomDTO> getPendingSales() throws SQLException {
         String saleSql = "SELECT s.sale_id, c.name, s.grand_total, s.paid_amount FROM Sales s LEFT JOIN Customer c ON s.customer_id = c.cus_id " +
                 "WHERE s.payment_status IN ('PENDING', 'PARTIAL') AND s.description LIKE 'Point of Sale Transaction'";
@@ -320,20 +331,4 @@ public class QueryDAOImpl implements QueryDAO {
                 rs.getDate("sold_date")
         );
     }
-
-    private ProductCondition fromConditionString(String s) {
-        if (s == null) return ProductCondition.BOTH;
-        try {
-            if (s.equals("USED")) {
-                return ProductCondition.USED;
-            } else if (s.equals("BRAND NEW")) {
-                return ProductCondition.BRAND_NEW;
-            }
-            return ProductCondition.BOTH;
-        } catch (IllegalArgumentException ex) {
-            return ProductCondition.BOTH; // unknown condition value
-        }
-    }
-
-
 }

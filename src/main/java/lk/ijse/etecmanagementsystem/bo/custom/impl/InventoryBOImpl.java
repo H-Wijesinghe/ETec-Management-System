@@ -2,6 +2,7 @@ package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import lk.ijse.etecmanagementsystem.bo.custom.InventoryBO;
 import lk.ijse.etecmanagementsystem.dao.custom.ProductItemDAO;
+import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.ProductItemDAOImpl;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.QueryDAOImpl;
@@ -24,7 +25,7 @@ public class InventoryBOImpl implements InventoryBO {
     ProductDAOImpl productDAO = new ProductDAOImpl();
     ProductItemDAO productItemDAO = new ProductItemDAOImpl();
     SupplierDAOImpl supplierDAO = new SupplierDAOImpl();
-    QueryDAOImpl queryDAO = new QueryDAOImpl();
+    QueryDAO queryDAO = new QueryDAOImpl();
 
     @Override
     public int saveProductAndGetId(ProductDTO p) throws SQLException {

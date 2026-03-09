@@ -7,6 +7,8 @@ import lk.ijse.etecmanagementsystem.dao.CrudUtil;
 import java.sql.SQLException;
 
 public class SalesItemDAOImpl implements SalesItemDAO {
+
+    @Override
     public boolean createSalesItem(SalesItem entity) throws SQLException {
         String sqlSalesItem = "INSERT INTO SalesItem (sale_id, item_id, customer_warranty_months, unit_price, discount) VALUES (?, ?, ?, ?, ?)";
         return CrudUtil.execute(sqlSalesItem,

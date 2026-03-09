@@ -101,9 +101,12 @@ public class CustomDTO {
 
     // RepairItemDTO
     private int repairItemId;
+    private String repairItemName;
+    private String repairItemCondition;
     private int repairItemRepairId;
     private int repairItemItemId;
     private double repairItemUnitPrice;
+    private String repairItemSerialNumber;
 
     // RepairJobDTO
     private int repairJobId;
@@ -234,6 +237,38 @@ public class CustomDTO {
         this.repairJobCustomerName = repairJobCustomerName;
         this.repairJobTotalAmount = repairJobTotalAmount;
         this.repairJobPaidAmount = repairJobPaidAmount;
+    }
+
+    public CustomDTO(int repairItemId, String repairItemName, String repairItemSerialNumber, String getRepairItemCondition, double repairItemUnitPrice) {
+        this.repairItemId = repairItemId;
+        this.repairItemName = repairItemName;
+        this.repairItemSerialNumber = repairItemSerialNumber;
+        this.repairItemCondition = getRepairItemCondition;
+        this.repairItemUnitPrice = repairItemUnitPrice;
+    }
+
+    public String getRepairItemName() {
+        return repairItemName;
+    }
+
+    public void setRepairItemName(String repairItemName) {
+        this.repairItemName = repairItemName;
+    }
+
+    public String getRepairItemCondition() {
+        return repairItemCondition;
+    }
+
+    public void setRepairItemCondition(String repairItemCondition) {
+        this.repairItemCondition = repairItemCondition;
+    }
+
+    public String getRepairItemSerialNumber() {
+        return repairItemSerialNumber;
+    }
+
+    public void setRepairItemSerialNumber(String repairItemSerialNumber) {
+        this.repairItemSerialNumber = repairItemSerialNumber;
     }
 
     public String getRepairJobCustomerName() {

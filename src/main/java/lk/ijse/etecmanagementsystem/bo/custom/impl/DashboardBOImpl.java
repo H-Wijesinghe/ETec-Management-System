@@ -2,6 +2,7 @@ package lk.ijse.etecmanagementsystem.bo.custom.impl;
 
 import javafx.scene.chart.XYChart;
 import lk.ijse.etecmanagementsystem.bo.custom.DashboardBO;
+import lk.ijse.etecmanagementsystem.dao.custom.QueryDAO;
 import lk.ijse.etecmanagementsystem.dao.custom.impl.*;
 import lk.ijse.etecmanagementsystem.dto.CustomDTO;
 
@@ -14,7 +15,7 @@ public class DashboardBOImpl implements DashboardBO {
 
     RepairJobDAOImpl repairDAO = new RepairJobDAOImpl();
     SalesDAOImpl salesDAO = new SalesDAOImpl();
-    QueryDAOImpl queryDAO = new QueryDAOImpl();
+    QueryDAO queryDAO = new QueryDAOImpl();
     TransactionRecordDAOImpl transactionDAO = new TransactionRecordDAOImpl();
     ProductDAOImpl productDAO = new ProductDAOImpl();
 

@@ -23,4 +23,6 @@ public interface RepairsBO extends SuperBO {
     boolean deleteRepairJob(int repairId) throws SQLException;
 
     List<CustomDTO> getPendingRepairs() throws SQLException;
+
+    List<CustomDTO> getUsedParts(int repairId) throws SQLException;
 }

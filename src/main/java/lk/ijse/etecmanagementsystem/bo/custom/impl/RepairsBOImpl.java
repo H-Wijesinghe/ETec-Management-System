@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static lk.ijse.etecmanagementsystem.controller.RepairDashboardController.getRepairPartTMS;
+
 public class RepairsBOImpl implements RepairsBO {
     RepairJobDAOImpl repairJobDAO = new RepairJobDAOImpl();
     QueryDAO queryDAO = new QueryDAOImpl();
@@ -230,7 +232,9 @@ public class RepairsBOImpl implements RepairsBO {
             System.out.println("Repair ID " + repairId + " has parts: " + hasParts);
 
             if (hasParts) {
-                List<RepairPartTM> partsToMark = queryDAO.getUsedParts(repairId);
+                List<CustomDTO> dbParts = getUsedParts(repairId);
+                List<RepairPartTM> partsToMark = getRepairPartTMS(dbParts);
+//                List<RepairPartTM> partsToMark = queryDAO.getUsedParts(repairId);
                 for (RepairPartTM repairPart : partsToMark) {
                     String sn = getProductItem(repairPart.getItemId()).getSerialNumber();
                     boolean marked = productItemDAO.updateStatus(sn, "SOLD");
@@ -373,6 +377,10 @@ public class RepairsBOImpl implements RepairsBO {
 
     public List<CustomDTO> getPendingRepairs() throws SQLException {
         return queryDAO.getPendingRepairs();
+    }
+
+    public List<CustomDTO> getUsedParts(int repairId) throws SQLException {
+        return queryDAO.getUsedParts(repairId);
     }
 
 }
